@@ -6,17 +6,16 @@ const Footer = () => {
     <Box
       component="footer"
       sx={{
-        py: 2,
+        py: 1.5,
         px: 3,
         mt: 'auto',
         textAlign: 'center',
-        backgroundColor: 'background.paper',
         borderTop: '1px solid',
         borderColor: 'divider',
       }}
     >
-      <Typography variant="body2" color="text.secondary">
-        Twilio Call Bot &copy; {new Date().getFullYear()}
+      <Typography variant="caption" color="text.secondary">
+        Exyconn &copy; {new Date().getFullYear()} &middot; AI-Powered Calling Agent
       </Typography>
     </Box>
   );

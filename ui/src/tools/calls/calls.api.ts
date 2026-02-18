@@ -1,5 +1,5 @@
 import apiClient from '../../api/apiClient';
-import { MakeCallPayload, CallResponse, CallLogsResponse, CallLogsParams } from './calls.types';
+import { MakeCallPayload, CallResponse, CallLogsResponse, CallLogsParams, AiCallPayload } from './calls.types';
 
 export const makeCall = async (payload: MakeCallPayload): Promise<CallResponse> => {
   const response = await apiClient.post<CallResponse>('/calls', {
@@ -10,7 +10,22 @@ export const makeCall = async (payload: MakeCallPayload): Promise<CallResponse> 
   return response.data;
 };
 
+export const makeAiCall = async (payload: AiCallPayload): Promise<CallResponse> => {
+  const response = await apiClient.post<CallResponse>('/ai/call', {
+    to: payload.to,
+    message: payload.message,
+    voice: payload.voice,
+    systemPrompt: payload.systemPrompt,
+  });
+  return response.data;
+};
+
 export const fetchCallLogs = async (params?: CallLogsParams): Promise<CallLogsResponse> => {
   const response = await apiClient.get<CallLogsResponse>('/calls/logs', { params });
+  return response.data;
+};
+
+export const fetchConversationHistory = async (callSid: string) => {
+  const response = await apiClient.get(`/ai/conversation/${callSid}`);
   return response.data;
 };

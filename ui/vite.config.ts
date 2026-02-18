@@ -15,6 +15,21 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:5000',
         changeOrigin: true,
+        configure: (proxy) => {
+          proxy.on('error', (err) => {
+            console.warn('[Vite Proxy] API proxy error (ignored):', err.message);
+          });
+        },
+      },
+      '/socket.io': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        ws: true,
+        configure: (proxy) => {
+          proxy.on('error', (err) => {
+            console.warn('[Vite Proxy] WS proxy error (ignored):', err.message);
+          });
+        },
       },
     },
   },

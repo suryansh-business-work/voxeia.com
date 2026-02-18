@@ -9,15 +9,10 @@ export const makeCallValidationSchema = Yup.object().shape({
   message: Yup.string()
     .max(500, 'Message must be under 500 characters')
     .notRequired(),
-  voice: Yup.string()
-    .oneOf([
-      'Polly.Joanna-Neural',
-      'Polly.Matthew-Neural',
-      'Polly.Amy-Neural',
-      'Polly.Brian-Neural',
-      'Polly.Ruth-Neural',
-      'Polly.Stephen-Neural',
-    ])
+  voice: Yup.string().notRequired(),
+  aiEnabled: Yup.boolean().notRequired(),
+  systemPrompt: Yup.string()
+    .max(2000, 'System prompt must be under 2000 characters')
     .notRequired(),
 });
 
@@ -25,19 +20,17 @@ export interface MakeCallFormValues {
   to: string;
   message: string;
   voice: string;
+  aiEnabled: boolean;
+  systemPrompt: string;
 }
+
+export const DEFAULT_SYSTEM_PROMPT =
+  'You are a helpful, friendly AI phone assistant. Keep your responses concise and conversational, suitable for a phone call. Respond in 1-3 sentences unless more detail is needed. Be warm, natural, and professional.';
 
 export const makeCallInitialValues: MakeCallFormValues = {
   to: '',
   message: 'Hello! This is a friendly reminder about your upcoming appointment tomorrow at 3 PM. Please call us back if you need to reschedule. Thank you, and have a great day!',
   voice: 'Polly.Joanna-Neural',
+  aiEnabled: false,
+  systemPrompt: DEFAULT_SYSTEM_PROMPT,
 };
-
-export const voiceOptions = [
-  { value: 'Polly.Joanna-Neural', label: 'Joanna (US Female - Warm & Conversational)' },
-  { value: 'Polly.Matthew-Neural', label: 'Matthew (US Male - Professional & Clear)' },
-  { value: 'Polly.Amy-Neural', label: 'Amy (UK Female - Clear & Articulate)' },
-  { value: 'Polly.Brian-Neural', label: 'Brian (UK Male - Authoritative)' },
-  { value: 'Polly.Ruth-Neural', label: 'Ruth (US Female - Young & Friendly)' },
-  { value: 'Polly.Stephen-Neural', label: 'Stephen (US Male - Mature & Confident)' },
-];

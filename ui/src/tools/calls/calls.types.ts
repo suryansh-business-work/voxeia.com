@@ -1,10 +1,4 @@
-export type VoiceOption = 
-  | 'Polly.Joanna-Neural'  // US English female (warm, conversational)
-  | 'Polly.Matthew-Neural' // US English male (clear, professional)
-  | 'Polly.Amy-Neural'     // British English female (clear, articulate)
-  | 'Polly.Brian-Neural'   // British English male (authoritative)
-  | 'Polly.Ruth-Neural'    // US English female (young, friendly)
-  | 'Polly.Stephen-Neural'; // US English male (mature, confident)
+export type VoiceOption = string; // Now supports any voice ID from the voices catalogue
 
 export interface MakeCallPayload {
   to: string;
@@ -37,6 +31,10 @@ export interface CallLogItem {
   endTime: string;
   price: string | null;
   priceUnit: string;
+  recordingUrl: string | null;
+  recordingSid: string | null;
+  recordingDuration: string | null;
+  userReply: string | null;
 }
 
 export interface CallLogsResponse {
@@ -56,4 +54,31 @@ export interface CallLogsParams {
   status?: string;
   to?: string;
   from?: string;
+}
+
+// ─── AI Conversation Types ──────────────────────────────────────────────────
+
+export interface AiCallPayload {
+  to: string;
+  message?: string;
+  voice?: VoiceOption;
+  systemPrompt?: string;
+}
+
+export interface ConversationMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: string;
+}
+
+export interface ConversationEvent {
+  callSid: string;
+  type: 'user_message' | 'ai_thinking' | 'ai_message' | 'call_ended' | 'silence';
+  content: string;
+  timestamp: string;
+}
+
+export interface ConversationTranscript {
+  callSid: string;
+  messages: ConversationMessage[];
 }

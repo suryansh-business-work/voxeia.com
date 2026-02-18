@@ -7,7 +7,7 @@ import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import Grid from '@mui/material/Grid';
 import SearchIcon from '@mui/icons-material/Search';
-import { ALL_VOICES, VOICE_PROVIDERS, VoiceProvider, getVoiceById } from './voices.data';
+import { ALL_VOICES, getVoiceById } from './voices.data';
 import VoiceCard from './VoiceCard';
 
 interface VoiceSelectorProps {
@@ -17,18 +17,17 @@ interface VoiceSelectorProps {
 }
 
 const VoiceSelector = ({ value, onChange, disabled }: VoiceSelectorProps) => {
-  const [tab, setTab] = useState<'all' | VoiceProvider>('all');
+  const [tab, setTab] = useState<'all' | 'feminine' | 'masculine'>('all');
   const [search, setSearch] = useState('');
 
   const filtered = useMemo(() => {
-    let list = tab === 'all' ? ALL_VOICES : ALL_VOICES.filter((v) => v.provider === tab);
+    let list = tab === 'all' ? ALL_VOICES : ALL_VOICES.filter((v) => v.gender === tab);
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter(
         (v) =>
           v.name.toLowerCase().includes(q) ||
           v.tags.some((t) => t.includes(q)) ||
-          v.languages.some((l) => l.includes(q)) ||
           v.gender.includes(q)
       );
     }
@@ -46,9 +45,7 @@ const VoiceSelector = ({ value, onChange, disabled }: VoiceSelectorProps) => {
       }}>
         <Box>
           <Typography variant="caption" color="text.secondary">Voice Provider</Typography>
-          <Typography variant="body2" fontWeight={600}>
-            {selectedVoice ? (selectedVoice.provider === 'amazon' ? 'Amazon Polly' : 'Google Cloud') : '—'}
-          </Typography>
+          <Typography variant="body2" fontWeight={600}>Sarvam.ai</Typography>
         </Box>
         <Box>
           <Typography variant="caption" color="text.secondary">Selected Voice</Typography>
@@ -58,7 +55,7 @@ const VoiceSelector = ({ value, onChange, disabled }: VoiceSelectorProps) => {
         </Box>
       </Box>
 
-      {/* Tabs */}
+      {/* Tabs — filter by gender */}
       <Tabs
         value={tab}
         onChange={(_, v) => setTab(v)}
@@ -67,9 +64,8 @@ const VoiceSelector = ({ value, onChange, disabled }: VoiceSelectorProps) => {
         sx={{ minHeight: 36, mb: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}
       >
         <Tab label="All" value="all" sx={{ minHeight: 36, py: 0.5 }} />
-        {VOICE_PROVIDERS.map((p) => (
-          <Tab key={p.id} label={p.label} value={p.id} sx={{ minHeight: 36, py: 0.5 }} />
-        ))}
+        <Tab label="Feminine" value="feminine" sx={{ minHeight: 36, py: 0.5 }} />
+        <Tab label="Masculine" value="masculine" sx={{ minHeight: 36, py: 0.5 }} />
       </Tabs>
 
       {/* Search */}

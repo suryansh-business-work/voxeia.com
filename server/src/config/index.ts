@@ -47,4 +47,7 @@ export const envConfig: EnvConfig = {
   IMAGEKIT_PUBLIC_KEY: getOptionalEnvVar('IMAGEKIT_PUBLIC_KEY'),
   IMAGEKIT_PRIVATE_KEY: getOptionalEnvVar('IMAGEKIT_PRIVATE_KEY'),
   IMAGEKIT_URL_ENDPOINT: getOptionalEnvVar('IMAGEKIT_URL_ENDPOINT'),
+
+  // Sarvam.ai TTS
+  SARVAM_API_KEY: getOptionalEnvVar('SARVAM_API_KEY'),
 };

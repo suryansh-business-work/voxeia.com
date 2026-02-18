@@ -84,8 +84,6 @@ const CallLogsCard = () => {
             setStatusFilter(val);
             setPage(0);
           }}
-          onRefresh={loadLogs}
-          loading={loading}
         />
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>

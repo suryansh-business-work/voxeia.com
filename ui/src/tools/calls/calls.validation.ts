@@ -32,8 +32,8 @@ export const DEFAULT_SYSTEM_PROMPT =
 export const makeCallInitialValues: MakeCallFormValues = {
   to: '',
   message: 'Hello! This is a friendly reminder about your upcoming appointment tomorrow at 3 PM. Please call us back if you need to reschedule. Thank you, and have a great day!',
-  voice: 'Polly.Joanna-Neural',
-  language: 'en-US',
+  voice: 'meera',
+  language: 'en-IN',
   aiEnabled: false,
   systemPrompt: DEFAULT_SYSTEM_PROMPT,
 };

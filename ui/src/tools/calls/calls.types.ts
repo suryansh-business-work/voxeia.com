@@ -41,6 +41,7 @@ export interface CallLogItem {
   userReply: string | null;
   language: string;
   voice: string;
+  conversationMessages?: { role: string; content: string; timestamp: string }[];
 }
 
 export interface CallLogsResponse {

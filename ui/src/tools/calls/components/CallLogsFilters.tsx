@@ -1,17 +1,13 @@
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
-import Button from '@mui/material/Button';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import Grid from '@mui/material/Grid2';
+import Grid from '@mui/material/Grid';
 
 interface CallLogsFiltersProps {
   searchQuery: string;
   onSearchChange: (value: string) => void;
   statusFilter: string;
   onStatusFilterChange: (value: string) => void;
-  onRefresh: () => void;
-  loading: boolean;
 }
 
 const statusOptions = [
@@ -22,6 +18,7 @@ const statusOptions = [
   { value: 'no-answer', label: 'No Answer' },
   { value: 'canceled', label: 'Canceled' },
   { value: 'in-progress', label: 'In Progress' },
+  { value: 'queued', label: 'Queued' },
 ];
 
 const CallLogsFilters = ({
@@ -29,23 +26,21 @@ const CallLogsFilters = ({
   onSearchChange,
   statusFilter,
   onStatusFilterChange,
-  onRefresh,
-  loading,
 }: CallLogsFiltersProps) => {
   return (
-    <Box sx={{ mb: 2 }}>
-      <Grid container spacing={2} alignItems="center">
-        <Grid size={{ xs: 12, sm: 5 }}>
+    <Box sx={{ mb: 1 }}>
+      <Grid container spacing={1} alignItems="center">
+        <Grid item xs={12} sm={7}>
           <TextField
             fullWidth
             size="small"
-            label="Search by phone number"
+            label="Search by phone"
             placeholder="+911234567890"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 4 }}>
+        <Grid item xs={12} sm={5}>
           <TextField
             fullWidth
             select
@@ -60,17 +55,6 @@ const CallLogsFilters = ({
               </MenuItem>
             ))}
           </TextField>
-        </Grid>
-        <Grid size={{ xs: 12, sm: 3 }}>
-          <Button
-            fullWidth
-            variant="outlined"
-            startIcon={<RefreshIcon />}
-            onClick={onRefresh}
-            disabled={loading}
-          >
-            Refresh
-          </Button>
         </Grid>
       </Grid>
     </Box>

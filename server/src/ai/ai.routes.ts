@@ -5,12 +5,16 @@ import {
   handleCallStatusWebhook,
   getConversationHistory,
   getActiveConversations,
+  translateTextController,
 } from './ai.controllers';
 
 const router = Router();
 
 /** POST /api/ai/call - Initiate AI conversation call */
 router.post('/call', initiateAiCall);
+
+/** POST /api/ai/translate - Translate text to target language */
+router.post('/translate', translateTextController);
 
 /** GET /api/ai/conversations - List all active conversations */
 router.get('/conversations', getActiveConversations);

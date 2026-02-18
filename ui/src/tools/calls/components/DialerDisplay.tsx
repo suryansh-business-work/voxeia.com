@@ -18,7 +18,7 @@ const pulse = keyframes`
 
 const ring = keyframes`
   0% { box-shadow: 0 0 0 0 rgba(76,175,80,0.4); }
-  70% { box-shadow: 0 0 0 20px rgba(76,175,80,0); }
+  70% { box-shadow: 0 0 0 14px rgba(76,175,80,0); }
   100% { box-shadow: 0 0 0 0 rgba(76,175,80,0); }
 `;
 
@@ -46,40 +46,41 @@ const DialerDisplay = ({ phoneNumber, isActive, duration, onHangup }: DialerDisp
 
   return (
     <Card sx={{ bgcolor: 'secondary.dark', color: '#fff', overflow: 'hidden' }}>
-      <CardContent sx={{ p: 2, textAlign: 'center' }}>
-        <Box sx={{ mb: 1.5 }}>
+      <CardContent sx={{ p: 1.5, textAlign: 'center', '&:last-child': { pb: 1.5 } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1.5 }}>
           <Box sx={{
-            width: 56, height: 56, bgcolor: 'rgba(255,255,255,0.1)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto',
+            width: 40, height: 40, bgcolor: 'rgba(255,255,255,0.1)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
             animation: isActive ? `${ring} 1.5s ease-in-out infinite` : undefined,
           }}>
-            <PersonIcon sx={{ fontSize: 30, opacity: 0.8 }} />
+            <PersonIcon sx={{ fontSize: 22, opacity: 0.8 }} />
           </Box>
+          <Box sx={{ textAlign: 'left' }}>
+            <Typography variant="body2" sx={{ fontFamily: 'monospace', letterSpacing: 1 }}>
+              {phoneNumber || 'No number'}
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Chip
+                label={isActive ? 'Connected' : 'Calling...'}
+                size="small"
+                sx={{
+                  bgcolor: isActive ? 'success.main' : 'warning.main',
+                  color: '#fff', height: 20, fontSize: '0.65rem',
+                  animation: !isActive ? `${pulse} 1.5s ease-in-out infinite` : undefined,
+                }}
+              />
+              <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 600 }}>
+                {formatDuration(elapsed)}
+              </Typography>
+            </Box>
+          </Box>
+          <IconButton
+            onClick={onHangup}
+            sx={{ bgcolor: 'error.main', color: '#fff', width: 40, height: 40, '&:hover': { bgcolor: 'error.dark' } }}
+          >
+            <CallEndIcon sx={{ fontSize: 20 }} />
+          </IconButton>
         </Box>
-        <Typography variant="h6" sx={{ fontFamily: 'monospace', letterSpacing: 2, mb: 0.5 }}>
-          {phoneNumber || 'No number'}
-        </Typography>
-        <Chip
-          label={isActive ? 'Connected' : 'Calling...'}
-          size="small"
-          sx={{
-            bgcolor: isActive ? 'success.main' : 'warning.main',
-            color: '#fff', mb: 1,
-            animation: !isActive ? `${pulse} 1.5s ease-in-out infinite` : undefined,
-          }}
-        />
-        <Typography variant="h4" sx={{ fontFamily: 'monospace', my: 1 }}>
-          {formatDuration(elapsed)}
-        </Typography>
-        <IconButton
-          onClick={onHangup}
-          sx={{
-            bgcolor: 'error.main', color: '#fff', width: 56, height: 56, mt: 1,
-            '&:hover': { bgcolor: 'error.dark' },
-          }}
-        >
-          <CallEndIcon />
-        </IconButton>
       </CardContent>
     </Card>
   );
@@ -92,17 +93,21 @@ interface DialerIdleProps {
 export const DialerIdle = ({ phoneNumber }: DialerIdleProps) => {
   return (
     <Card sx={{ bgcolor: 'secondary.main', color: '#fff' }}>
-      <CardContent sx={{ p: 2, textAlign: 'center' }}>
-        <Box sx={{
-          width: 56, height: 56, bgcolor: 'rgba(255,255,255,0.1)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 1.5,
-        }}>
-          <PhoneIcon sx={{ fontSize: 30, opacity: 0.8 }} />
+      <CardContent sx={{ p: 1, textAlign: 'center', '&:last-child': { pb: 1 } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+          <Box sx={{
+            width: 36, height: 36, bgcolor: 'rgba(255,255,255,0.1)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <PhoneIcon sx={{ fontSize: 20, opacity: 0.8 }} />
+          </Box>
+          <Box>
+            <Typography variant="body2" sx={{ fontFamily: 'monospace', letterSpacing: 1.5 }}>
+              {phoneNumber || 'Enter a number'}
+            </Typography>
+            <Typography variant="caption" sx={{ opacity: 0.6, fontSize: '0.65rem' }}>Ready to call</Typography>
+          </Box>
         </Box>
-        <Typography variant="h6" sx={{ fontFamily: 'monospace', letterSpacing: 2, mb: 0.5 }}>
-          {phoneNumber || 'Enter a number'}
-        </Typography>
-        <Typography variant="body2" sx={{ opacity: 0.6 }}>Ready to call</Typography>
       </CardContent>
     </Card>
   );

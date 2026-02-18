@@ -3,6 +3,7 @@ import { makeCallSchema, callLogsQuerySchema } from './calls.validators';
 import * as callService from './calls.services';
 import { uploadRecordingToImageKit } from '../config/imagekit';
 import { envConfig } from '../config';
+import CallLog from '../calllogs/calllogs.models';
 
 export const initiateCall = async (req: Request, res: Response): Promise<void> => {
   const parsed = makeCallSchema.safeParse(req.body);
@@ -186,6 +187,47 @@ export const proxyRecordingAudio = async (req: Request, res: Response): Promise<
   } catch (error: unknown) {
     const errMsg = error instanceof Error ? error.message : 'Failed to fetch recording audio';
     console.error('[Recording Proxy Error]', errMsg);
+    res.status(500).json({ success: false, message: errMsg });
+  }
+};
+
+/**
+ * GET /api/calls/:callSid/detail - Get full call log details including conversation messages
+ */
+export const getCallDetail = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { callSid } = req.params;
+    const doc = await CallLog.findOne({ callSid });
+
+    if (!doc) {
+      res.status(404).json({ success: false, message: 'Call log not found' });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        _id: doc._id.toString(),
+        callSid: doc.callSid,
+        agentId: doc.agentId?.toString() || null,
+        from: doc.from,
+        to: doc.to,
+        status: doc.status,
+        direction: doc.direction,
+        duration: doc.duration,
+        startTime: doc.startTime,
+        endTime: doc.endTime || null,
+        recordingUrl: doc.recordingUrl,
+        recordingSid: doc.recordingSid,
+        recordingDuration: doc.recordingDuration,
+        userReply: doc.userReply,
+        language: doc.language,
+        voice: doc.voice,
+        conversationMessages: doc.conversationMessages || [],
+      },
+    });
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : 'Failed to fetch call detail';
     res.status(500).json({ success: false, message: errMsg });
   }
 };

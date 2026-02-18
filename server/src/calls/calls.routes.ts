@@ -6,6 +6,7 @@ import {
   handleTranscription,
   getCallRecording,
   proxyRecordingAudio,
+  getCallDetail,
 } from './calls.controllers';
 
 const router = Router();
@@ -18,6 +19,9 @@ router.get('/logs', fetchCallLogs);
 
 /** GET /api/calls/recordings/:recordingSid/audio - Proxy recording audio from Twilio */
 router.get('/recordings/:recordingSid/audio', proxyRecordingAudio);
+
+/** GET /api/calls/:callSid/detail - Get full call log with conversation */
+router.get('/:callSid/detail', getCallDetail);
 
 /** GET /api/calls/:callSid/recording - Get recording metadata for a specific call */
 router.get('/:callSid/recording', getCallRecording);

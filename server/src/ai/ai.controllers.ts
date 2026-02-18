@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { aiCallSchema } from './ai.validators';
+import { aiCallSchema, translateSchema } from './ai.validators';
 import * as aiService from './ai.services';
 
 /**
@@ -51,7 +51,7 @@ export const handleConversationRespond = async (req: Request, res: Response): Pr
     // Return a safe TwiML on error so Twilio doesn't play the generic error
     res.status(200).type('text/xml').send(`<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Say voice="Polly.Joanna-Neural" language="en-US">I apologize, something went wrong. Please try again later. Goodbye!</Say>
+  <Say language="en-IN">I apologize, something went wrong. Please try again later. Goodbye!</Say>
   <Hangup/>
 </Response>`);
   }
@@ -67,9 +67,7 @@ export const handleCallStatusWebhook = async (req: Request, res: Response): Prom
 
     console.log(`[AI Status Webhook] CallSid: ${callSid}, Status: ${callStatus}`);
 
-    aiService.handleCallStatus(callSid, callStatus);
-
-    res.status(200).type('text/xml').send('<Response/>');
+      await aiService.handleCallStatus(callSid, callStatus);
   } catch (error) {
     console.error('[AI Status Webhook Error]', error);
     res.status(200).type('text/xml').send('<Response/>');
@@ -108,4 +106,29 @@ export const getActiveConversations = async (_req: Request, res: Response): Prom
       messageCount: c.messages.filter((m) => m.role !== 'system').length,
     })),
   });
+};
+
+/**
+ * POST /api/ai/translate - Translate text to target language using OpenAI
+ */
+export const translateTextController = async (req: Request, res: Response): Promise<void> => {
+  const parsed = translateSchema.safeParse(req.body);
+
+  if (!parsed.success) {
+    res.status(400).json({
+      success: false,
+      message: 'Validation failed',
+      errors: parsed.error.flatten().fieldErrors,
+    });
+    return;
+  }
+
+  try {
+    const { text, targetLanguage } = parsed.data;
+    const translated = await aiService.translateText(text, targetLanguage);
+    res.status(200).json({ success: true, data: { translated } });
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : 'Translation failed';
+    res.status(500).json({ success: false, message: errMsg });
+  }
 };

@@ -14,6 +14,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import MicIcon from '@mui/icons-material/Mic';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import Tooltip from '@mui/material/Tooltip';
 import { CallLogItem } from '../calls.types';
 import StatusChip from './StatusChip';
@@ -26,64 +27,72 @@ interface CallLogsTableBodyProps {
   order: Order;
   orderBy: keyof CallLogItem;
   onSort: (property: keyof CallLogItem) => void;
+  onRowClick?: (log: CallLogItem) => void;
 }
 
 const headCells: { id: keyof CallLogItem; label: string }[] = [
   { id: 'to', label: 'To' },
-  { id: 'from', label: 'From' },
   { id: 'status', label: 'Status' },
-  { id: 'duration', label: 'Duration (s)' },
-  { id: 'startTime', label: 'Start Time' },
+  { id: 'duration', label: 'Dur(s)' },
+  { id: 'startTime', label: 'Time' },
 ];
 
 const formatDate = (dateStr: string): string => {
   if (!dateStr) return '-';
-  return new Date(dateStr).toLocaleString();
+  const d = new Date(dateStr);
+  return d.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 };
 
 interface ExpandableRowProps {
   log: CallLogItem;
+  onSelect?: (log: CallLogItem) => void;
 }
 
-const ExpandableRow = ({ log }: ExpandableRowProps) => {
+const ExpandableRow = ({ log, onSelect }: ExpandableRowProps) => {
   const [open, setOpen] = useState(false);
   const hasRecording = Boolean(log.recordingUrl);
   const hasReply = Boolean(log.userReply);
 
   return (
     <>
-      <TableRow hover sx={{ '& > *': { borderBottom: open ? 'unset' : undefined } }}>
-        <TableCell sx={{ width: 48, p: 0.5 }}>
-          <IconButton size="small" onClick={() => setOpen(!open)}>
-            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+      <TableRow hover sx={{ cursor: onSelect ? 'pointer' : 'default', '& > *': { borderBottom: open ? 'unset' : undefined } }}>
+        <TableCell sx={{ width: 36, p: 0.3 }}>
+          <IconButton size="small" onClick={(e) => { e.stopPropagation(); setOpen(!open); }}>
+            {open ? <KeyboardArrowUpIcon fontSize="small" /> : <KeyboardArrowDownIcon fontSize="small" />}
           </IconButton>
         </TableCell>
-        <TableCell>{log.to}</TableCell>
-        <TableCell>{log.from}</TableCell>
-        <TableCell>
+        <TableCell sx={{ py: 0.5, fontSize: '0.78rem' }}>{log.to}</TableCell>
+        <TableCell sx={{ py: 0.5 }}>
           <StatusChip status={log.status} />
         </TableCell>
-        <TableCell>{log.duration}</TableCell>
-        <TableCell>{formatDate(log.startTime)}</TableCell>
-        <TableCell sx={{ width: 60 }}>
-          <Box sx={{ display: 'flex', gap: 0.5 }}>
+        <TableCell sx={{ py: 0.5, fontSize: '0.78rem' }}>{log.duration}</TableCell>
+        <TableCell sx={{ py: 0.5, fontSize: '0.75rem' }}>{formatDate(log.startTime)}</TableCell>
+        <TableCell sx={{ width: 72, py: 0.5 }}>
+          <Box sx={{ display: 'flex', gap: 0.3, alignItems: 'center' }}>
             {hasRecording && (
               <Tooltip title="Has recording">
-                <MicIcon fontSize="small" color="primary" />
+                <MicIcon sx={{ fontSize: 15 }} color="primary" />
               </Tooltip>
             )}
             {hasReply && (
-              <Tooltip title="Has user reply">
-                <ChatBubbleOutlineIcon fontSize="small" color="secondary" />
+              <Tooltip title="Has transcript">
+                <ChatBubbleOutlineIcon sx={{ fontSize: 15 }} color="secondary" />
+              </Tooltip>
+            )}
+            {onSelect && (
+              <Tooltip title="Load this call">
+                <IconButton size="small" onClick={(e) => { e.stopPropagation(); onSelect(log); }} sx={{ p: 0.3 }}>
+                  <OpenInNewIcon sx={{ fontSize: 15 }} />
+                </IconButton>
               </Tooltip>
             )}
           </Box>
         </TableCell>
       </TableRow>
       <TableRow>
-        <TableCell sx={{ py: 0 }} colSpan={7}>
+        <TableCell sx={{ py: 0 }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ py: 2, px: 1 }}>
+            <Box sx={{ py: 1, px: 1 }}>
               <RecordingPlayer
                 recordingUrl={log.recordingUrl}
                 recordingDuration={log.recordingDuration}
@@ -97,15 +106,15 @@ const ExpandableRow = ({ log }: ExpandableRowProps) => {
   );
 };
 
-const CallLogsTableBody = ({ logs, order, orderBy, onSort }: CallLogsTableBodyProps) => {
+const CallLogsTableBody = ({ logs, order, orderBy, onSort, onRowClick }: CallLogsTableBodyProps) => {
   return (
     <TableContainer>
       <Table size="small">
         <TableHead>
           <TableRow>
-            <TableCell sx={{ width: 48 }} />
+            <TableCell sx={{ width: 36, p: 0.3 }} />
             {headCells.map((cell) => (
-              <TableCell key={cell.id}>
+              <TableCell key={cell.id} sx={{ py: 0.5, fontSize: '0.75rem' }}>
                 <TableSortLabel
                   active={orderBy === cell.id}
                   direction={orderBy === cell.id ? order : 'asc'}
@@ -115,20 +124,22 @@ const CallLogsTableBody = ({ logs, order, orderBy, onSort }: CallLogsTableBodyPr
                 </TableSortLabel>
               </TableCell>
             ))}
-            <TableCell sx={{ width: 60 }}>Media</TableCell>
+            <TableCell sx={{ width: 72, py: 0.5, fontSize: '0.75rem' }}>Media</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {logs.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} align="center">
-                <Typography variant="body2" color="text.secondary" sx={{ py: 3 }}>
+              <TableCell colSpan={6} align="center">
+                <Typography variant="body2" color="text.secondary" sx={{ py: 2, fontSize: '0.8rem' }}>
                   No call logs found
                 </Typography>
               </TableCell>
             </TableRow>
           ) : (
-            logs.map((log) => <ExpandableRow key={log.callSid} log={log} />)
+            logs.map((log) => (
+              <ExpandableRow key={log.callSid} log={log} onSelect={onRowClick} />
+            ))
           )}
         </TableBody>
       </Table>

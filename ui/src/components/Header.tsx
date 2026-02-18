@@ -10,11 +10,6 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Divider from '@mui/material/Divider';
 import ListItemIcon from '@mui/material/ListItemIcon';
-import Chip from '@mui/material/Chip';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import PersonIcon from '@mui/icons-material/Person';
@@ -23,22 +18,16 @@ import BusinessIcon from '@mui/icons-material/Business';
 import HeadsetMicIcon from '@mui/icons-material/HeadsetMic';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
-import RecordVoiceOverIcon from '@mui/icons-material/RecordVoiceOver';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useThemeMode } from '../context/ThemeContext';
-import { useVoice } from '../context/VoiceContext';
-import { getVoiceLabel } from '../tools/voices/voices.data';
-import VoiceSelector from '../tools/voices/VoiceSelector';
 
 const Header = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const { mode, toggleTheme } = useThemeMode();
-  const { voice, setVoice } = useVoice();
   const navigate = useNavigate();
   const location = useLocation();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [voiceDialogOpen, setVoiceDialogOpen] = useState(false);
 
   const handleMenuClose = () => setAnchorEl(null);
 
@@ -97,31 +86,6 @@ const Header = () => {
         <IconButton size="small" onClick={toggleTheme} sx={{ color: 'text.secondary' }}>
           {mode === 'light' ? <DarkModeIcon fontSize="small" /> : <LightModeIcon fontSize="small" />}
         </IconButton>
-
-        {isAuthenticated && (
-          <>
-            <Chip
-              icon={<RecordVoiceOverIcon />}
-              label={getVoiceLabel(voice)}
-              onClick={() => setVoiceDialogOpen(true)}
-              variant="outlined"
-              size="small"
-              sx={{ display: { xs: 'none', sm: 'flex' }, maxWidth: 180, fontSize: '0.7rem', height: 28 }}
-            />
-            <Dialog open={voiceDialogOpen} onClose={() => setVoiceDialogOpen(false)} maxWidth="md" fullWidth>
-              <DialogTitle>Global Voice Selection</DialogTitle>
-              <DialogContent>
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-                  This voice will be used as default for new calls across the app.
-                </Typography>
-                <VoiceSelector value={voice} onChange={(v) => setVoice(v)} />
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={() => setVoiceDialogOpen(false)} variant="contained">Done</Button>
-              </DialogActions>
-            </Dialog>
-          </>
-        )}
 
         {isAuthenticated && user ? (
           <Box>

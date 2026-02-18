@@ -29,7 +29,22 @@ export const fetchCallLogs = async (params?: CallLogsParams): Promise<CallLogsRe
   return response.data;
 };
 
+export const fetchCallDetail = async (callSid: string) => {
+  const response = await apiClient.get(`/calls/${callSid}/detail`);
+  return response.data;
+};
+
 export const fetchConversationHistory = async (callSid: string) => {
   const response = await apiClient.get(`/ai/conversation/${callSid}`);
+  return response.data;
+};
+
+export interface TranslatePayload {
+  text: string;
+  targetLanguage: string;
+}
+
+export const translateText = async (payload: TranslatePayload): Promise<{ success: boolean; data: { translated: string } }> => {
+  const response = await apiClient.post('/ai/translate', payload);
   return response.data;
 };

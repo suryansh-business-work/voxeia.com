@@ -57,3 +57,12 @@ export const emitToCall = (callSid: string, event: string, data: unknown): void 
     io.to(`call:${callSid}`).emit(event, data);
   }
 };
+
+/**
+ * Emit an event to ALL connected clients (global broadcast).
+ */
+export const emitGlobal = (event: string, data?: unknown): void => {
+  if (io) {
+    io.emit(event, data);
+  }
+};

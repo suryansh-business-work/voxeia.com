@@ -1,14 +1,16 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
 import Radio from '@mui/material/Radio';
 import IconButton from '@mui/material/IconButton';
+import CircularProgress from '@mui/material/CircularProgress';
 import { alpha } from '@mui/material/styles';
 import PersonIcon from '@mui/icons-material/Person';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import StopIcon from '@mui/icons-material/Stop';
 import { VoiceEntry } from './voices.data';
+import apiClient from '../../api/apiClient';
 
 interface VoiceCardProps {
   voice: VoiceEntry;
@@ -18,20 +20,37 @@ interface VoiceCardProps {
 
 const VoiceCard = ({ voice, selected, onSelect }: VoiceCardProps) => {
   const [playing, setPlaying] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const handlePlaySample = (e: React.MouseEvent) => {
+  const handlePlaySample = async (e: React.MouseEvent) => {
     e.stopPropagation();
+
     if (playing) {
-      window.speechSynthesis.cancel();
+      audioRef.current?.pause();
+      audioRef.current = null;
       setPlaying(false);
       return;
     }
-    const utterance = new SpeechSynthesisUtterance(`Hello, I am ${voice.name}. How can I help you today?`);
-    utterance.rate = 0.9;
-    utterance.onend = () => setPlaying(false);
-    utterance.onerror = () => setPlaying(false);
-    window.speechSynthesis.speak(utterance);
-    setPlaying(true);
+
+    try {
+      setLoading(true);
+      const { data } = await apiClient.post<{ audio: string }>('/tts/preview', {
+        speaker: voice.id,
+        language: voice.languageCode,
+      });
+
+      const audio = new Audio(`data:audio/wav;base64,${data.audio}`);
+      audioRef.current = audio;
+      audio.onended = () => { setPlaying(false); audioRef.current = null; };
+      audio.onerror = () => { setPlaying(false); audioRef.current = null; };
+      await audio.play();
+      setPlaying(true);
+    } catch {
+      console.error('Failed to play voice preview');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -56,14 +75,15 @@ const VoiceCard = ({ voice, selected, onSelect }: VoiceCardProps) => {
           <PersonIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
           <Typography variant="body2" fontWeight={600} color="text.primary">{voice.name}</Typography>
           <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
-            {voice.provider === 'amazon' ? 'Polly' : 'Google'}
+            Sarvam
           </Typography>
           <IconButton
             size="small"
             onClick={handlePlaySample}
+            disabled={loading}
             sx={{ ml: 'auto', color: playing ? 'error.main' : 'primary.main', p: 0.3 }}
           >
-            {playing ? <StopIcon sx={{ fontSize: 16 }} /> : <PlayArrowIcon sx={{ fontSize: 16 }} />}
+            {loading ? <CircularProgress size={16} /> : playing ? <StopIcon sx={{ fontSize: 16 }} /> : <PlayArrowIcon sx={{ fontSize: 16 }} />}
           </IconButton>
         </Box>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>

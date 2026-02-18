@@ -16,13 +16,20 @@ export const aiCallSchema = z.object({
     .string()
     .min(1)
     .optional()
-    .default('Polly.Joanna-Neural'),
+    .default('meera'),
   systemPrompt: z
     .string()
     .max(2000, 'System prompt must be under 2000 characters')
     .optional(),
   agentId: z.string().optional(),
-  language: z.string().optional().default('en-US'),
+  language: z.string().optional().default('en-IN'),
 });
 
 export type AiCallInput = z.infer<typeof aiCallSchema>;
+
+export const translateSchema = z.object({
+  text: z.string().min(1, 'Text is required').max(5000, 'Text must be under 5000 characters'),
+  targetLanguage: z.string().min(2, 'Target language code is required'),
+});
+
+export type TranslateInput = z.infer<typeof translateSchema>;

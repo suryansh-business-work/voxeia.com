@@ -4,8 +4,9 @@ import { envConfig } from '../config';
 import { ConversationState, ConversationMessage } from './ai.models';
 import { VoiceOption } from '../calls/calls.models';
 import CallLog from '../calllogs/calllogs.models';
-import { emitToCall } from '../websocket';
+import { emitToCall, emitGlobal } from '../websocket';
 import { getTunnelUrl } from '../tunnel';
+import { generateAndCacheAudio } from '../tts/tts.services';
 
 // ─── In-memory conversation store ───────────────────────────────────────────
 const conversations = new Map<string, ConversationState>();
@@ -37,15 +38,6 @@ const getTwilioClient = () => {
   return twilioClient;
 };
 
-// ─── Escape XML ─────────────────────────────────────────────────────────────
-const escapeXml = (text: string): string =>
-  text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-
 // ─── Webhook URL helper ─────────────────────────────────────────────────────
 
 /** Returns the tunnel URL if available, else falls back to env BASE_URL. */
@@ -53,22 +45,36 @@ const getWebhookBaseUrl = (): string => {
   return getTunnelUrl() || envConfig.BASE_URL;
 };
 
+// ─── Language name mapping (Sarvam.ai supported languages) ──────────────────
+const LANGUAGE_NAMES: Record<string, string> = {
+  'en-IN': 'English', 'hi-IN': 'Hindi', 'bn-IN': 'Bengali',
+  'ta-IN': 'Tamil', 'te-IN': 'Telugu', 'kn-IN': 'Kannada',
+  'ml-IN': 'Malayalam', 'mr-IN': 'Marathi', 'gu-IN': 'Gujarati',
+  'pa-IN': 'Punjabi', 'od-IN': 'Odia',
+};
+
+const getLanguageName = (code: string): string => LANGUAGE_NAMES[code] || code;
+
 // ─── Conversation management ────────────────────────────────────────────────
 
 export const createConversation = (
   callSid: string,
   voice: VoiceOption,
   systemPrompt?: string,
-  language: string = 'en-US'
+  language: string = 'en-IN'
 ): ConversationState => {
+  const basePrompt = systemPrompt || envConfig.AI_SYSTEM_PROMPT;
+  const langInstruction = language && !language.startsWith('en')
+    ? `\n\nIMPORTANT: You MUST respond ONLY in ${getLanguageName(language)} language. Do not use English unless the user explicitly asks for it.`
+    : '';
   const state: ConversationState = {
     callSid,
     voice,
-    systemPrompt: systemPrompt || envConfig.AI_SYSTEM_PROMPT,
+    systemPrompt: basePrompt + langInstruction,
     messages: [
       {
         role: 'system',
-        content: systemPrompt || envConfig.AI_SYSTEM_PROMPT,
+        content: basePrompt + langInstruction,
         timestamp: new Date().toISOString(),
       },
     ],
@@ -99,7 +105,7 @@ export const initiateAiCall = async (
   systemPrompt?: string,
   agentId?: string,
   userId?: string,
-  language: string = 'en-US'
+  language: string = 'en-IN'
 ) => {
   const baseUrl = getWebhookBaseUrl();
 
@@ -112,13 +118,20 @@ export const initiateAiCall = async (
 
   const client = getTwilioClient();
 
+  // Generate Sarvam.ai TTS audio for the opening message and prompt
+  const [messageAudioUrl, listeningAudioUrl, goodbyeAudioUrl] = await Promise.all([
+    generateAndCacheAudio(message, language, voice),
+    generateAndCacheAudio('I am listening.', language, voice),
+    generateAndCacheAudio('I did not hear anything. Goodbye!', language, voice),
+  ]);
+
   const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Say voice="${voice}" language="${language}">${escapeXml(message)}</Say>
+  <Play>${messageAudioUrl}</Play>
   <Gather input="speech" action="${baseUrl}/api/ai/conversation/respond" method="POST" speechTimeout="auto" language="${language}" actionOnEmptyResult="true">
-    <Say voice="${voice}" language="${language}">I am listening.</Say>
+    <Play>${listeningAudioUrl}</Play>
   </Gather>
-  <Say voice="${voice}" language="${language}">I did not hear anything. Goodbye!</Say>
+  <Play>${goodbyeAudioUrl}</Play>
 </Response>`;
 
   const call = await client.calls.create({
@@ -183,13 +196,13 @@ export const handleUserSpeech = async (
   speechResult: string | null
 ): Promise<string> => {
   const convo = conversations.get(callSid);
-  const voice = convo?.voice || 'Polly.Joanna-Neural';
-  const lang = convo?.language || 'en-US';
+  const voice = convo?.voice || 'meera';
+  const lang = convo?.language || 'en-IN';
   const baseUrl = getWebhookBaseUrl();
 
   // If no conversation state, start a basic one
   if (!convo) {
-    const fallback = createConversation(callSid, voice);
+    createConversation(callSid, voice);
     return handleUserSpeech(callSid, speechResult);
   }
 
@@ -205,7 +218,6 @@ export const handleUserSpeech = async (
     });
 
     if (convo.silenceCount >= MAX_SILENCE) {
-      // Too many silences, end call
       emitToCall(callSid, 'conversation:update', {
         callSid,
         type: 'call_ended',
@@ -213,27 +225,35 @@ export const handleUserSpeech = async (
         timestamp: new Date().toISOString(),
       });
       deleteConversation(callSid);
+
+      const goodbyeUrl = await generateAndCacheAudio(
+        'I have not heard anything for a while. Thank you for calling. Goodbye!',
+        lang, voice
+      );
       return `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Say voice="${voice}" language="${lang}">I have not heard anything for a while. Thank you for calling. Goodbye!</Say>
+  <Play>${goodbyeUrl}</Play>
   <Hangup/>
 </Response>`;
     }
 
-    // Ask if still there, re-gather
+    const [stillThereUrl, byeUrl] = await Promise.all([
+      generateAndCacheAudio('Are you still there? Please go ahead, I am listening.', lang, voice),
+      generateAndCacheAudio('Goodbye!', lang, voice),
+    ]);
+
     return `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Gather input="speech" action="${baseUrl}/api/ai/conversation/respond" method="POST" speechTimeout="auto" language="${lang}" actionOnEmptyResult="true">
-    <Say voice="${voice}" language="${lang}">Are you still there? Please go ahead, I am listening.</Say>
+    <Play>${stillThereUrl}</Play>
   </Gather>
-  <Say voice="${voice}" language="${lang}">Goodbye!</Say>
+  <Play>${byeUrl}</Play>
 </Response>`;
   }
 
   // Reset silence counter on valid speech
   convo.silenceCount = 0;
 
-  // Emit user message to UI
   emitToCall(callSid, 'conversation:update', {
     callSid,
     type: 'user_message',
@@ -241,7 +261,6 @@ export const handleUserSpeech = async (
     timestamp: new Date().toISOString(),
   });
 
-  // Add user message to history
   const userMsg: ConversationMessage = {
     role: 'user',
     content: speechResult,
@@ -249,7 +268,6 @@ export const handleUserSpeech = async (
   };
   convo.messages.push(userMsg);
 
-  // Emit "AI thinking" to UI
   emitToCall(callSid, 'conversation:update', {
     callSid,
     type: 'ai_thinking',
@@ -257,7 +275,6 @@ export const handleUserSpeech = async (
     timestamp: new Date().toISOString(),
   });
 
-  // Call OpenAI
   let aiReply: string;
   try {
     const openai = getOpenAI();
@@ -279,14 +296,12 @@ export const handleUserSpeech = async (
     aiReply = 'I apologize, I am having trouble processing your request right now.';
   }
 
-  // Add assistant response to history
   convo.messages.push({
     role: 'assistant',
     content: aiReply,
     timestamp: new Date().toISOString(),
   });
 
-  // Emit AI response to UI
   emitToCall(callSid, 'conversation:update', {
     callSid,
     type: 'ai_message',
@@ -294,10 +309,11 @@ export const handleUserSpeech = async (
     timestamp: new Date().toISOString(),
   });
 
-  // Return TwiML: Say the response, then Gather again for next turn
+  const replyAudioUrl = await generateAndCacheAudio(aiReply, lang, voice);
+
   return `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Say voice="${voice}" language="${lang}">${escapeXml(aiReply)}</Say>
+  <Play>${replyAudioUrl}</Play>
   <Gather input="speech" action="${baseUrl}/api/ai/conversation/respond" method="POST" speechTimeout="auto" language="${lang}" actionOnEmptyResult="true">
   </Gather>
   <Redirect>${baseUrl}/api/ai/conversation/respond?timeout=true</Redirect>
@@ -306,7 +322,7 @@ export const handleUserSpeech = async (
 
 // ─── Handle call status changes ─────────────────────────────────────────────
 
-export const handleCallStatus = (callSid: string, status: string): void => {
+export const handleCallStatus = async (callSid: string, status: string): Promise<void> => {
   console.log(`[AI] Call ${callSid} status: ${status}`);
 
   if (['completed', 'failed', 'busy', 'no-answer', 'canceled'].includes(status)) {
@@ -319,6 +335,19 @@ export const handleCallStatus = (callSid: string, status: string): void => {
       timestamp: new Date().toISOString(),
     });
 
+    // Save conversation messages and update status in DB
+    try {
+      const updateData: Record<string, unknown> = { status };
+      if (convo) {
+        updateData.conversationMessages = convo.messages
+          .filter((m) => m.role !== 'system')
+          .map((m) => ({ role: m.role, content: m.content, timestamp: m.timestamp }));
+      }
+      await CallLog.findOneAndUpdate({ callSid }, updateData);
+    } catch (err) {
+      console.error(`[AI] Failed to update call log for ${callSid}:`, err);
+    }
+
     // Send full transcript to UI before cleanup
     if (convo) {
       emitToCall(callSid, 'conversation:transcript', {
@@ -326,6 +355,9 @@ export const handleCallStatus = (callSid: string, status: string): void => {
         messages: convo.messages.filter((m) => m.role !== 'system'),
       });
     }
+
+    // Notify all clients to refresh call logs
+    emitGlobal('calllog:updated', { callSid, status });
 
     deleteConversation(callSid);
   }
@@ -355,3 +387,25 @@ setInterval(() => {
     }
   }
 }, 5 * 60 * 1000); // every 5 minutes
+
+// ─── Translation ────────────────────────────────────────────────────────────
+
+export const translateText = async (text: string, targetLanguage: string): Promise<string> => {
+  const openai = getOpenAI();
+  const langName = getLanguageName(targetLanguage);
+
+  const completion = await openai.chat.completions.create({
+    model: 'gpt-4o-mini',
+    messages: [
+      {
+        role: 'system',
+        content: `You are a translator. Translate the following text to ${langName}. Return ONLY the translated text, nothing else. Preserve formatting and meaning.`,
+      },
+      { role: 'user', content: text },
+    ],
+    max_tokens: 1000,
+    temperature: 0.3,
+  });
+
+  return completion.choices[0]?.message?.content?.trim() || text;
+};

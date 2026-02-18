@@ -3,6 +3,7 @@ import cors from 'cors';
 import { envConfig } from './config';
 import callsRoutes from './calls/calls.routes';
 import aiRoutes from './ai/ai.routes';
+import ttsRoutes from './tts/tts.routes';
 import authRoutes from './auth/auth.routes';
 import agentsRoutes from './agents/agents.routes';
 import callLogsRoutes from './calllogs/calllogs.routes';
@@ -29,5 +30,6 @@ app.use('/api/companies', companiesRoutes);
 app.use('/api/contacts', contactsRoutes);
 app.use('/api/calls', callsRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/tts', ttsRoutes);
 
 export default app;

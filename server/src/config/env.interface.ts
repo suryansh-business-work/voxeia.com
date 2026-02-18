@@ -46,4 +46,7 @@ export interface EnvConfig {
   IMAGEKIT_PUBLIC_KEY: string;
   IMAGEKIT_PRIVATE_KEY: string;
   IMAGEKIT_URL_ENDPOINT: string;
+
+  /** Sarvam.ai TTS */
+  SARVAM_API_KEY: string;
 }

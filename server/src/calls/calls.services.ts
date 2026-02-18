@@ -3,6 +3,8 @@ import { envConfig } from '../config';
 import CallLog from '../calllogs/calllogs.models';
 import { CallLogItem, CallLogsQuery, CallResponse, VoiceOption } from './calls.models';
 import { getTunnelUrl } from '../tunnel';
+import { emitGlobal } from '../websocket';
+import { generateAndCacheAudio } from '../tts/tts.services';
 
 let client: ReturnType<typeof twilio> | null = null;
 
@@ -19,21 +21,13 @@ const getTwilioClient = () => {
   return client;
 };
 
-const escapeXml = (text: string): string =>
-  text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-
 export const makeCall = async (
   to: string,
   message: string,
-  voice: VoiceOption = 'Polly.Joanna-Neural',
+  voice: VoiceOption = 'meera',
   agentId?: string,
   userId?: string,
-  language: string = 'en-US'
+  language: string = 'en-IN'
 ): Promise<CallResponse> => {
   try {
     const twilioClient = getTwilioClient();
@@ -41,10 +35,17 @@ export const makeCall = async (
     const baseUrl = getTunnelUrl() || envConfig.BASE_URL;
     const isPublicUrl = !baseUrl.includes('localhost') && !baseUrl.includes('127.0.0.1');
 
+    // Generate Sarvam.ai TTS audio
+    const messageAudioUrl = await generateAndCacheAudio(message, language, voice);
+
     let recordBlock = '';
     if (isPublicUrl) {
+      const [leaveResponseUrl, thankYouUrl] = await Promise.all([
+        generateAndCacheAudio('Please leave your response after the beep. Press the hash key when you are done.', language, voice),
+        generateAndCacheAudio('Thank you for your response. Goodbye!', language, voice),
+      ]);
       recordBlock = `
-  <Say voice="${voice}" language="${language}">Please leave your response after the beep. Press the hash key when you are done.</Say>
+  <Play>${leaveResponseUrl}</Play>
   <Record
     maxLength="120"
     playBeep="true"
@@ -55,15 +56,16 @@ export const makeCall = async (
     finishOnKey="#"
     timeout="10"
   />
-  <Say voice="${voice}" language="${language}">Thank you for your response. Goodbye!</Say>`;
+  <Play>${thankYouUrl}</Play>`;
     } else {
+      const thankYouUrl = await generateAndCacheAudio('Thank you. Goodbye!', language, voice);
       recordBlock = `
-  <Say voice="${voice}" language="${language}">Thank you. Goodbye!</Say>`;
+  <Play>${thankYouUrl}</Play>`;
     }
 
     const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Say voice="${voice}" language="${language}">${escapeXml(message)}</Say>${recordBlock}
+  <Play>${messageAudioUrl}</Play>${recordBlock}
 </Response>`;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -172,6 +174,8 @@ export const updateCallLog = async (
   }>
 ): Promise<void> => {
   await CallLog.findOneAndUpdate({ callSid }, update);
+  // Notify all clients to refresh call logs
+  emitGlobal('calllog:updated', { callSid });
 };
 
 export const getRecordingForCall = async (

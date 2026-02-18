@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { makeCallSchema, callLogsQuerySchema } from './calls.validators';
 import * as callService from './calls.services';
-import { saveRecording, saveTranscription } from './calls.storage';
+import { uploadRecordingToImageKit } from '../config/imagekit';
 import { envConfig } from '../config';
 
 export const initiateCall = async (req: Request, res: Response): Promise<void> => {
@@ -16,8 +16,8 @@ export const initiateCall = async (req: Request, res: Response): Promise<void> =
     return;
   }
 
-  const { to, message, voice } = parsed.data;
-  const result = await callService.makeCall(to, message, voice);
+  const { to, message, voice, agentId, language } = parsed.data;
+  const result = await callService.makeCall(to, message, voice, agentId, undefined, language);
 
   if (!result.success) {
     res.status(500).json(result);
@@ -78,12 +78,13 @@ export const handleRecordingStatus = async (req: Request, res: Response): Promis
     console.log(`[Recording Webhook] CallSid: ${CallSid}, Status: ${RecordingStatus}, RecordingSid: ${RecordingSid}`);
 
     if (RecordingStatus === 'completed' && RecordingSid) {
-      saveRecording({
-        callSid: CallSid,
-        recordingSid: RecordingSid,
-        recordingUrl: `${RecordingUrl}.mp3`,
-        recordingDuration: RecordingDuration || '0',
-        timestamp: new Date().toISOString(),
+      // Upload recording to ImageKit (async, don't block response)
+      uploadRecordingToImageKit(RecordingSid, RecordingUrl).then((imagekitUrl) => {
+        callService.updateCallLog(CallSid, {
+          recordingSid: RecordingSid,
+          recordingUrl: imagekitUrl || `/api/calls/recordings/${RecordingSid}/audio`,
+          recordingDuration: RecordingDuration || '0',
+        });
       });
     }
 
@@ -112,12 +113,8 @@ export const handleTranscription = async (req: Request, res: Response): Promise<
     console.log(`[Transcription Webhook] CallSid: ${CallSid}, Status: ${TranscriptionStatus}, Text: "${TranscriptionText}"`);
 
     if (TranscriptionStatus === 'completed' && TranscriptionText) {
-      saveTranscription({
-        callSid: CallSid,
-        recordingSid: RecordingSid || '',
-        transcriptionText: TranscriptionText,
-        transcriptionSid: TranscriptionSid || '',
-        timestamp: new Date().toISOString(),
+      await callService.updateCallLog(CallSid, {
+        userReply: TranscriptionText,
       });
     }
 

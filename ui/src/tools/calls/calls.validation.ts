@@ -10,6 +10,7 @@ export const makeCallValidationSchema = Yup.object().shape({
     .max(500, 'Message must be under 500 characters')
     .notRequired(),
   voice: Yup.string().notRequired(),
+  language: Yup.string().notRequired(),
   aiEnabled: Yup.boolean().notRequired(),
   systemPrompt: Yup.string()
     .max(2000, 'System prompt must be under 2000 characters')
@@ -20,6 +21,7 @@ export interface MakeCallFormValues {
   to: string;
   message: string;
   voice: string;
+  language: string;
   aiEnabled: boolean;
   systemPrompt: string;
 }
@@ -31,6 +33,7 @@ export const makeCallInitialValues: MakeCallFormValues = {
   to: '',
   message: 'Hello! This is a friendly reminder about your upcoming appointment tomorrow at 3 PM. Please call us back if you need to reschedule. Thank you, and have a great day!',
   voice: 'Polly.Joanna-Neural',
+  language: 'en-US',
   aiEnabled: false,
   systemPrompt: DEFAULT_SYSTEM_PROMPT,
 };

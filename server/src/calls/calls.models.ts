@@ -4,6 +4,9 @@ export interface MakeCallRequest {
   to: string;
   message?: string;
   voice?: VoiceOption;
+  agentId?: string;
+  userId?: string;
+  language?: string;
 }
 
 export interface CallResponse {
@@ -18,21 +21,26 @@ export interface CallResponse {
   };
 }
 
+/** Serialized call log item for API responses */
 export interface CallLogItem {
+  _id: string;
   callSid: string;
+  agentId: string | null;
   from: string;
   to: string;
   status: string;
   direction: string;
   duration: string;
   startTime: string;
-  endTime: string;
+  endTime: string | null;
   price: string | null;
   priceUnit: string;
   recordingUrl: string | null;
   recordingSid: string | null;
   recordingDuration: string | null;
   userReply: string | null;
+  language: string;
+  voice: string;
 }
 
 export interface CallLogsResponse {
@@ -52,4 +60,5 @@ export interface CallLogsQuery {
   status?: string;
   to?: string;
   from?: string;
+  agentId?: string;
 }

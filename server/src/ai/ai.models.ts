@@ -15,6 +15,7 @@ export interface ConversationState {
   messages: ConversationMessage[];
   startedAt: string;
   silenceCount: number;
+  language: string;
 }
 
 /** Socket event payload for live UI updates */

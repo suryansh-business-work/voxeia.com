@@ -3,6 +3,7 @@ import twilio from 'twilio';
 import { envConfig } from '../config';
 import { ConversationState, ConversationMessage } from './ai.models';
 import { VoiceOption } from '../calls/calls.models';
+import CallLog from '../calllogs/calllogs.models';
 import { emitToCall } from '../websocket';
 import { getTunnelUrl } from '../tunnel';
 
@@ -57,7 +58,8 @@ const getWebhookBaseUrl = (): string => {
 export const createConversation = (
   callSid: string,
   voice: VoiceOption,
-  systemPrompt?: string
+  systemPrompt?: string,
+  language: string = 'en-US'
 ): ConversationState => {
   const state: ConversationState = {
     callSid,
@@ -72,6 +74,7 @@ export const createConversation = (
     ],
     startedAt: new Date().toISOString(),
     silenceCount: 0,
+    language,
   };
   conversations.set(callSid, state);
   return state;
@@ -93,7 +96,10 @@ export const initiateAiCall = async (
   to: string,
   message: string,
   voice: VoiceOption,
-  systemPrompt?: string
+  systemPrompt?: string,
+  agentId?: string,
+  userId?: string,
+  language: string = 'en-US'
 ) => {
   const baseUrl = getWebhookBaseUrl();
 
@@ -106,14 +112,13 @@ export const initiateAiCall = async (
 
   const client = getTwilioClient();
 
-  // TwiML: Speak opening message, then Gather user's speech
   const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Say voice="${voice}" language="en-US">${escapeXml(message)}</Say>
-  <Gather input="speech" action="${baseUrl}/api/ai/conversation/respond" method="POST" speechTimeout="auto" language="en-US" actionOnEmptyResult="true">
-    <Say voice="${voice}" language="en-US">I am listening.</Say>
+  <Say voice="${voice}" language="${language}">${escapeXml(message)}</Say>
+  <Gather input="speech" action="${baseUrl}/api/ai/conversation/respond" method="POST" speechTimeout="auto" language="${language}" actionOnEmptyResult="true">
+    <Say voice="${voice}" language="${language}">I am listening.</Say>
   </Gather>
-  <Say voice="${voice}" language="en-US">I did not hear anything. Goodbye!</Say>
+  <Say voice="${voice}" language="${language}">I did not hear anything. Goodbye!</Say>
 </Response>`;
 
   const call = await client.calls.create({
@@ -121,12 +126,27 @@ export const initiateAiCall = async (
     from: envConfig.TWILIO_PHONE_NUMBER,
     twiml,
     record: true,
+    recordingChannels: 'dual',
     statusCallback: `${baseUrl}/api/ai/conversation/status`,
     statusCallbackEvent: ['completed', 'failed', 'busy', 'no-answer'],
   });
 
+  // Save call log to MongoDB
+  await CallLog.create({
+    callSid: call.sid,
+    agentId: agentId || null,
+    userId: userId || null,
+    from: call.from,
+    to: call.to,
+    status: call.status,
+    direction: call.direction || 'outbound-api',
+    startTime: (call.dateCreated || new Date()).toISOString(),
+    language,
+    voice,
+  });
+
   // Create conversation state
-  const convo = createConversation(call.sid, voice, systemPrompt);
+  const convo = createConversation(call.sid, voice, systemPrompt, language);
 
   // Add the opening message as assistant's first message
   convo.messages.push({
@@ -164,6 +184,7 @@ export const handleUserSpeech = async (
 ): Promise<string> => {
   const convo = conversations.get(callSid);
   const voice = convo?.voice || 'Polly.Joanna-Neural';
+  const lang = convo?.language || 'en-US';
   const baseUrl = getWebhookBaseUrl();
 
   // If no conversation state, start a basic one
@@ -194,7 +215,7 @@ export const handleUserSpeech = async (
       deleteConversation(callSid);
       return `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Say voice="${voice}" language="en-US">I have not heard anything for a while. Thank you for calling. Goodbye!</Say>
+  <Say voice="${voice}" language="${lang}">I have not heard anything for a while. Thank you for calling. Goodbye!</Say>
   <Hangup/>
 </Response>`;
     }
@@ -202,10 +223,10 @@ export const handleUserSpeech = async (
     // Ask if still there, re-gather
     return `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Gather input="speech" action="${baseUrl}/api/ai/conversation/respond" method="POST" speechTimeout="auto" language="en-US" actionOnEmptyResult="true">
-    <Say voice="${voice}" language="en-US">Are you still there? Please go ahead, I am listening.</Say>
+  <Gather input="speech" action="${baseUrl}/api/ai/conversation/respond" method="POST" speechTimeout="auto" language="${lang}" actionOnEmptyResult="true">
+    <Say voice="${voice}" language="${lang}">Are you still there? Please go ahead, I am listening.</Say>
   </Gather>
-  <Say voice="${voice}" language="en-US">Goodbye!</Say>
+  <Say voice="${voice}" language="${lang}">Goodbye!</Say>
 </Response>`;
   }
 
@@ -276,8 +297,8 @@ export const handleUserSpeech = async (
   // Return TwiML: Say the response, then Gather again for next turn
   return `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Say voice="${voice}" language="en-US">${escapeXml(aiReply)}</Say>
-  <Gather input="speech" action="${baseUrl}/api/ai/conversation/respond" method="POST" speechTimeout="auto" language="en-US" actionOnEmptyResult="true">
+  <Say voice="${voice}" language="${lang}">${escapeXml(aiReply)}</Say>
+  <Gather input="speech" action="${baseUrl}/api/ai/conversation/respond" method="POST" speechTimeout="auto" language="${lang}" actionOnEmptyResult="true">
   </Gather>
   <Redirect>${baseUrl}/api/ai/conversation/respond?timeout=true</Redirect>
 </Response>`;

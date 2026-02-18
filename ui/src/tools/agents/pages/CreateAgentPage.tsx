@@ -31,9 +31,9 @@ const CreateAgentPage = () => {
       setLoading(true);
       try {
         const response = await createAgentApi(values);
-        if (response.success) {
+        if (response.success && response.data) {
           toast.success('Agent created!');
-          navigate('/agents');
+          navigate(`/agents/${response.data._id}/call`);
         } else {
           toast.error(response.message);
         }
@@ -46,38 +46,43 @@ const CreateAgentPage = () => {
   });
 
   return (
-    <Box>
+    <Box sx={{ px: { xs: 1, md: 2 }, py: 1 }}>
       <AppBreadcrumb items={breadcrumbItems} />
       <Card sx={{ maxWidth: 800, mx: 'auto' }}>
-        <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
-          <Typography variant="h5" sx={{ mb: 3 }}>Create Call Agent</Typography>
+        <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+          <Typography variant="h5" sx={{ mb: 2, fontWeight: 700 }}>Create Call Agent</Typography>
           <form onSubmit={formik.handleSubmit}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <TextField
                 fullWidth label="Agent Name" name="name"
                 value={formik.values.name} onChange={formik.handleChange} onBlur={formik.handleBlur}
                 error={formik.touched.name && Boolean(formik.errors.name)}
-                helperText={formik.touched.name && formik.errors.name} disabled={loading}
+                helperText={(formik.touched.name && formik.errors.name) || 'Give your agent a descriptive name (e.g., Sales Bot, Support Agent)'}
+                disabled={loading}
                 placeholder="e.g., Customer Support Bot"
               />
               <TextField
                 fullWidth label="Greeting Message" name="greeting"
                 value={formik.values.greeting} onChange={formik.handleChange} onBlur={formik.handleBlur}
                 error={formik.touched.greeting && Boolean(formik.errors.greeting)}
-                helperText={formik.touched.greeting && formik.errors.greeting} disabled={loading}
+                helperText={(formik.touched.greeting && formik.errors.greeting) || 'First message the agent will speak when the call connects'}
+                disabled={loading}
                 multiline rows={2}
               />
               <TextField
                 fullWidth label="System Prompt" name="systemPrompt"
                 value={formik.values.systemPrompt} onChange={formik.handleChange} onBlur={formik.handleBlur}
                 error={formik.touched.systemPrompt && Boolean(formik.errors.systemPrompt)}
-                helperText={formik.touched.systemPrompt && formik.errors.systemPrompt} disabled={loading}
+                helperText={(formik.touched.systemPrompt && formik.errors.systemPrompt) || 'Instructions that define how the AI agent behaves during calls'}
+                disabled={loading}
                 multiline rows={4} placeholder="Describe how the AI agent should behave..."
               />
 
-              {/* Voice Selection */}
-              <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, p: 2 }}>
-                <Typography variant="subtitle2" sx={{ mb: 1.5 }}>Choose Voice</Typography>
+              <Box sx={{ border: '1px solid', borderColor: 'divider', p: 2 }}>
+                <Typography variant="subtitle2" sx={{ mb: 0.5 }}>Choose Voice</Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
+                  Select the text-to-speech voice for your agent. Click the play button to preview.
+                </Typography>
                 <VoiceSelector
                   value={formik.values.voice}
                   onChange={(v) => formik.setFieldValue('voice', v)}

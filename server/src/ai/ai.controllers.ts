@@ -18,8 +18,8 @@ export const initiateAiCall = async (req: Request, res: Response): Promise<void>
   }
 
   try {
-    const { to, message, voice, systemPrompt } = parsed.data;
-    const result = await aiService.initiateAiCall(to, message, voice, systemPrompt);
+    const { to, message, voice, systemPrompt, agentId, language } = parsed.data;
+    const result = await aiService.initiateAiCall(to, message, voice, systemPrompt, agentId, undefined, language);
 
     if (!result.success) {
       res.status(500).json(result);

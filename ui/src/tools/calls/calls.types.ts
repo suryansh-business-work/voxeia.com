@@ -4,6 +4,8 @@ export interface MakeCallPayload {
   to: string;
   message?: string;
   voice?: VoiceOption;
+  agentId?: string;
+  language?: string;
 }
 
 export interface CallData {
@@ -21,20 +23,24 @@ export interface CallResponse {
 }
 
 export interface CallLogItem {
+  _id: string;
   callSid: string;
+  agentId: string | null;
   from: string;
   to: string;
   status: string;
   direction: string;
   duration: string;
   startTime: string;
-  endTime: string;
+  endTime: string | null;
   price: string | null;
   priceUnit: string;
   recordingUrl: string | null;
   recordingSid: string | null;
   recordingDuration: string | null;
   userReply: string | null;
+  language: string;
+  voice: string;
 }
 
 export interface CallLogsResponse {
@@ -54,6 +60,7 @@ export interface CallLogsParams {
   status?: string;
   to?: string;
   from?: string;
+  agentId?: string;
 }
 
 // ─── AI Conversation Types ──────────────────────────────────────────────────
@@ -63,6 +70,8 @@ export interface AiCallPayload {
   message?: string;
   voice?: VoiceOption;
   systemPrompt?: string;
+  agentId?: string;
+  language?: string;
 }
 
 export interface ConversationMessage {

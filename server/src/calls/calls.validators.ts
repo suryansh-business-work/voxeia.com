@@ -17,6 +17,8 @@ export const makeCallSchema = z.object({
     .min(1)
     .optional()
     .default('Polly.Joanna-Neural'),
+  agentId: z.string().optional(),
+  language: z.string().optional().default('en-US'),
 });
 
 export const callLogsQuerySchema = z.object({
@@ -25,6 +27,7 @@ export const callLogsQuerySchema = z.object({
   status: z.string().optional(),
   to: z.string().optional(),
   from: z.string().optional(),
+  agentId: z.string().optional(),
 });
 
 export type MakeCallInput = z.infer<typeof makeCallSchema>;

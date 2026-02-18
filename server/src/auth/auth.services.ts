@@ -138,6 +138,9 @@ export const updateProfile = async (userId: string, data: { name?: string }) => 
 
 export const uploadProfilePhoto = async (userId: string, fileBuffer: Buffer, fileName: string) => {
   const imagekit = getImageKit();
+  if (!imagekit) {
+    throw new Error('ImageKit is not configured. Set IMAGEKIT_PRIVATE_KEY in .env');
+  }
 
   const user = await User.findById(userId);
   if (!user) {

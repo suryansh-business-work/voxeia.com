@@ -7,6 +7,7 @@ export interface IAgent extends Document {
   systemPrompt: string;
   voice: string;
   greeting: string;
+  image: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -21,6 +22,7 @@ const agentSchema = new Schema<IAgent>(
       type: String,
       default: 'Hello! I am your AI assistant. How can I help you today?',
     },
+    image: { type: String, default: null },
   },
   { timestamps: true }
 );

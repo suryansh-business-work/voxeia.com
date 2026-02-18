@@ -6,6 +6,8 @@ export const makeCall = async (payload: MakeCallPayload): Promise<CallResponse> 
     to: payload.to,
     message: payload.message,
     voice: payload.voice,
+    agentId: payload.agentId,
+    language: payload.language,
   });
   return response.data;
 };
@@ -16,6 +18,8 @@ export const makeAiCall = async (payload: AiCallPayload): Promise<CallResponse> 
     message: payload.message,
     voice: payload.voice,
     systemPrompt: payload.systemPrompt,
+    agentId: payload.agentId,
+    language: payload.language,
   });
   return response.data;
 };

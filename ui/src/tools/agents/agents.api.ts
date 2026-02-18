@@ -25,3 +25,12 @@ export const deleteAgentApi = async (agentId: string) => {
   const response = await apiClient.delete(`/agents/${agentId}`);
   return response.data;
 };
+
+export const uploadAgentPhotoApi = async (agentId: string, file: File): Promise<{ success: boolean; message: string; data?: { image: string } }> => {
+  const formData = new FormData();
+  formData.append('image', file);
+  const response = await apiClient.post(`/agents/${agentId}/photo`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return response.data;
+};

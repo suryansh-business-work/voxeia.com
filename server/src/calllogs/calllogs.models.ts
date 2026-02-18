@@ -2,7 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface ICallLog extends Document {
   _id: mongoose.Types.ObjectId;
-  userId: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId | null;
   agentId: mongoose.Types.ObjectId | null;
   callSid: string;
   from: string;
@@ -21,14 +21,16 @@ export interface ICallLog extends Document {
   recordingImageKitFileId: string | null;
   userReply: string | null;
   conversationMessages: { role: string; content: string; timestamp: string }[];
+  language: string;
+  voice: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
 const callLogSchema = new Schema<ICallLog>(
   {
-    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-    agentId: { type: Schema.Types.ObjectId, ref: 'Agent', default: null },
+    userId: { type: Schema.Types.ObjectId, ref: 'User', default: null, index: true },
+    agentId: { type: Schema.Types.ObjectId, ref: 'Agent', default: null, index: true },
     callSid: { type: String, required: true, unique: true, index: true },
     from: { type: String, required: true },
     to: { type: String, required: true },
@@ -52,6 +54,8 @@ const callLogSchema = new Schema<ICallLog>(
         timestamp: { type: String },
       },
     ],
+    language: { type: String, default: 'en-US' },
+    voice: { type: String, default: 'Polly.Joanna-Neural' },
   },
   { timestamps: true }
 );

@@ -19,24 +19,12 @@ const ConversationMessage = ({ event }: ConversationMessageProps) => {
   const isSilence = event.type === 'silence';
   const isEnded = event.type === 'call_ended';
 
-  // ─── Call ended badge ────────────────────
   if (isEnded) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 0.8,
-            backgroundColor: '#ffebee',
-            border: '1px solid #ef9a9a',
-            px: 2,
-            py: 0.6,
-            borderRadius: 3,
-          }}
-        >
-          <CallEndIcon sx={{ fontSize: 14, color: '#c62828' }} />
-          <Typography variant="caption" sx={{ color: '#c62828', fontWeight: 600 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8, bgcolor: 'error.main', px: 2, py: 0.5 }}>
+          <CallEndIcon sx={{ fontSize: 14, color: '#fff' }} />
+          <Typography variant="caption" sx={{ color: '#fff', fontWeight: 600 }}>
             {event.content}
           </Typography>
         </Box>
@@ -44,116 +32,59 @@ const ConversationMessage = ({ event }: ConversationMessageProps) => {
     );
   }
 
-  // ─── Silence indicator ───────────────────
   if (isSilence) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', my: 1 }}>
-        <Typography
-          variant="caption"
-          sx={{ color: 'text.disabled', fontStyle: 'italic', fontSize: '0.7rem' }}
-        >
+        <Typography variant="caption" color="text.disabled" sx={{ fontStyle: 'italic', fontSize: '0.7rem' }}>
           {event.content}
         </Typography>
       </Box>
     );
   }
 
-  // ─── AI thinking (typing indicator) ──────
   if (isThinking) {
     return (
       <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, ml: 0.5, my: 1 }}>
-        <Box
-          sx={{
-            width: 30,
-            height: 30,
-            borderRadius: '50%',
-            backgroundColor: '#e3f2fd',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-          }}
-        >
-          <SmartToyIcon sx={{ fontSize: 16, color: '#1565c0' }} />
+        <Box sx={{ width: 28, height: 28, bgcolor: 'primary.main', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <SmartToyIcon sx={{ fontSize: 14, color: '#fff' }} />
         </Box>
-        <Box
-          sx={{
-            backgroundColor: '#fff',
-            borderRadius: '16px 16px 16px 4px',
-            px: 1,
-            py: 0.5,
-            boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
-          }}
-        >
+        <Box sx={{ bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', px: 1.5, py: 0.5 }}>
           <TypingIndicator />
         </Box>
       </Box>
     );
   }
 
-  // ─── Chat bubble ─────────────────────────
   const time = formatTime(event.timestamp);
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: isUser ? 'row-reverse' : 'row',
-        alignItems: 'flex-end',
-        gap: 1,
-        my: 1.2,
-        mx: 0.5,
-      }}
-    >
-      {/* Avatar */}
-      <Box
-        sx={{
-          width: 30,
-          height: 30,
-          borderRadius: '50%',
-          backgroundColor: isUser ? '#e8f5e9' : '#e3f2fd',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-        }}
-      >
+    <Box sx={{ display: 'flex', flexDirection: isUser ? 'row-reverse' : 'row', alignItems: 'flex-end', gap: 0.8, my: 1, mx: 0.5 }}>
+      <Box sx={{
+        width: 28, height: 28,
+        bgcolor: isUser ? 'success.main' : 'primary.main',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+      }}>
         {isUser ? (
-          <PersonIcon sx={{ fontSize: 16, color: '#2e7d32' }} />
+          <PersonIcon sx={{ fontSize: 14, color: '#fff' }} />
         ) : (
-          <SmartToyIcon sx={{ fontSize: 16, color: '#1565c0' }} />
+          <SmartToyIcon sx={{ fontSize: 14, color: '#fff' }} />
         )}
       </Box>
 
-      {/* Bubble */}
-      <Box
-        sx={{
-          maxWidth: '72%',
-          backgroundColor: isUser ? '#dcf8c6' : '#ffffff',
-          borderRadius: isUser ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-          px: 1.8,
-          py: 1,
-          boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
-          position: 'relative',
-        }}
-      >
-        <Typography
-          variant="body2"
-          sx={{ wordBreak: 'break-word', lineHeight: 1.5, color: '#1a1a1a' }}
-        >
+      <Box sx={{
+        maxWidth: '72%',
+        bgcolor: isUser ? 'primary.main' : 'background.paper',
+        border: isUser ? 'none' : '1px solid',
+        borderColor: 'divider',
+        px: 1.5, py: 0.8,
+      }}>
+        <Typography variant="caption" sx={{ display: 'block', fontWeight: 600, mb: 0.3, fontSize: '0.65rem', color: isUser ? 'rgba(255,255,255,0.85)' : 'text.secondary' }}>
+          {isUser ? 'User' : 'AI Agent'}
+        </Typography>
+        <Typography variant="body2" sx={{ wordBreak: 'break-word', lineHeight: 1.5, color: isUser ? '#fff' : 'text.primary', fontSize: '0.82rem' }}>
           {event.content}
         </Typography>
-        <Typography
-          variant="caption"
-          sx={{
-            display: 'block',
-            mt: 0.4,
-            textAlign: isUser ? 'left' : 'right',
-            color: '#999',
-            fontSize: '0.65rem',
-            lineHeight: 1,
-          }}
-        >
+        <Typography variant="caption" sx={{ display: 'block', mt: 0.3, textAlign: isUser ? 'left' : 'right', color: isUser ? 'rgba(255,255,255,0.6)' : 'text.disabled', fontSize: '0.6rem' }}>
           {time}
         </Typography>
       </Box>

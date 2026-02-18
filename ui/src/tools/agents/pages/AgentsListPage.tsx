@@ -93,7 +93,7 @@ const AgentsListPage = () => {
               <Grid item xs={12} sm={6} md={4} key={agent._id}>
                 <AgentCard
                   agent={agent}
-                  onSelect={() => navigate(`/dashboard?agentId=${agent._id}`)}
+                  onSelect={() => navigate(`/agents/${agent._id}/call`)}
                   onEdit={() => navigate(`/agents/${agent._id}/edit`)}
                   onDelete={() => handleDelete(agent._id)}
                 />

@@ -14,6 +14,7 @@ import AppBreadcrumb from '../../../components/AppBreadcrumb';
 import { createAgentValidationSchema } from '../agents.validation';
 import { fetchAgentById, updateAgentApi } from '../agents.api';
 import VoiceSelector from '../../voices/VoiceSelector';
+import AgentPhotoUpload from '../components/AgentPhotoUpload';
 
 const breadcrumbItems = [
   { label: 'Home', href: '/dashboard' },
@@ -26,6 +27,7 @@ const EditAgentPage = () => {
   const { agentId } = useParams<{ agentId: string }>();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const [agentImage, setAgentImage] = useState<string | null>(null);
 
   const formik = useFormik({
     initialValues: { name: '', voice: 'Polly.Joanna-Neural', greeting: '', systemPrompt: '' },
@@ -62,6 +64,7 @@ const EditAgentPage = () => {
             greeting: res.data.greeting || '',
             systemPrompt: res.data.systemPrompt,
           });
+          setAgentImage(res.data.image || null);
         } else {
           toast.error('Agent not found');
           navigate('/agents');
@@ -93,37 +96,52 @@ const EditAgentPage = () => {
   }
 
   return (
-    <Box>
+    <Box sx={{ px: { xs: 1, md: 2 }, py: 1 }}>
       <AppBreadcrumb items={breadcrumbItems} />
       <Card sx={{ maxWidth: 800, mx: 'auto' }}>
-        <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
-          <Typography variant="h5" sx={{ mb: 3 }}>Edit Call Agent</Typography>
+        <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+          <Typography variant="h5" sx={{ mb: 2, fontWeight: 700 }}>Edit Call Agent</Typography>
+
+          <Box sx={{ mb: 2, p: 2, border: '1px solid', borderColor: 'divider' }}>
+            <AgentPhotoUpload
+              agentId={agentId}
+              currentImage={agentImage}
+              onImageUploaded={(url) => setAgentImage(url)}
+              disabled={loading}
+            />
+          </Box>
+
           <form onSubmit={formik.handleSubmit}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <TextField
                 fullWidth label="Agent Name" name="name"
                 value={formik.values.name} onChange={formik.handleChange} onBlur={formik.handleBlur}
                 error={formik.touched.name && Boolean(formik.errors.name)}
-                helperText={formik.touched.name && formik.errors.name} disabled={loading}
+                helperText={(formik.touched.name && formik.errors.name) || 'Give your agent a descriptive name'}
+                disabled={loading}
               />
               <TextField
                 fullWidth label="Greeting Message" name="greeting"
                 value={formik.values.greeting} onChange={formik.handleChange} onBlur={formik.handleBlur}
                 error={formik.touched.greeting && Boolean(formik.errors.greeting)}
-                helperText={formik.touched.greeting && formik.errors.greeting} disabled={loading}
+                helperText={(formik.touched.greeting && formik.errors.greeting) || 'First message spoken when the call connects'}
+                disabled={loading}
                 multiline rows={2}
               />
               <TextField
                 fullWidth label="System Prompt" name="systemPrompt"
                 value={formik.values.systemPrompt} onChange={formik.handleChange} onBlur={formik.handleBlur}
                 error={formik.touched.systemPrompt && Boolean(formik.errors.systemPrompt)}
-                helperText={formik.touched.systemPrompt && formik.errors.systemPrompt} disabled={loading}
+                helperText={(formik.touched.systemPrompt && formik.errors.systemPrompt) || 'Instructions defining AI agent behavior during calls'}
+                disabled={loading}
                 multiline rows={4}
               />
 
-              {/* Voice Selection */}
-              <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, p: 2 }}>
-                <Typography variant="subtitle2" sx={{ mb: 1.5 }}>Choose Voice</Typography>
+              <Box sx={{ border: '1px solid', borderColor: 'divider', p: 2 }}>
+                <Typography variant="subtitle2" sx={{ mb: 0.5 }}>Choose Voice</Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
+                  Select the text-to-speech voice. Click the play button to preview.
+                </Typography>
                 <VoiceSelector
                   value={formik.values.voice}
                   onChange={(v) => formik.setFieldValue('voice', v)}

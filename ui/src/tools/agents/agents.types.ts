@@ -5,6 +5,7 @@ export interface Agent {
   systemPrompt: string;
   voice: string;
   greeting: string;
+  image: string | null;
   createdAt: string;
   updatedAt: string;
 }

@@ -1,7 +1,7 @@
 import twilio from 'twilio';
 import { envConfig } from '../config';
+import CallLog from '../calllogs/calllogs.models';
 import { CallLogItem, CallLogsQuery, CallResponse, VoiceOption } from './calls.models';
-import { getLatestRecording, getLatestTranscription } from './calls.storage';
 import { getTunnelUrl } from '../tunnel';
 
 let client: ReturnType<typeof twilio> | null = null;
@@ -19,9 +19,6 @@ const getTwilioClient = () => {
   return client;
 };
 
-/**
- * Escapes special XML characters so user text is safe inside TwiML <Say>.
- */
 const escapeXml = (text: string): string =>
   text
     .replace(/&/g, '&amp;')
@@ -33,7 +30,10 @@ const escapeXml = (text: string): string =>
 export const makeCall = async (
   to: string,
   message: string,
-  voice: VoiceOption = 'Polly.Joanna-Neural'
+  voice: VoiceOption = 'Polly.Joanna-Neural',
+  agentId?: string,
+  userId?: string,
+  language: string = 'en-US'
 ): Promise<CallResponse> => {
   try {
     const twilioClient = getTwilioClient();
@@ -41,11 +41,10 @@ export const makeCall = async (
     const baseUrl = getTunnelUrl() || envConfig.BASE_URL;
     const isPublicUrl = !baseUrl.includes('localhost') && !baseUrl.includes('127.0.0.1');
 
-    // Build TwiML — only add <Record> with webhooks if BASE_URL is publicly reachable (e.g. ngrok)
     let recordBlock = '';
     if (isPublicUrl) {
       recordBlock = `
-  <Say voice="${voice}" language="en-US">Please leave your response after the beep. Press the hash key when you are done.</Say>
+  <Say voice="${voice}" language="${language}">Please leave your response after the beep. Press the hash key when you are done.</Say>
   <Record
     maxLength="120"
     playBeep="true"
@@ -56,25 +55,24 @@ export const makeCall = async (
     finishOnKey="#"
     timeout="10"
   />
-  <Say voice="${voice}" language="en-US">Thank you for your response. Goodbye!</Say>`;
+  <Say voice="${voice}" language="${language}">Thank you for your response. Goodbye!</Say>`;
     } else {
       recordBlock = `
-  <Say voice="${voice}" language="en-US">Thank you. Goodbye!</Say>`;
+  <Say voice="${voice}" language="${language}">Thank you. Goodbye!</Say>`;
     }
 
     const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Say voice="${voice}" language="en-US">${escapeXml(message)}</Say>${recordBlock}
+  <Say voice="${voice}" language="${language}">${escapeXml(message)}</Say>${recordBlock}
 </Response>`;
 
-    // record: true records the full call via Twilio API (recordings accessible later)
-    // Only add webhook callback if URL is publicly reachable
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const createOptions: any = {
       to,
       from: envConfig.TWILIO_PHONE_NUMBER,
       twiml,
       record: true,
+      recordingChannels: 'dual',
     };
 
     if (isPublicUrl) {
@@ -83,6 +81,20 @@ export const makeCall = async (
     }
 
     const call = await twilioClient.calls.create(createOptions);
+
+    // Save call log to MongoDB
+    await CallLog.create({
+      callSid: call.sid,
+      agentId: agentId || null,
+      userId: userId || null,
+      from: call.from,
+      to: call.to,
+      status: call.status,
+      direction: call.direction || 'outbound-api',
+      startTime: (call.dateCreated || new Date()).toISOString(),
+      language,
+      voice,
+    });
 
     return {
       success: true,
@@ -97,92 +109,71 @@ export const makeCall = async (
     };
   } catch (error: unknown) {
     const errMsg = error instanceof Error ? error.message : 'Failed to make call';
-    return {
-      success: false,
-      message: errMsg,
-    };
+    return { success: false, message: errMsg };
   }
 };
 
 export const getCallLogs = async (
   query: CallLogsQuery
 ): Promise<{ logs: CallLogItem[]; total: number }> => {
-  const { page = 1, pageSize = 10, status, to, from } = query;
+  const { page = 1, pageSize = 10, status, to, from, agentId } = query;
 
-  const twilioClient = getTwilioClient();
-  
-  const filters: Record<string, string> = {};
-  if (status) filters.status = status;
-  if (to) filters.to = to;
-  if (from) filters.from = from;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const filter: Record<string, any> = {};
+  if (status) filter.status = status;
+  if (to) filter.to = { $regex: to, $options: 'i' };
+  if (from) filter.from = { $regex: from, $options: 'i' };
+  if (agentId) filter.agentId = agentId;
 
-  const calls = await twilioClient.calls.list({
-    ...filters,
-    limit: pageSize,
-    pageSize,
-  });
+  const [docs, total] = await Promise.all([
+    CallLog.find(filter)
+      .sort({ startTime: -1 })
+      .skip((page - 1) * pageSize)
+      .limit(pageSize),
+    CallLog.countDocuments(filter),
+  ]);
 
-  // For each call, fetch recordings from Twilio API and transcriptions from local storage
-  const logs: CallLogItem[] = await Promise.all(
-    calls.map(async (call) => {
-      let recordingUrl: string | null = null;
-      let recordingSid: string | null = null;
-      let recordingDuration: string | null = null;
+  const logs: CallLogItem[] = docs.map((doc) => ({
+    _id: doc._id.toString(),
+    callSid: doc.callSid,
+    agentId: doc.agentId?.toString() || null,
+    from: doc.from,
+    to: doc.to,
+    status: doc.status,
+    direction: doc.direction,
+    duration: doc.duration,
+    startTime: doc.startTime || '',
+    endTime: doc.endTime || null,
+    price: doc.price,
+    priceUnit: doc.priceUnit,
+    recordingUrl: doc.recordingUrl,
+    recordingSid: doc.recordingSid,
+    recordingDuration: doc.recordingDuration,
+    userReply: doc.userReply,
+    language: doc.language,
+    voice: doc.voice,
+  }));
 
-      // Try local storage first
-      const localRec = getLatestRecording(call.sid);
-      if (localRec) {
-        recordingSid = localRec.recordingSid;
-        // Use proxy URL so the browser can play without auth
-        recordingUrl = `/api/calls/recordings/${localRec.recordingSid}/audio`;
-        recordingDuration = localRec.recordingDuration;
-      } else {
-        // Fallback: fetch from Twilio API
-        try {
-          const recordings = await twilioClient.recordings.list({
-            callSid: call.sid,
-            limit: 1,
-          });
-          if (recordings.length > 0) {
-            const rec = recordings[0];
-            recordingSid = rec.sid;
-            // Use proxy URL so the browser can play without auth
-            recordingUrl = `/api/calls/recordings/${rec.sid}/audio`;
-            recordingDuration = rec.duration;
-          }
-        } catch {
-          // Recording fetch failed, leave as null
-        }
-      }
-
-      // Get user reply transcription from local storage
-      const userReply = getLatestTranscription(call.sid);
-
-      return {
-        callSid: call.sid,
-        from: call.from,
-        to: call.to,
-        status: call.status,
-        direction: call.direction,
-        duration: call.duration || '0',
-        startTime: call.startTime?.toISOString() || '',
-        endTime: call.endTime?.toISOString() || '',
-        price: call.price,
-        priceUnit: call.priceUnit,
-        recordingUrl,
-        recordingSid,
-        recordingDuration,
-        userReply,
-      };
-    })
-  );
-
-  return { logs, total: logs.length };
+  return { logs, total };
 };
 
-/**
- * Get recording details (URL + transcription) for a specific call
- */
+/** Update a call log entry (e.g. when recording completes or call ends) */
+export const updateCallLog = async (
+  callSid: string,
+  update: Partial<{
+    status: string;
+    duration: string;
+    endTime: Date;
+    price: string | null;
+    recordingUrl: string | null;
+    recordingSid: string | null;
+    recordingDuration: string | null;
+    userReply: string | null;
+  }>
+): Promise<void> => {
+  await CallLog.findOneAndUpdate({ callSid }, update);
+};
+
 export const getRecordingForCall = async (
   callSid: string
 ): Promise<{
@@ -191,33 +182,29 @@ export const getRecordingForCall = async (
   recordingDuration: string | null;
   userReply: string | null;
 }> => {
-  const twilioClient = getTwilioClient();
+  const doc = await CallLog.findOne({ callSid });
+  if (doc && doc.recordingSid) {
+    return {
+      recordingUrl: doc.recordingUrl,
+      recordingSid: doc.recordingSid,
+      recordingDuration: doc.recordingDuration,
+      userReply: doc.userReply,
+    };
+  }
 
+  // Fallback: fetch from Twilio API
+  const twilioClient = getTwilioClient();
   let recordingUrl: string | null = null;
   let recordingSid: string | null = null;
   let recordingDuration: string | null = null;
 
-  // Try local storage first
-  const localRec = getLatestRecording(callSid);
-  if (localRec) {
-    recordingSid = localRec.recordingSid;
-    recordingUrl = `/api/calls/recordings/${localRec.recordingSid}/audio`;
-    recordingDuration = localRec.recordingDuration;
-  } else {
-    // Fetch from Twilio API
-    const recordings = await twilioClient.recordings.list({
-      callSid,
-      limit: 1,
-    });
-    if (recordings.length > 0) {
-      const rec = recordings[0];
-      recordingSid = rec.sid;
-      recordingUrl = `/api/calls/recordings/${rec.sid}/audio`;
-      recordingDuration = rec.duration;
-    }
+  const recordings = await twilioClient.recordings.list({ callSid, limit: 1 });
+  if (recordings.length > 0) {
+    const rec = recordings[0];
+    recordingSid = rec.sid;
+    recordingUrl = `/api/calls/recordings/${rec.sid}/audio`;
+    recordingDuration = rec.duration;
   }
 
-  const userReply = getLatestTranscription(callSid);
-
-  return { recordingUrl, recordingSid, recordingDuration, userReply };
+  return { recordingUrl, recordingSid, recordingDuration, userReply: null };
 };

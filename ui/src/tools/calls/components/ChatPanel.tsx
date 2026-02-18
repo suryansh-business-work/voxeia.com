@@ -1,9 +1,11 @@
+import { useMemo } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import HeadsetMicIcon from '@mui/icons-material/HeadsetMic';
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import { ConversationEvent } from '../calls.types';
 import ConversationMessage from './LiveConversation/ConversationMessage';
 import { useRef, useEffect } from 'react';
@@ -20,55 +22,66 @@ const ChatPanel = ({ events, isActive }: ChatPanelProps) => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [events]);
 
+  // Filter out ai_thinking events that are followed by ai_message (resolved thinking)
+  const filteredEvents = useMemo(() => {
+    return events.filter((event, idx) => {
+      if (event.type !== 'ai_thinking') return true;
+      // Keep only the last ai_thinking if it has no subsequent ai_message
+      const nextEvent = events[idx + 1];
+      if (nextEvent && (nextEvent.type === 'ai_message' || nextEvent.type === 'call_ended')) {
+        return false;
+      }
+      return true;
+    });
+  }, [events]);
+
   const messageCount = events.filter(
     (e) => e.type === 'user_message' || e.type === 'ai_message'
   ).length;
 
   return (
-    <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', borderRadius: 3, overflow: 'hidden' }}>
-      {/* Header */}
+    <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <Box sx={{
-        px: 2, py: 1.5, bgcolor: 'secondary.main', color: '#fff',
+        px: 2, py: 1, bgcolor: 'primary.main', color: '#fff',
         display: 'flex', alignItems: 'center', gap: 1,
       }}>
-        <ChatBubbleOutlineIcon fontSize="small" />
-        <Typography variant="subtitle2" sx={{ flex: 1 }}>Live Chat</Typography>
-        <Typography variant="caption" sx={{ opacity: 0.7 }}>
+        <ChatBubbleOutlineIcon sx={{ fontSize: 18 }} />
+        <Typography variant="subtitle2" sx={{ flex: 1, fontSize: '0.8rem' }}>Live Conversation</Typography>
+        {isActive && <FiberManualRecordIcon sx={{ fontSize: 10, color: '#4caf50' }} />}
+        <Typography variant="caption" sx={{ opacity: 0.8, fontSize: '0.7rem' }}>
           {messageCount} msg{messageCount !== 1 ? 's' : ''}
         </Typography>
       </Box>
 
-      {/* Messages */}
       <CardContent sx={{
-        flex: 1, overflowY: 'auto', p: 1.5, bgcolor: '#ece5dd',
+        flex: 1, overflowY: 'auto', p: 1.5, bgcolor: 'background.default',
         '&::-webkit-scrollbar': { width: 4 },
-        '&::-webkit-scrollbar-thumb': { backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: 2 },
+        '&::-webkit-scrollbar-thumb': { backgroundColor: 'rgba(128,128,128,0.3)' },
       }}>
         {events.length === 0 ? (
           <Box sx={{
             display: 'flex', flexDirection: 'column', alignItems: 'center',
-            justifyContent: 'center', height: '100%', gap: 1, opacity: 0.6,
+            justifyContent: 'center', height: '100%', gap: 1, opacity: 0.5,
           }}>
-            <HeadsetMicIcon sx={{ fontSize: 40, color: '#8d6e63' }} />
-            <Typography variant="body2" sx={{ color: '#5d4037', fontWeight: 500, textAlign: 'center' }}>
-              {isActive ? 'Waiting for conversation...' : 'Start a call to see chat'}
+            <HeadsetMicIcon sx={{ fontSize: 36, color: 'text.disabled' }} />
+            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500, textAlign: 'center', fontSize: '0.8rem' }}>
+              {isActive ? 'Waiting for conversation...' : 'Start a call to see the live conversation'}
             </Typography>
           </Box>
         ) : (
-          events.map((event, idx) => (
+          filteredEvents.map((event, idx) => (
             <ConversationMessage key={`${event.timestamp}-${idx}`} event={event} />
           ))
         )}
         <div ref={endRef} />
       </CardContent>
 
-      {/* Footer */}
       <Box sx={{
-        px: 2, py: 0.8, borderTop: '1px solid rgba(0,0,0,0.08)', bgcolor: '#f5f5f5',
+        px: 2, py: 0.6, borderTop: '1px solid', borderColor: 'divider', bgcolor: 'background.paper',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       }}>
-        <Typography variant="caption" sx={{ color: '#757575', fontSize: '0.7rem' }}>
-          {isActive ? 'Live conversation' : 'No active call'}
+        <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>
+          {isActive ? 'Live conversation in progress' : 'No active call'}
         </Typography>
       </Box>
     </Card>

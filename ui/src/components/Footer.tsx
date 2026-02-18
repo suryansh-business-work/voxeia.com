@@ -6,12 +6,14 @@ const Footer = () => {
     <Box
       component="footer"
       sx={{
-        py: 1.5,
+        py: 1,
         px: 3,
-        mt: 'auto',
         textAlign: 'center',
         borderTop: '1px solid',
         borderColor: 'divider',
+        bgcolor: 'background.paper',
+        flexShrink: 0,
+        width: '100%',
       }}
     >
       <Typography variant="caption" color="text.secondary">

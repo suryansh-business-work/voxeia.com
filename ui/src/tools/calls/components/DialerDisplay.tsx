@@ -45,15 +45,15 @@ const DialerDisplay = ({ phoneNumber, isActive, duration, onHangup }: DialerDisp
   }, [isActive]);
 
   return (
-    <Card sx={{ bgcolor: 'secondary.dark', color: '#fff', borderRadius: 3, overflow: 'hidden' }}>
-      <CardContent sx={{ p: 3, textAlign: 'center' }}>
-        <Box sx={{ mb: 2 }}>
+    <Card sx={{ bgcolor: 'secondary.dark', color: '#fff', overflow: 'hidden' }}>
+      <CardContent sx={{ p: 2, textAlign: 'center' }}>
+        <Box sx={{ mb: 1.5 }}>
           <Box sx={{
-            width: 70, height: 70, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.1)',
+            width: 56, height: 56, bgcolor: 'rgba(255,255,255,0.1)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto',
             animation: isActive ? `${ring} 1.5s ease-in-out infinite` : undefined,
           }}>
-            <PersonIcon sx={{ fontSize: 36, opacity: 0.8 }} />
+            <PersonIcon sx={{ fontSize: 30, opacity: 0.8 }} />
           </Box>
         </Box>
         <Typography variant="h6" sx={{ fontFamily: 'monospace', letterSpacing: 2, mb: 0.5 }}>
@@ -91,13 +91,13 @@ interface DialerIdleProps {
 
 export const DialerIdle = ({ phoneNumber }: DialerIdleProps) => {
   return (
-    <Card sx={{ bgcolor: 'secondary.main', color: '#fff', borderRadius: 3 }}>
-      <CardContent sx={{ p: 3, textAlign: 'center' }}>
+    <Card sx={{ bgcolor: 'secondary.main', color: '#fff' }}>
+      <CardContent sx={{ p: 2, textAlign: 'center' }}>
         <Box sx={{
-          width: 70, height: 70, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.1)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 2,
+          width: 56, height: 56, bgcolor: 'rgba(255,255,255,0.1)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 1.5,
         }}>
-          <PhoneIcon sx={{ fontSize: 36, opacity: 0.8 }} />
+          <PhoneIcon sx={{ fontSize: 30, opacity: 0.8 }} />
         </Box>
         <Typography variant="h6" sx={{ fontFamily: 'monospace', letterSpacing: 2, mb: 0.5 }}>
           {phoneNumber || 'Enter a number'}

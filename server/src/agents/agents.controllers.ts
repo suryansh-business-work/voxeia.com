@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth.middleware';
 import { createAgentSchema, updateAgentSchema, agentListQuerySchema } from './agents.validators';
 import * as agentService from './agents.services';
+import { uploadAgentPhoto } from '../config/imagekit';
 
 export const createAgent = async (req: AuthRequest, res: Response): Promise<void> => {
   const parsed = createAgentSchema.safeParse(req.body);
@@ -83,6 +84,35 @@ export const deleteAgent = async (req: AuthRequest, res: Response): Promise<void
     res.status(200).json({ success: true, message: 'Agent deleted' });
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Failed to delete agent';
+    res.status(500).json({ success: false, message: msg });
+  }
+};
+
+export const uploadAgentImage = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { agentId } = req.params;
+    const file = req.file;
+
+    if (!file) {
+      res.status(400).json({ success: false, message: 'No image file provided' });
+      return;
+    }
+
+    const imageUrl = await uploadAgentPhoto(`agent-${agentId}-${Date.now()}`, file.buffer);
+    if (!imageUrl) {
+      res.status(500).json({ success: false, message: 'ImageKit not configured or upload failed' });
+      return;
+    }
+
+    const agent = await agentService.updateAgent(req.userId!, agentId, { image: imageUrl });
+    if (!agent) {
+      res.status(404).json({ success: false, message: 'Agent not found' });
+      return;
+    }
+
+    res.status(200).json({ success: true, message: 'Photo uploaded', data: { image: imageUrl } });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : 'Failed to upload photo';
     res.status(500).json({ success: false, message: msg });
   }
 };

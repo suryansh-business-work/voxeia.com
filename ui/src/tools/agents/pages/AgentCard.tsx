@@ -6,6 +6,7 @@ import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
+import Avatar from '@mui/material/Avatar';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -23,8 +24,13 @@ const AgentCard = ({ agent, onSelect, onEdit, onDelete }: AgentCardProps) => {
   return (
     <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <CardContent sx={{ flex: 1 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-          <SmartToyIcon color="primary" />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+          <Avatar
+            src={agent.image || undefined}
+            sx={{ width: 40, height: 40, bgcolor: 'primary.main' }}
+          >
+            {!agent.image && <SmartToyIcon />}
+          </Avatar>
           <Typography variant="h6" noWrap sx={{ flex: 1 }}>{agent.name}</Typography>
         </Box>
         <Chip label={agent.voice.replace('Polly.', '').replace('-Neural', '')} size="small" sx={{ mb: 1 }} />

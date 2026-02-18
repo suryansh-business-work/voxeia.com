@@ -16,6 +16,7 @@ export const updateAgentSchema = z.object({
   systemPrompt: z.string().min(10).max(5000).optional(),
   voice: z.string().min(1).optional(),
   greeting: z.string().max(500).optional(),
+  image: z.string().url().nullable().optional(),
 });
 
 export const agentListQuerySchema = z.object({

@@ -21,6 +21,8 @@ export const aiCallSchema = z.object({
     .string()
     .max(2000, 'System prompt must be under 2000 characters')
     .optional(),
+  agentId: z.string().optional(),
+  language: z.string().optional().default('en-US'),
 });
 
 export type AiCallInput = z.infer<typeof aiCallSchema>;

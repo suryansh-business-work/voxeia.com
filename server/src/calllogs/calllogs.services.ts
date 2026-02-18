@@ -68,6 +68,7 @@ export const uploadRecordingToImageKit = async (
 ): Promise<string | null> => {
   try {
     const imagekit = getImageKit();
+    if (!imagekit) return null;
     const accountSid = envConfig.TWILIO_ACCOUNT_SID;
     const authToken = envConfig.TWILIO_AUTH_TOKEN;
 

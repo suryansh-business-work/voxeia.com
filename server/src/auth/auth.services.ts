@@ -129,7 +129,7 @@ export const getProfile = async (userId: string) => {
 };
 
 export const updateProfile = async (userId: string, data: { name?: string }) => {
-  const user = await User.findByIdAndUpdate(userId, data, { new: true, runValidators: true });
+  const user = await User.findByIdAndUpdate(userId, data, { returnDocument: 'after', runValidators: true });
   if (!user) {
     throw new Error('User not found');
   }

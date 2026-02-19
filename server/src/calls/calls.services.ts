@@ -5,6 +5,7 @@ import { CallLogItem, CallLogsQuery, CallResponse, VoiceOption } from './calls.m
 import { getTunnelUrl } from '../tunnel';
 import { emitGlobal } from '../websocket';
 import { generateAndCacheAudio } from '../tts/tts.services';
+import { escapeRegex } from '../utils/regex';
 
 let client: ReturnType<typeof twilio> | null = null;
 
@@ -129,8 +130,8 @@ export const getCallLogs = async (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const filter: Record<string, any> = {};
   if (status) filter.status = status;
-  if (to) filter.to = { $regex: to, $options: 'i' };
-  if (from) filter.from = { $regex: from, $options: 'i' };
+  if (to) filter.to = { $regex: escapeRegex(to), $options: 'i' };
+  if (from) filter.from = { $regex: escapeRegex(from), $options: 'i' };
   if (agentId) filter.agentId = agentId;
 
   const [docs, total] = await Promise.all([

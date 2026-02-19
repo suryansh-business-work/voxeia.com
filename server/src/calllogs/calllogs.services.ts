@@ -2,6 +2,7 @@ import CallLog, { ICallLog } from './calllogs.models';
 import { CallLogsQueryInput } from './calllogs.validators';
 import { getImageKit } from '../config/imagekit';
 import { envConfig } from '../config';
+import { escapeRegex } from '../utils/regex';
 
 export const saveCallLog = async (
   userId: string,
@@ -24,14 +25,15 @@ export const getCallLogs = async (
 
   const filter: Record<string, unknown> = { userId };
   if (status) filter.status = status;
-  if (to) filter.to = { $regex: to, $options: 'i' };
-  if (from) filter.from = { $regex: from, $options: 'i' };
+  if (to) filter.to = { $regex: escapeRegex(to), $options: 'i' };
+  if (from) filter.from = { $regex: escapeRegex(from), $options: 'i' };
   if (agentId) filter.agentId = agentId;
   if (search) {
+    const s = escapeRegex(search);
     filter.$or = [
-      { to: { $regex: search, $options: 'i' } },
-      { from: { $regex: search, $options: 'i' } },
-      { callSid: { $regex: search, $options: 'i' } },
+      { to: { $regex: s, $options: 'i' } },
+      { from: { $regex: s, $options: 'i' } },
+      { callSid: { $regex: s, $options: 'i' } },
     ];
   }
 

@@ -1,5 +1,6 @@
 import Agent, { IAgent } from './agents.models';
 import { CreateAgentInput, UpdateAgentInput, AgentListQueryInput } from './agents.validators';
+import { escapeRegex } from '../utils/regex';
 
 export const createAgent = async (userId: string, data: CreateAgentInput): Promise<IAgent> => {
   const agent = await Agent.create({ userId, ...data });
@@ -14,7 +15,7 @@ export const getAgents = async (
   const filter: Record<string, unknown> = { userId };
 
   if (search) {
-    filter.name = { $regex: search, $options: 'i' };
+    filter.name = { $regex: escapeRegex(search), $options: 'i' };
   }
 
   const [agents, total] = await Promise.all([
@@ -37,7 +38,7 @@ export const updateAgent = async (
   agentId: string,
   data: UpdateAgentInput
 ): Promise<IAgent | null> => {
-  return Agent.findOneAndUpdate({ _id: agentId, userId }, data, { new: true, runValidators: true });
+  return Agent.findOneAndUpdate({ _id: agentId, userId }, data, { returnDocument: 'after', runValidators: true });
 };
 
 export const deleteAgent = async (userId: string, agentId: string): Promise<boolean> => {

@@ -1,6 +1,7 @@
 import Contact from './contacts.models';
 import Company from '../companies/companies.models';
 import { CreateContactInput, UpdateContactInput, ContactListQueryInput } from './contacts.validators';
+import { escapeRegex } from '../utils/regex';
 
 export const createContact = async (userId: string, data: CreateContactInput) => {
   const contact = new Contact({ ...data, userId });
@@ -22,12 +23,13 @@ export const getContacts = async (userId: string, query: ContactListQueryInput) 
   if (tag) filter.tags = tag;
 
   if (search) {
+    const s = escapeRegex(search);
     filter.$or = [
-      { firstName: { $regex: search, $options: 'i' } },
-      { lastName: { $regex: search, $options: 'i' } },
-      { email: { $regex: search, $options: 'i' } },
-      { phone: { $regex: search, $options: 'i' } },
-      { jobTitle: { $regex: search, $options: 'i' } },
+      { firstName: { $regex: s, $options: 'i' } },
+      { lastName: { $regex: s, $options: 'i' } },
+      { email: { $regex: s, $options: 'i' } },
+      { phone: { $regex: s, $options: 'i' } },
+      { jobTitle: { $regex: s, $options: 'i' } },
     ];
   }
 

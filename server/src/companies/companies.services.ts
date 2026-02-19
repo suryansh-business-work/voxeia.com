@@ -1,5 +1,6 @@
 import Company from './companies.models';
 import { CreateCompanyInput, UpdateCompanyInput, CompanyListQueryInput } from './companies.validators';
+import { escapeRegex } from '../utils/regex';
 
 export const createCompany = async (userId: string, data: CreateCompanyInput) => {
   const company = new Company({ ...data, userId });
@@ -12,10 +13,11 @@ export const getCompanies = async (userId: string, query: CompanyListQueryInput)
   const filter: Record<string, unknown> = { userId };
 
   if (search) {
+    const s = escapeRegex(search);
     filter.$or = [
-      { name: { $regex: search, $options: 'i' } },
-      { industry: { $regex: search, $options: 'i' } },
-      { email: { $regex: search, $options: 'i' } },
+      { name: { $regex: s, $options: 'i' } },
+      { industry: { $regex: s, $options: 'i' } },
+      { email: { $regex: s, $options: 'i' } },
     ];
   }
 
@@ -39,7 +41,7 @@ export const updateCompany = async (userId: string, companyId: string, data: Upd
   return Company.findOneAndUpdate(
     { _id: companyId, userId },
     { $set: data },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   ).lean();
 };
 

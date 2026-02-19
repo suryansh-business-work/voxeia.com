@@ -1,5 +1,6 @@
 import PromptTemplate, { IPromptTemplate } from './promptlibrary.models';
 import { CreatePromptInput, UpdatePromptInput, PromptListQueryInput } from './promptlibrary.validators';
+import { escapeRegex } from '../utils/regex';
 
 export const createPrompt = async (userId: string, data: CreatePromptInput): Promise<IPromptTemplate> => {
   return PromptTemplate.create({ userId, ...data });
@@ -13,7 +14,7 @@ export const getPrompts = async (
   const filter: Record<string, unknown> = { userId };
 
   if (search) {
-    const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const escaped = escapeRegex(search);
     filter.$or = [
       { name: { $regex: escaped, $options: 'i' } },
       { description: { $regex: escaped, $options: 'i' } },
@@ -41,7 +42,7 @@ export const updatePrompt = async (
   promptId: string,
   data: UpdatePromptInput
 ): Promise<IPromptTemplate | null> => {
-  return PromptTemplate.findOneAndUpdate({ _id: promptId, userId }, data, { new: true, runValidators: true });
+  return PromptTemplate.findOneAndUpdate({ _id: promptId, userId }, data, { returnDocument: 'after', runValidators: true });
 };
 
 export const deletePrompt = async (userId: string, promptId: string): Promise<boolean> => {

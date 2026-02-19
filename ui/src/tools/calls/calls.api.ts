@@ -20,6 +20,7 @@ export const makeAiCall = async (payload: AiCallPayload): Promise<CallResponse> 
     systemPrompt: payload.systemPrompt,
     agentId: payload.agentId,
     language: payload.language,
+    aiModel: payload.aiModel,
   });
   return response.data;
 };

@@ -10,6 +10,8 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Divider from '@mui/material/Divider';
 import ListItemIcon from '@mui/material/ListItemIcon';
+import TextField from '@mui/material/TextField';
+import Chip from '@mui/material/Chip';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import PersonIcon from '@mui/icons-material/Person';
@@ -18,13 +20,19 @@ import BusinessIcon from '@mui/icons-material/Business';
 import HeadsetMicIcon from '@mui/icons-material/HeadsetMic';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
+import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useThemeMode } from '../context/ThemeContext';
+import { useSocket } from '../context/SocketContext';
+import { useModel, AI_MODELS } from '../context/ModelContext';
 
 const Header = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const { mode, toggleTheme } = useThemeMode();
+  const { connected } = useSocket();
+  const { aiModel, setAiModel } = useModel();
   const navigate = useNavigate();
   const location = useLocation();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -41,6 +49,7 @@ const Header = () => {
     { label: 'Dashboard', path: '/dashboard', icon: <DashboardIcon fontSize="small" /> },
     { label: 'Agents', path: '/agents', icon: <SmartToyIcon fontSize="small" /> },
     { label: 'Contacts', path: '/contacts', icon: <BusinessIcon fontSize="small" /> },
+    { label: 'Prompt Library', path: '/prompt-library', icon: <LibraryBooksIcon fontSize="small" /> },
   ];
 
   return (
@@ -82,6 +91,39 @@ const Header = () => {
         )}
 
         {!isAuthenticated && <Box sx={{ flex: 1 }} />}
+
+        {/* AI Model selector */}
+        {isAuthenticated && (
+          <TextField
+            select
+            size="small"
+            value={aiModel}
+            onChange={(e) => setAiModel(e.target.value)}
+            sx={{ minWidth: 140, '& .MuiInputBase-root': { fontSize: '0.75rem', height: 30 } }}
+          >
+            {AI_MODELS.map((m) => (
+              <MenuItem key={m.id} value={m.id} sx={{ fontSize: '0.75rem' }}>
+                {m.label} <Chip label={m.tier} size="small" sx={{ ml: 0.5, height: 16, fontSize: '0.6rem' }} />
+              </MenuItem>
+            ))}
+          </TextField>
+        )}
+
+        {/* WebSocket status */}
+        {isAuthenticated && (
+          <Chip
+            size="small"
+            icon={<FiberManualRecordIcon sx={{ fontSize: 10, color: connected ? '#4caf50' : '#f44336' }} />}
+            label={connected ? 'Connected' : 'Disconnected'}
+            variant="outlined"
+            sx={{
+              height: 24,
+              fontSize: '0.65rem',
+              borderColor: connected ? '#4caf50' : '#f44336',
+              color: connected ? '#4caf50' : '#f44336',
+            }}
+          />
+        )}
 
         <IconButton size="small" onClick={toggleTheme} sx={{ color: 'text.secondary' }}>
           {mode === 'light' ? <DarkModeIcon fontSize="small" /> : <LightModeIcon fontSize="small" />}

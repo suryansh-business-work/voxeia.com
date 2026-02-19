@@ -6,8 +6,9 @@ import Tab from '@mui/material/Tab';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import Grid from '@mui/material/Grid';
+import Chip from '@mui/material/Chip';
 import SearchIcon from '@mui/icons-material/Search';
-import { ALL_VOICES, getVoiceById } from './voices.data';
+import { ALL_VOICES, getVoiceById, VoiceProvider } from './voices.data';
 import VoiceCard from './VoiceCard';
 
 interface VoiceSelectorProps {
@@ -18,10 +19,14 @@ interface VoiceSelectorProps {
 
 const VoiceSelector = ({ value, onChange, disabled }: VoiceSelectorProps) => {
   const [tab, setTab] = useState<'all' | 'feminine' | 'masculine'>('all');
+  const [providerFilter, setProviderFilter] = useState<'all' | VoiceProvider>('all');
   const [search, setSearch] = useState('');
 
   const filtered = useMemo(() => {
     let list = tab === 'all' ? ALL_VOICES : ALL_VOICES.filter((v) => v.gender === tab);
+    if (providerFilter !== 'all') {
+      list = list.filter((v) => v.provider === providerFilter);
+    }
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter(
@@ -32,7 +37,7 @@ const VoiceSelector = ({ value, onChange, disabled }: VoiceSelectorProps) => {
       );
     }
     return list;
-  }, [tab, search]);
+  }, [tab, providerFilter, search]);
 
   const selectedVoice = getVoiceById(value);
 
@@ -45,7 +50,19 @@ const VoiceSelector = ({ value, onChange, disabled }: VoiceSelectorProps) => {
       }}>
         <Box>
           <Typography variant="caption" color="text.secondary">Voice Provider</Typography>
-          <Typography variant="body2" fontWeight={600}>Sarvam.ai</Typography>
+          <Box sx={{ display: 'flex', gap: 0.5, mt: 0.3 }}>
+            {(['all', 'sarvam', 'openai'] as const).map((p) => (
+              <Chip
+                key={p}
+                label={p === 'all' ? 'All' : p === 'sarvam' ? 'Sarvam.ai' : 'OpenAI'}
+                size="small"
+                variant={providerFilter === p ? 'filled' : 'outlined'}
+                color={providerFilter === p ? 'primary' : 'default'}
+                onClick={() => setProviderFilter(p)}
+                sx={{ height: 24, fontSize: '0.7rem' }}
+              />
+            ))}
+          </Box>
         </Box>
         <Box>
           <Typography variant="caption" color="text.secondary">Selected Voice</Typography>

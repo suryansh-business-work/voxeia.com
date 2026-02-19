@@ -9,6 +9,7 @@ import agentsRoutes from './agents/agents.routes';
 import callLogsRoutes from './calllogs/calllogs.routes';
 import companiesRoutes from './companies/companies.routes';
 import contactsRoutes from './contacts/contacts.routes';
+import promptLibraryRoutes from './promptlibrary/promptlibrary.routes';
 
 const app = express();
 
@@ -16,6 +17,18 @@ const app = express();
 app.use(cors({ origin: envConfig.CLIENT_URL, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Suppress ECONNABORTED / ECONNRESET when the browser disconnects mid-request.
+// Without this, Express logs a noisy unhandled error for every hot-reload or
+// navigation that races with a slow API call (e.g. Sarvam TTS preview).
+app.use((_req, res, next) => {
+  const onSocketError = (err: NodeJS.ErrnoException) => {
+    if (err.code === 'ECONNABORTED' || err.code === 'ECONNRESET') return;
+    console.error('[Socket error]', err);
+  };
+  res.socket?.on('error', onSocketError);
+  next();
+});
 
 // Health check
 app.get('/api/health', (_req, res) => {
@@ -31,5 +44,6 @@ app.use('/api/contacts', contactsRoutes);
 app.use('/api/calls', callsRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/tts', ttsRoutes);
+app.use('/api/prompts', promptLibraryRoutes);
 
 export default app;

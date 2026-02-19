@@ -61,7 +61,8 @@ export const createConversation = (
   callSid: string,
   voice: VoiceOption,
   systemPrompt?: string,
-  language: string = 'en-IN'
+  language: string = 'en-IN',
+  aiModel?: string
 ): ConversationState => {
   const basePrompt = systemPrompt || envConfig.AI_SYSTEM_PROMPT;
   const langInstruction = language && !language.startsWith('en')
@@ -81,6 +82,7 @@ export const createConversation = (
     startedAt: new Date().toISOString(),
     silenceCount: 0,
     language,
+    aiModel,
   };
   conversations.set(callSid, state);
   return state;
@@ -105,7 +107,8 @@ export const initiateAiCall = async (
   systemPrompt?: string,
   agentId?: string,
   userId?: string,
-  language: string = 'en-IN'
+  language: string = 'en-IN',
+  aiModel?: string
 ) => {
   const baseUrl = getWebhookBaseUrl();
 
@@ -159,7 +162,7 @@ export const initiateAiCall = async (
   });
 
   // Create conversation state
-  const convo = createConversation(call.sid, voice, systemPrompt, language);
+  const convo = createConversation(call.sid, voice, systemPrompt, language, aiModel);
 
   // Add the opening message as assistant's first message
   convo.messages.push({
@@ -237,6 +240,7 @@ export const handleUserSpeech = async (
 </Response>`;
     }
 
+    // Generate both clips in parallel
     const [stillThereUrl, byeUrl] = await Promise.all([
       generateAndCacheAudio('Are you still there? Please go ahead, I am listening.', lang, voice),
       generateAndCacheAudio('Goodbye!', lang, voice),
@@ -284,7 +288,7 @@ export const handleUserSpeech = async (
     }));
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: (convo as ConversationState & { aiModel?: string }).aiModel || 'gpt-4o-mini',
       messages: chatMessages,
       max_tokens: 200,
       temperature: 0.7,
@@ -390,12 +394,13 @@ setInterval(() => {
 
 // ─── Translation ────────────────────────────────────────────────────────────
 
-export const translateText = async (text: string, targetLanguage: string): Promise<string> => {
+export const translateText = async (text: string, targetLanguage: string, model?: string): Promise<string> => {
   const openai = getOpenAI();
   const langName = getLanguageName(targetLanguage);
+  const chatModel = model || 'gpt-4o-mini';
 
   const completion = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
+    model: chatModel,
     messages: [
       {
         role: 'system',
@@ -408,4 +413,49 @@ export const translateText = async (text: string, targetLanguage: string): Promi
   });
 
   return completion.choices[0]?.message?.content?.trim() || text;
+};
+
+// ─── AI Prompt Generation ───────────────────────────────────────────────────
+
+export const generateAgentPrompt = async (
+  description: string,
+  language: string = 'en-IN'
+): Promise<{ name: string; systemPrompt: string; description: string }> => {
+  const openai = getOpenAI();
+  const langName = getLanguageName(language);
+
+  const completion = await openai.chat.completions.create({
+    model: 'gpt-4o-mini',
+    messages: [
+      {
+        role: 'system',
+        content: `You are an expert at crafting system prompts for AI phone call agents. Given a user's description, generate:
+1. A short name for the agent (2-5 words)
+2. A detailed, professional system prompt (200-500 words) that defines the agent's personality, behavior, goals, and conversation style
+3. A brief description of the agent (1-2 sentences)
+
+The system prompt should instruct the AI to behave naturally in phone conversations — concise, warm, and professional.
+
+${language !== 'en-IN' ? `IMPORTANT: Write the system prompt in ${langName} language.` : ''}
+
+Respond in VALID JSON format:
+{"name": "...", "systemPrompt": "...", "description": "..."}`,
+      },
+      { role: 'user', content: description },
+    ],
+    max_tokens: 1500,
+    temperature: 0.7,
+  });
+
+  const raw = completion.choices[0]?.message?.content?.trim() || '{}';
+  try {
+    const parsed = JSON.parse(raw);
+    return {
+      name: parsed.name || 'AI Agent',
+      systemPrompt: parsed.systemPrompt || '',
+      description: parsed.description || '',
+    };
+  } catch {
+    return { name: 'AI Agent', systemPrompt: raw, description: '' };
+  }
 };

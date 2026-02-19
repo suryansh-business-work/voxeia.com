@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
@@ -9,7 +9,8 @@ import { alpha } from '@mui/material/styles';
 import PersonIcon from '@mui/icons-material/Person';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import StopIcon from '@mui/icons-material/Stop';
-import { VoiceEntry } from './voices.data';
+import axios from 'axios';
+import { VoiceEntry, getProviderLabel } from './voices.data';
 import apiClient from '../../api/apiClient';
 
 interface VoiceCardProps {
@@ -22,6 +23,16 @@ const VoiceCard = ({ voice, selected, onSelect }: VoiceCardProps) => {
   const [playing, setPlaying] = useState(false);
   const [loading, setLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+
+  // Cancel any in-flight request and stop audio when component unmounts.
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+      audioRef.current?.pause();
+      audioRef.current = null;
+    };
+  }, []);
 
   const handlePlaySample = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -29,25 +40,38 @@ const VoiceCard = ({ voice, selected, onSelect }: VoiceCardProps) => {
     if (playing) {
       audioRef.current?.pause();
       audioRef.current = null;
+      abortRef.current?.abort();
+      abortRef.current = null;
       setPlaying(false);
       return;
     }
 
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     try {
       setLoading(true);
-      const { data } = await apiClient.post<{ audio: string }>('/tts/preview', {
-        speaker: voice.id,
-        language: voice.languageCode,
-      });
+      const { data } = await apiClient.post<{ audio: string; contentType?: string }>(
+        '/tts/preview',
+        { speaker: voice.id, language: voice.languageCode },
+        { signal: controller.signal }
+      );
 
-      const audio = new Audio(`data:audio/wav;base64,${data.audio}`);
+      // Ignore if aborted while request was in flight.
+      if (controller.signal.aborted) return;
+
+      const mime = data.contentType || (voice.provider === 'openai' ? 'audio/mpeg' : 'audio/wav');
+      const audio = new Audio(`data:${mime};base64,${data.audio}`);
       audioRef.current = audio;
       audio.onended = () => { setPlaying(false); audioRef.current = null; };
       audio.onerror = () => { setPlaying(false); audioRef.current = null; };
       await audio.play();
       setPlaying(true);
-    } catch {
-      console.error('Failed to play voice preview');
+    } catch (err: unknown) {
+      // Axios CancelledError / AbortError are expected on unmount — suppress.
+      if (err instanceof Error && (err.name === 'AbortError' || err.name === 'CanceledError')) return;
+      if (axios.isCancel(err)) return;
+      console.error('Failed to play voice preview', err);
     } finally {
       setLoading(false);
     }
@@ -75,7 +99,7 @@ const VoiceCard = ({ voice, selected, onSelect }: VoiceCardProps) => {
           <PersonIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
           <Typography variant="body2" fontWeight={600} color="text.primary">{voice.name}</Typography>
           <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
-            Sarvam
+            {getProviderLabel(voice.provider)}
           </Typography>
           <IconButton
             size="small"

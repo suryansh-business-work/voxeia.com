@@ -9,6 +9,7 @@ import { makeCall, makeAiCall } from '../calls.api';
 import { CallResponse, VoiceOption } from '../calls.types';
 import { fetchAgentById } from '../../agents/agents.api';
 import { useVoice } from '../../../context/VoiceContext';
+import { useModel } from '../../../context/ModelContext';
 import DialerDisplay, { DialerIdle } from './DialerDisplay';
 import DialerForm from './DialerForm';
 
@@ -36,6 +37,7 @@ const DialerPanel = ({ agentId, activeCallSid, isCallActive, activePhone, onCall
   const [voiceDialogOpen, setVoiceDialogOpen] = useState(false);
   const [inputMode, setInputMode] = useState<number>(0);
   const { voice: globalVoice, language: globalLanguage } = useVoice();
+  const { aiModel } = useModel();
 
   const formik = useFormik<MakeCallFormValues>({
     initialValues: { ...makeCallInitialValues, voice: globalVoice, language: globalLanguage },
@@ -45,13 +47,15 @@ const DialerPanel = ({ agentId, activeCallSid, isCallActive, activePhone, onCall
       try {
         let response: CallResponse;
         if (values.aiEnabled) {
+          const combinedPrompt = [values.systemPrompt, values.additionalPrompt].filter(Boolean).join('\n\n');
           response = await makeAiCall({
             to: values.to,
             message: values.message || undefined,
             voice: values.voice as VoiceOption,
-            systemPrompt: values.systemPrompt || undefined,
+            systemPrompt: combinedPrompt || undefined,
             agentId,
             language: values.language,
+            aiModel,
           });
         } else {
           response = await makeCall({

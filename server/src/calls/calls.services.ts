@@ -35,15 +35,17 @@ export const makeCall = async (
     const baseUrl = getTunnelUrl() || envConfig.BASE_URL;
     const isPublicUrl = !baseUrl.includes('localhost') && !baseUrl.includes('127.0.0.1');
 
-    // Generate Sarvam.ai TTS audio
-    const messageAudioUrl = await generateAndCacheAudio(message, language, voice);
-
+    // Generate ALL Sarvam.ai TTS audio clips in parallel to minimize latency
+    let messageAudioUrl: string;
     let recordBlock = '';
+
     if (isPublicUrl) {
-      const [leaveResponseUrl, thankYouUrl] = await Promise.all([
+      const [msgUrl, leaveResponseUrl, thankYouUrl] = await Promise.all([
+        generateAndCacheAudio(message, language, voice),
         generateAndCacheAudio('Please leave your response after the beep. Press the hash key when you are done.', language, voice),
         generateAndCacheAudio('Thank you for your response. Goodbye!', language, voice),
       ]);
+      messageAudioUrl = msgUrl;
       recordBlock = `
   <Play>${leaveResponseUrl}</Play>
   <Record
@@ -58,7 +60,11 @@ export const makeCall = async (
   />
   <Play>${thankYouUrl}</Play>`;
     } else {
-      const thankYouUrl = await generateAndCacheAudio('Thank you. Goodbye!', language, voice);
+      const [msgUrl, thankYouUrl] = await Promise.all([
+        generateAndCacheAudio(message, language, voice),
+        generateAndCacheAudio('Thank you. Goodbye!', language, voice),
+      ]);
+      messageAudioUrl = msgUrl;
       recordBlock = `
   <Play>${thankYouUrl}</Play>`;
     }

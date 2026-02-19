@@ -23,6 +23,7 @@ export const aiCallSchema = z.object({
     .optional(),
   agentId: z.string().optional(),
   language: z.string().optional().default('en-IN'),
+  aiModel: z.string().optional(),
 });
 
 export type AiCallInput = z.infer<typeof aiCallSchema>;

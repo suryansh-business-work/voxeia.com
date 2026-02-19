@@ -8,6 +8,7 @@ import { SocketProvider } from './context/SocketContext';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { VoiceProvider } from './context/VoiceContext';
+import { ModelProvider } from './context/ModelContext';
 import LoginPage from './tools/auth/pages/LoginPage';
 import SignupPage from './tools/auth/pages/SignupPage';
 import ForgotPasswordPage from './tools/auth/pages/ForgotPasswordPage';
@@ -19,6 +20,7 @@ import AgentsListPage from './tools/agents/pages/AgentsListPage';
 import CreateAgentPage from './tools/agents/pages/CreateAgentPage';
 import EditAgentPage from './tools/agents/pages/EditAgentPage';
 import ContactsPage from './tools/contacts/ContactsPage';
+import PromptLibraryPage from './tools/promptlibrary/pages/PromptLibraryPage';
 
 const App = () => {
   return (
@@ -28,6 +30,7 @@ const App = () => {
         <AuthProvider>
           <SocketProvider>
           <VoiceProvider>
+          <ModelProvider>
             <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: 'background.default' }}>
               <Header />
               <Box
@@ -47,6 +50,7 @@ const App = () => {
                   <Route path="/agents/:agentId/edit" element={<ProtectedRoute><EditAgentPage /></ProtectedRoute>} />
                   <Route path="/agents/:agentId/call" element={<ProtectedRoute><AgentCallPage /></ProtectedRoute>} />
                   <Route path="/contacts" element={<ProtectedRoute><ContactsPage /></ProtectedRoute>} />
+                  <Route path="/prompt-library" element={<ProtectedRoute><PromptLibraryPage /></ProtectedRoute>} />
 
                   <Route path="/" element={<Navigate to="/dashboard" replace />} />
                   <Route path="*" element={<Navigate to="/dashboard" replace />} />
@@ -54,6 +58,7 @@ const App = () => {
               </Box>
               <Footer />
             </Box>
+          </ModelProvider>
           </VoiceProvider>
           </SocketProvider>
         </AuthProvider>

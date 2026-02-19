@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { getCachedAudio, generatePreviewSpeech } from './tts.services';
+import { getCachedAudio, generatePreviewSpeech, generateOpenAiPreview } from './tts.services';
 
 /** Serve cached TTS audio to Twilio <Play> */
 export const serveCachedAudio = async (req: Request, res: Response): Promise<void> => {
@@ -21,6 +21,16 @@ export const serveCachedAudio = async (req: Request, res: Response): Promise<voi
 
 /** Generate a preview TTS sample for the UI voice selector */
 export const previewVoice = async (req: Request, res: Response): Promise<void> => {
+  // Abort the Sarvam fetch automatically when the browser disconnects.
+  const abortController = new AbortController();
+  req.on('close', () => abortController.abort());
+
+  // Suppress ECONNABORTED / ECONNRESET when writing to a disconnected client.
+  req.socket?.on('error', (err: NodeJS.ErrnoException) => {
+    if (err.code === 'ECONNABORTED' || err.code === 'ECONNRESET') return;
+    console.error('[TTS Preview] Socket error:', err);
+  });
+
   try {
     const { speaker, text, language } = req.body as {
       speaker?: string;
@@ -33,15 +43,35 @@ export const previewVoice = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
-    const base64Audio = await generatePreviewSpeech(
-      speaker,
-      text || `Hello, I am ${speaker}. How can I help you today?`,
-      language || 'en-IN'
-    );
+    let base64Audio: string;
 
-    res.json({ audio: base64Audio });
-  } catch (err) {
-    console.error('[TTS Preview] Error:', err);
-    res.status(500).json({ error: 'Failed to generate voice preview' });
+    // Route to OpenAI TTS for openai-* voice IDs
+    if (speaker.startsWith('openai-')) {
+      base64Audio = await generateOpenAiPreview(
+        speaker,
+        text || `Hello, I am ${speaker.replace('openai-', '')}. How can I help you today?`,
+        abortController.signal
+      );
+    } else {
+      base64Audio = await generatePreviewSpeech(
+        speaker,
+        text || `Hello, I am ${speaker}. How can I help you today?`,
+        language || 'en-IN',
+        abortController.signal
+      );
+    }
+
+    // Client may have disconnected while TTS was responding — skip write.
+    if (res.destroyed || res.headersSent) return;
+
+    const contentType = speaker.startsWith('openai-') ? 'audio/mpeg' : 'audio/wav';
+    res.json({ audio: base64Audio, contentType });
+  } catch (err: unknown) {
+    // AbortError means the client closed the connection — not a real error.
+    if (err instanceof Error && err.name === 'AbortError') return;
+    if (!res.destroyed && !res.headersSent) {
+      console.error('[TTS Preview] Error:', err);
+      res.status(500).json({ error: 'Failed to generate voice preview' });
+    }
   }
 };

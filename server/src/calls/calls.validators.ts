@@ -16,7 +16,7 @@ export const makeCallSchema = z.object({
     .string()
     .min(1)
     .optional()
-    .default('Polly.Joanna-Neural'),
+    .default('SARVAM_VOICES.shubh'),
   agentId: z.string().optional(),
   language: z.string().optional().default('en-US'),
 });

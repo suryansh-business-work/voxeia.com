@@ -22,7 +22,10 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    const s = io('/', {
+    // Connect directly to the backend server (not via Vite proxy) to avoid
+    // ws proxy socket ECONNABORTED errors during dev-server hot reloads.
+    const serverUrl = import.meta.env.VITE_SERVER_URL || 'http://localhost:5000';
+    const s = io(serverUrl, {
       transports: ['websocket', 'polling'],
       autoConnect: true,
     });

@@ -10,6 +10,7 @@ import Switch from '@mui/material/Switch';
 import Alert from '@mui/material/Alert';
 import Collapse from '@mui/material/Collapse';
 import PhoneForwardedIcon from '@mui/icons-material/PhoneForwarded';
+import CallIcon from '@mui/icons-material/Call';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import { useFormik } from 'formik';
 import toast from 'react-hot-toast';
@@ -109,6 +110,7 @@ const MakeCallForm = () => {
                 touched={formik.touched}
                 errors={formik.errors}
                 disabled={loading}
+                label="First Message (Text-to-Speech)"
               />
 
               {/* AI Conversation Toggle */}
@@ -151,10 +153,10 @@ const MakeCallForm = () => {
                 variant="contained"
                 size="large"
                 disabled={loading}
-                startIcon={loading ? <CircularProgress size={20} /> : formik.values.aiEnabled ? <SmartToyIcon /> : <PhoneForwardedIcon />}
+                startIcon={loading ? <CircularProgress size={20} /> : <CallIcon />}
                 sx={{ alignSelf: { xs: 'stretch', sm: 'flex-start' } }}
               >
-                {loading ? 'Calling...' : formik.values.aiEnabled ? 'Start AI Call' : 'Make Call'}
+                {loading ? 'Calling...' : 'Call'}
               </Button>
             </Box>
           </form>

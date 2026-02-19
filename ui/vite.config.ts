@@ -21,16 +21,6 @@ export default defineConfig({
           });
         },
       },
-      '/socket.io': {
-        target: 'http://localhost:5000',
-        changeOrigin: true,
-        ws: true,
-        configure: (proxy) => {
-          proxy.on('error', (err) => {
-            console.warn('[Vite Proxy] WS proxy error (ignored):', err.message);
-          });
-        },
-      },
     },
   },
 });

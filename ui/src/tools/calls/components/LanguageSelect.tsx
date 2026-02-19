@@ -21,7 +21,11 @@ const LanguageSelect = ({ value, onChange, disabled }: LanguageSelectProps) => {
       onChange={(e) => onChange(e.target.value)}
       disabled={disabled}
       helperText="Speech recognition & TTS language"
+      SelectProps={{ displayEmpty: true }}
     >
+      <MenuItem value="" disabled>
+        <Typography variant="body2" color="text.secondary">Select Language</Typography>
+      </MenuItem>
       {SUPPORTED_LANGUAGES.map((lang) => (
         <MenuItem key={lang.code} value={lang.code}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

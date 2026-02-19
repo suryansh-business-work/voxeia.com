@@ -73,6 +73,7 @@ export interface AiCallPayload {
   systemPrompt?: string;
   agentId?: string;
   language?: string;
+  aiModel?: string;
 }
 
 export interface ConversationMessage {

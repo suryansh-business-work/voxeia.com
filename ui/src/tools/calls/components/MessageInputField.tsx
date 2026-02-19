@@ -9,6 +9,7 @@ interface MessageInputFieldProps {
   touched: FormikTouched<MakeCallFormValues>;
   errors: FormikErrors<MakeCallFormValues>;
   disabled: boolean;
+  label?: string;
 }
 
 const MessageInputField = ({
@@ -18,13 +19,14 @@ const MessageInputField = ({
   touched,
   errors,
   disabled,
+  label,
 }: MessageInputFieldProps) => {
   return (
     <TextField
       fullWidth
       id="message"
       name="message"
-      label="Message (Text-to-Speech)"
+      label={label || 'First Message (Text-to-Speech)'}
       placeholder="Enter a natural, conversational message..."
       value={value}
       onChange={onChange}

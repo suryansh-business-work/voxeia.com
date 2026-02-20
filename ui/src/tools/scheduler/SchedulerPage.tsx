@@ -1,11 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
+import Chip from '@mui/material/Chip';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import AddIcon from '@mui/icons-material/Add';
+import AutorenewIcon from '@mui/icons-material/Autorenew';
 import { alpha } from '@mui/material/styles';
 import toast from 'react-hot-toast';
 import AppBreadcrumb from '../../components/AppBreadcrumb';
@@ -27,6 +29,8 @@ const SchedulerPage = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [dialogOpen, setDialogOpen] = useState(false);
   const { socket } = useSocket();
+  const [countdown, setCountdown] = useState(30);
+  const loadCallsRef = useRef<() => void>(() => {});
 
   const loadCalls = useCallback(async () => {
     setLoading(true);
@@ -50,6 +54,23 @@ const SchedulerPage = () => {
       setLoading(false);
     }
   }, [page, rowsPerPage, statusFilter, search, sortBy, sortOrder]);
+
+  loadCallsRef.current = loadCalls;
+
+  // Auto-refresh every 30 seconds (CRON-like polling)
+  useEffect(() => {
+    setCountdown(30);
+    const ticker = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          loadCallsRef.current();
+          return 30;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(ticker);
+  }, []);
 
   useEffect(() => { loadCalls(); }, [loadCalls]);
 
@@ -95,14 +116,23 @@ const SchedulerPage = () => {
             </Typography>
           </Box>
         </Box>
-        <Button
-          variant="contained"
-          size="small"
-          startIcon={<AddIcon />}
-          onClick={() => setDialogOpen(true)}
-        >
-          Schedule Call
-        </Button>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Chip
+            icon={<AutorenewIcon sx={{ fontSize: 14, animation: 'spin 2s linear infinite', '@keyframes spin': { '0%': { transform: 'rotate(0deg)' }, '100%': { transform: 'rotate(360deg)' } } }} />}
+            label={`Auto-refresh in ${countdown}s`}
+            size="small"
+            variant="outlined"
+            sx={{ height: 26, fontSize: '0.68rem' }}
+          />
+          <Button
+            variant="contained"
+            size="small"
+            startIcon={<AddIcon />}
+            onClick={() => setDialogOpen(true)}
+          >
+            Schedule Call
+          </Button>
+        </Box>
       </Box>
 
       <Card>

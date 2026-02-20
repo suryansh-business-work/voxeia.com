@@ -33,3 +33,13 @@ export const validateSmtp = async (req: AuthRequest, res: Response): Promise<voi
     res.status(500).json({ success: false, message: msg });
   }
 };
+
+export const sendTestEmail = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const result = await emailService.sendTestEmail(req.userId!);
+    res.status(200).json({ success: true, data: result });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : 'Failed to send test email';
+    res.status(500).json({ success: false, message: msg });
+  }
+};

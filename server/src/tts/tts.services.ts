@@ -23,7 +23,8 @@ const getPreviewCacheKey = (speaker: string, text: string, lang: string): string
 // ─── Sarvam.ai TTS API ─────────────────────────────────────────────────────
 
 const SARVAM_API_URL = 'https://api.sarvam.ai/text-to-speech';
-const TTS_TIMEOUT_MS = 8000; // 8 s max per Sarvam call
+const TTS_TIMEOUT_MS = 15_000; // 15 s max per Sarvam call
+const TTS_MAX_RETRIES = 2; // retry once on transient failures
 
 /**
  * All valid Sarvam.ai bulbul:v3 speaker IDs.
@@ -84,36 +85,62 @@ export const generateSpeech = async (
   // Sarvam.ai supports max 2500 chars for bulbul:v3
   const truncatedText = text.slice(0, 2400);
 
-  const response = await fetchWithTimeout(SARVAM_API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'api-subscription-key': apiKey,
-    },
-    body: JSON.stringify({
-      text: truncatedText,
-      target_language_code: targetLanguageCode,
-      speaker: safeSpeaker,
-      model: 'bulbul:v3',
-      pace,
-      speech_sample_rate: 8000,
-      output_audio_codec: 'mulaw',
-    }),
+  const payload = JSON.stringify({
+    text: truncatedText,
+    target_language_code: targetLanguageCode,
+    speaker: safeSpeaker,
+    model: 'bulbul:v3',
+    pace,
+    speech_sample_rate: 8000,
+    output_audio_codec: 'mulaw',
   });
 
-  if (!response.ok) {
-    const errBody = await response.text();
-    console.error('[Sarvam TTS] API error:', response.status, errBody);
-    throw new Error(`Sarvam TTS API error: ${response.status}`);
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= TTS_MAX_RETRIES; attempt++) {
+    try {
+      const response = await fetchWithTimeout(SARVAM_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'api-subscription-key': apiKey,
+        },
+        body: payload,
+      });
+
+      if (!response.ok) {
+        const errBody = await response.text();
+        console.error(`[Sarvam TTS] API error (attempt ${attempt}):`, response.status, errBody);
+        lastError = new Error(`Sarvam TTS API error: ${response.status}`);
+        // Retry on server errors (5xx), not on client errors (4xx)
+        if (response.status < 500) throw lastError;
+        continue;
+      }
+
+      const data = (await response.json()) as { request_id: string; audios: string[] };
+
+      if (!data.audios || data.audios.length === 0) {
+        throw new Error('Sarvam TTS returned no audio');
+      }
+
+      return Buffer.from(data.audios[0], 'base64');
+    } catch (err: unknown) {
+      lastError = err;
+      const isAbort = err instanceof Error && (err.name === 'AbortError' || err.message === 'This operation was aborted');
+      const isRetryable = isAbort || (err instanceof Error && err.message.includes('5'));
+
+      if (!isRetryable || attempt === TTS_MAX_RETRIES) {
+        console.error(`[Sarvam TTS] Failed after attempt ${attempt}:`, err);
+        throw lastError;
+      }
+
+      const backoffMs = attempt * 1000; // 1s, 2s, ...
+      console.warn(`[Sarvam TTS] Attempt ${attempt} failed (${isAbort ? 'timeout' : 'error'}), retrying in ${backoffMs}ms...`);
+      await new Promise((r) => setTimeout(r, backoffMs));
+    }
   }
 
-  const data = (await response.json()) as { request_id: string; audios: string[] };
-
-  if (!data.audios || data.audios.length === 0) {
-    throw new Error('Sarvam TTS returned no audio');
-  }
-
-  return Buffer.from(data.audios[0], 'base64');
+  throw lastError;
 };
 
 /**

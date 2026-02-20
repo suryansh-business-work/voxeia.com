@@ -123,14 +123,18 @@ const DialerPanel = ({ agentId, initialPhone, activeCallSid, isCallActive, activ
   }, [historySelection]);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, height: '100%', p: 0.5 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, height: '100%' }}>
       {activeCallSid ? (
         <DialerDisplay phoneNumber={activePhone} isActive={isCallActive} duration={0} onHangup={onCallEnded} />
       ) : (
         <DialerIdle phoneNumber={formik.values.to} />
       )}
 
-      <Card sx={{ flex: 1, overflow: 'auto', borderRadius: '4px' }}>
+      <Card sx={{
+        flex: 1, overflow: 'auto', borderRadius: '4px',
+        '&::-webkit-scrollbar': { width: 4 },
+        '&::-webkit-scrollbar-thumb': { bgcolor: 'divider', borderRadius: 2 },
+      }}>
         <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
           <DialerForm
             formik={formik}

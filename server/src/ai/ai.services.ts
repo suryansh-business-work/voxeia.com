@@ -127,14 +127,16 @@ export const initiateAiCall = async (
 
   const client = getTwilioClient();
 
-  // Generate Sarvam.ai TTS audio for the opening message and prompt
-  const [messageAudioUrl, listeningAudioUrl, goodbyeAudioUrl] = await Promise.all([
-    generateAndCacheAudio(message, language, voice),
-    generateAndCacheAudio('I am listening.', language, voice),
-    generateAndCacheAudio('I did not hear anything. Goodbye!', language, voice),
-  ]);
+  // Generate Sarvam.ai TTS audio — fall back to <Say> on failure
+  let twiml: string;
+  try {
+    const [messageAudioUrl, listeningAudioUrl, goodbyeAudioUrl] = await Promise.all([
+      generateAndCacheAudio(message, language, voice),
+      generateAndCacheAudio('I am listening.', language, voice),
+      generateAndCacheAudio('I did not hear anything. Goodbye!', language, voice),
+    ]);
 
-  const twiml = `<?xml version="1.0" encoding="UTF-8"?>
+    twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Play>${messageAudioUrl}</Play>
   <Gather input="speech" action="${baseUrl}/api/ai/conversation/respond" method="POST" speechTimeout="auto" language="${language}" actionOnEmptyResult="true">
@@ -142,6 +144,18 @@ export const initiateAiCall = async (
   </Gather>
   <Play>${goodbyeAudioUrl}</Play>
 </Response>`;
+  } catch (ttsErr) {
+    console.error('[AI Service] TTS failed during call init, falling back to <Say>:', ttsErr);
+    const safeMsg = message.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    twiml = `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Say language="${language}">${safeMsg}</Say>
+  <Gather input="speech" action="${baseUrl}/api/ai/conversation/respond" method="POST" speechTimeout="auto" language="${language}" actionOnEmptyResult="true">
+    <Say language="${language}">I am listening.</Say>
+  </Gather>
+  <Say language="${language}">I did not hear anything. Goodbye!</Say>
+</Response>`;
+  }
 
   const call = await client.calls.create({
     to,
@@ -237,30 +251,28 @@ export const handleUserSpeech = async (
       });
       deleteConversation(callSid);
 
-      const goodbyeUrl = await generateAndCacheAudio(
-        'I have not heard anything for a while. Thank you for calling. Goodbye!',
-        lang, voice
-      );
-      return `<?xml version="1.0" encoding="UTF-8"?>
-<Response>
-  <Play>${goodbyeUrl}</Play>
-  <Hangup/>
-</Response>`;
+      try {
+        const goodbyeUrl = await generateAndCacheAudio(
+          'I have not heard anything for a while. Thank you for calling. Goodbye!',
+          lang, voice
+        );
+        return `<?xml version="1.0" encoding="UTF-8"?>\n<Response>\n  <Play>${goodbyeUrl}</Play>\n  <Hangup/>\n</Response>`;
+      } catch {
+        return `<?xml version="1.0" encoding="UTF-8"?>\n<Response>\n  <Say language="${lang}">I have not heard anything for a while. Thank you for calling. Goodbye!</Say>\n  <Hangup/>\n</Response>`;
+      }
     }
 
-    // Generate both clips in parallel
-    const [stillThereUrl, byeUrl] = await Promise.all([
-      generateAndCacheAudio('Are you still there? Please go ahead, I am listening.', lang, voice),
-      generateAndCacheAudio('Goodbye!', lang, voice),
-    ]);
+    // Generate both clips in parallel — fall back to <Say> on failure
+    try {
+      const [stillThereUrl, byeUrl] = await Promise.all([
+        generateAndCacheAudio('Are you still there? Please go ahead, I am listening.', lang, voice),
+        generateAndCacheAudio('Goodbye!', lang, voice),
+      ]);
 
-    return `<?xml version="1.0" encoding="UTF-8"?>
-<Response>
-  <Gather input="speech" action="${baseUrl}/api/ai/conversation/respond" method="POST" speechTimeout="auto" language="${lang}" actionOnEmptyResult="true">
-    <Play>${stillThereUrl}</Play>
-  </Gather>
-  <Play>${byeUrl}</Play>
-</Response>`;
+      return `<?xml version="1.0" encoding="UTF-8"?>\n<Response>\n  <Gather input="speech" action="${baseUrl}/api/ai/conversation/respond" method="POST" speechTimeout="auto" language="${lang}" actionOnEmptyResult="true">\n    <Play>${stillThereUrl}</Play>\n  </Gather>\n  <Play>${byeUrl}</Play>\n</Response>`;
+    } catch {
+      return `<?xml version="1.0" encoding="UTF-8"?>\n<Response>\n  <Gather input="speech" action="${baseUrl}/api/ai/conversation/respond" method="POST" speechTimeout="auto" language="${lang}" actionOnEmptyResult="true">\n    <Say language="${lang}">Are you still there? Please go ahead, I am listening.</Say>\n  </Gather>\n  <Say language="${lang}">Goodbye!</Say>\n</Response>`;
+    }
   }
 
   // Reset silence counter on valid speech
@@ -321,11 +333,20 @@ export const handleUserSpeech = async (
     timestamp: new Date().toISOString(),
   });
 
-  const replyAudioUrl = await generateAndCacheAudio(aiReply, lang, voice);
+  // Attempt TTS — fall back to <Say> if Sarvam/TTS is unavailable
+  let replyTwiml: string;
+  try {
+    const replyAudioUrl = await generateAndCacheAudio(aiReply, lang, voice);
+    replyTwiml = `<Play>${replyAudioUrl}</Play>`;
+  } catch (ttsErr) {
+    console.error('[AI Service] TTS failed, falling back to <Say>:', ttsErr);
+    const escapedReply = aiReply.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    replyTwiml = `<Say language="${lang}">${escapedReply}</Say>`;
+  }
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Play>${replyAudioUrl}</Play>
+  ${replyTwiml}
   <Gather input="speech" action="${baseUrl}/api/ai/conversation/respond" method="POST" speechTimeout="auto" language="${lang}" actionOnEmptyResult="true">
   </Gather>
   <Redirect>${baseUrl}/api/ai/conversation/respond?timeout=true</Redirect>

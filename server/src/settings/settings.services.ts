@@ -24,8 +24,17 @@ export const updateSettings = async (
 ): Promise<ISettings> => {
   const update: Record<string, unknown> = {};
 
-  if (data.useGlobalConfig !== undefined) {
-    update.useGlobalConfig = data.useGlobalConfig;
+  if (data.useCustomCallConfig !== undefined) {
+    update.useCustomCallConfig = data.useCustomCallConfig;
+  }
+  if (data.useCustomAiConfig !== undefined) {
+    update.useCustomAiConfig = data.useCustomAiConfig;
+  }
+  if (data.useCustomTtsConfig !== undefined) {
+    update.useCustomTtsConfig = data.useCustomTtsConfig;
+  }
+  if (data.useCustomEmailConfig !== undefined) {
+    update.useCustomEmailConfig = data.useCustomEmailConfig;
   }
   if (data.callConfig) {
     if (data.callConfig.twilioAccountSid !== undefined)
@@ -79,33 +88,22 @@ export const getResolvedConfig = async (
 }> => {
   const settings = await getSettings(userId);
 
-  if (!settings.useGlobalConfig) {
-    return {
-      callConfig: {
-        twilioAccountSid: envConfig.TWILIO_ACCOUNT_SID,
-        twilioAuthToken: envConfig.TWILIO_AUTH_TOKEN,
-        twilioPhoneNumber: envConfig.TWILIO_PHONE_NUMBER,
-      },
-      aiConfig: {
-        openaiApiKey: envConfig.OPENAI_API_KEY,
-      },
-      ttsConfig: {
-        sarvamApiKey: envConfig.SARVAM_API_KEY,
-      },
-    };
-  }
+  // Per-section custom config: use user values only if the individual section toggle is ON
+  const useCallCustom = settings.useCustomCallConfig;
+  const useAiCustom = settings.useCustomAiConfig;
+  const useTtsCustom = settings.useCustomTtsConfig;
 
   return {
     callConfig: {
-      twilioAccountSid: settings.callConfig.twilioAccountSid || envConfig.TWILIO_ACCOUNT_SID,
-      twilioAuthToken: settings.callConfig.twilioAuthToken || envConfig.TWILIO_AUTH_TOKEN,
-      twilioPhoneNumber: settings.callConfig.twilioPhoneNumber || envConfig.TWILIO_PHONE_NUMBER,
+      twilioAccountSid: useCallCustom ? (settings.callConfig.twilioAccountSid || envConfig.TWILIO_ACCOUNT_SID) : envConfig.TWILIO_ACCOUNT_SID,
+      twilioAuthToken: useCallCustom ? (settings.callConfig.twilioAuthToken || envConfig.TWILIO_AUTH_TOKEN) : envConfig.TWILIO_AUTH_TOKEN,
+      twilioPhoneNumber: useCallCustom ? (settings.callConfig.twilioPhoneNumber || envConfig.TWILIO_PHONE_NUMBER) : envConfig.TWILIO_PHONE_NUMBER,
     },
     aiConfig: {
-      openaiApiKey: settings.aiConfig.openaiApiKey || envConfig.OPENAI_API_KEY,
+      openaiApiKey: useAiCustom ? (settings.aiConfig.openaiApiKey || envConfig.OPENAI_API_KEY) : envConfig.OPENAI_API_KEY,
     },
     ttsConfig: {
-      sarvamApiKey: settings.ttsConfig.sarvamApiKey || envConfig.SARVAM_API_KEY,
+      sarvamApiKey: useTtsCustom ? (settings.ttsConfig.sarvamApiKey || envConfig.SARVAM_API_KEY) : envConfig.SARVAM_API_KEY,
     },
   };
 };

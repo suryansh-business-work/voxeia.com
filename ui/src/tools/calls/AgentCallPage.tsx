@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import Box from '@mui/material/Box';
-import SplitPane from 'react-split-pane';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 import { useParams, useSearchParams } from 'react-router-dom';
 import DialerPanel from './components/DialerPanel';
 import CallLogsPanelCard from './components/CallLogsPanelCard';
@@ -9,7 +12,6 @@ import CostPanel from './components/CostPanel';
 import { ConversationEvent, CallLogItem } from './calls.types';
 import { fetchCallDetail } from './calls.api';
 import { useSocket } from '../../context/SocketContext';
-import { useAuth } from '../../context/AuthContext';
 
 interface HistorySelection {
   to: string;
@@ -20,27 +22,15 @@ interface HistorySelection {
   message: string;
 }
 
-/** localStorage helper for split pane sizes keyed by user */
-const PANE_KEY_PREFIX = 'call_pane_';
-const getPaneKey = (userId: string, pane: string) => `${PANE_KEY_PREFIX}${userId}_${pane}`;
-const loadPaneSize = (userId: string, pane: string, fallback: number | string) => {
-  try {
-    const val = localStorage.getItem(getPaneKey(userId, pane));
-    if (!val) return fallback;
-    return val.includes('%') ? val : Number(val);
-  } catch { return fallback; }
-};
-const savePaneSize = (userId: string, pane: string, size: number) => {
-  try { localStorage.setItem(getPaneKey(userId, pane), String(size)); } catch { /* ignore */ }
-};
-
+/** Agent call page with 3-column top row and full-width call logs below */
 const AgentCallPage = () => {
   const { agentId } = useParams<{ agentId: string }>();
   const [searchParams] = useSearchParams();
   const initialPhone = searchParams.get('phone') || '';
   const { socket } = useSocket();
-  const { user } = useAuth();
-  const uid = user?._id || 'default';
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [mobileTab, setMobileTab] = useState(0);
   const [activeCallSid, setActiveCallSid] = useState<string | null>(null);
   const [events, setEvents] = useState<ConversationEvent[]>([]);
   const [isCallActive, setIsCallActive] = useState(false);
@@ -119,89 +109,92 @@ const AgentCallPage = () => {
     };
   }, [socket, activeCallSid]);
 
-  const panelSx = {
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column' as const,
-    overflow: 'hidden',
-    borderRadius: '4px',
-  };
+  const dialerNode = (
+    <DialerPanel
+      agentId={agentId}
+      initialPhone={initialPhone}
+      activeCallSid={activeCallSid}
+      isCallActive={isCallActive}
+      activePhone={activePhone}
+      onCallStarted={handleCallStarted}
+      onCallEnded={handleCallEnded}
+      historySelection={historySelection}
+    />
+  );
 
-  return (
-    <Box
-      sx={{
-        height: '100%',
-        mx: { xs: -1, sm: -2, md: -3 },
-        my: { xs: -1, sm: -2 },
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-        '& .SplitPane': { position: 'relative !important' as string },
-        '& .Pane': { overflow: 'hidden' },
-        '& .Resizer': {
-          background: 'transparent',
-          opacity: 1,
-          zIndex: 1,
-          boxSizing: 'border-box',
-          backgroundClip: 'padding-box',
-        },
-        '& .Resizer.vertical': {
-          width: 8,
-          mx: '1px',
-          borderRadius: '4px',
-          background: (t) => t.palette.divider,
-          cursor: 'col-resize',
-          transition: 'background 0.2s ease, box-shadow 0.2s ease',
-          '&:hover': {
-            background: (t) => t.palette.primary.main,
-            boxShadow: (t) => `0 0 6px ${t.palette.primary.main}40`,
-          },
-        },
-      }}
-    >
-      {/* @ts-expect-error react-split-pane types mismatch with React 18 */}
-      <SplitPane
-        split="vertical"
-        minSize={220}
-        maxSize={400}
-        defaultSize={loadPaneSize(uid, 'left', 280)}
-        onChange={(size: number) => savePaneSize(uid, 'left', size)}
-        style={{ flex: 1, position: 'relative' }}
-      >
-        <Box sx={{ ...panelSx, p: 0.5 }}>
-          <DialerPanel
-            agentId={agentId}
-            initialPhone={initialPhone}
-            activeCallSid={activeCallSid}
-            isCallActive={isCallActive}
-            activePhone={activePhone}
-            onCallStarted={handleCallStarted}
-            onCallEnded={handleCallEnded}
-            historySelection={historySelection}
-          />
+  const logsNode = <CallLogsPanelCard onSelectLog={handleSelectLog} />;
+
+  const chatNode = (
+    <Box sx={{ height: '100%', overflow: 'hidden' }}>
+      <ChatPanel events={events} isActive={isCallActive} />
+    </Box>
+  );
+
+  const costNode = (
+    <Box sx={{ height: '100%', overflow: 'auto' }}>
+      <CostPanel callDuration={callDuration} isCallActive={isCallActive} />
+    </Box>
+  );
+
+  /* ── Mobile / Tablet layout (stacked with tabs) ──────── */
+  if (isMobile) {
+    return (
+      <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <Box sx={{ flex: '0 0 auto', overflow: 'auto', maxHeight: '50%', p: 0.5 }}>
+          {dialerNode}
         </Box>
-        {/* @ts-expect-error react-split-pane types mismatch with React 18 */}
-        <SplitPane
-          split="vertical"
-          minSize={300}
-          maxSize={-300}
-          defaultSize={loadPaneSize(uid, 'right', '65%')}
-          onChange={(size: number) => savePaneSize(uid, 'right', size)}
-          style={{ position: 'relative' }}
-        >
-          <Box sx={{ ...panelSx, p: 0.5 }}>
-            <CallLogsPanelCard onSelectLog={handleSelectLog} />
+        <Box sx={{ flex: '1 1 auto', display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
+          <Tabs
+            value={mobileTab}
+            onChange={(_, v) => setMobileTab(v)}
+            variant="fullWidth"
+            sx={{
+              minHeight: 36,
+              '& .MuiTab-root': { minHeight: 36, fontSize: '0.75rem', textTransform: 'none', fontWeight: 600 },
+            }}
+          >
+            <Tab label="Call Logs" />
+            <Tab label="Chat" />
+            <Tab label="Cost" />
+          </Tabs>
+          <Box sx={{ flex: 1, overflow: 'auto', p: 0.5 }}>
+            {mobileTab === 0 && logsNode}
+            {mobileTab === 1 && chatNode}
+            {mobileTab === 2 && costNode}
           </Box>
-          <Box sx={{ ...panelSx, p: 0.5, gap: 0.5 }}>
-            <Box sx={{ flex: '1 1 auto', overflow: 'hidden' }}>
-              <ChatPanel events={events} isActive={isCallActive} />
-            </Box>
-            <Box sx={{ flex: '0 0 auto', overflow: 'auto', maxHeight: '40%' }}>
-              <CostPanel callDuration={callDuration} isCallActive={isCallActive} />
-            </Box>
+        </Box>
+      </Box>
+    );
+  }
+
+  /* ── Desktop layout ─────────────────────────────────────────
+     Left:  Dialer (fixed width, scrollable)
+     Right: top row = Chat | Cost (flexible height)
+            bottom   = Call Logs (full width of right pane)
+     Full viewport height — no page-level scroll
+  ──────────────────────────────────────────────────────────── */
+  return (
+    <Box sx={{ display: 'flex', gap: 1, height: 'calc(100vh - 80px)', overflow: 'hidden' }}>
+      {/* ── Left: Dialer (fixed width, internal scroll) ── */}
+      <Box sx={{ flex: '0 0 320px', width: 320, overflow: 'auto', height: '100%' }}>
+        {dialerNode}
+      </Box>
+
+      {/* ── Right: Chat+Cost on top, Logs below ── */}
+      <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 1, height: '100%', overflow: 'hidden' }}>
+        {/* Top: Live Conversation + Cost side by side — takes ~50% */}
+        <Box sx={{ display: 'flex', gap: 1, flex: '1 1 50%', minHeight: 280, overflow: 'hidden' }}>
+          <Box sx={{ flex: '1 1 0', minWidth: 0, height: '100%', overflow: 'hidden' }}>
+            {chatNode}
           </Box>
-        </SplitPane>
-      </SplitPane>
+          <Box sx={{ flex: '0 0 280px', width: 280, height: '100%', overflow: 'auto' }}>
+            {costNode}
+          </Box>
+        </Box>
+
+        {/* Bottom: Call Logs — takes ~50% */}
+        <Box sx={{ flex: '1 1 50%', minHeight: 200, overflow: 'auto' }}>{logsNode}</Box>
+      </Box>
     </Box>
   );
 };

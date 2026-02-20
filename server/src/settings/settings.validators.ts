@@ -1,7 +1,10 @@
 import { z } from 'zod';
 
 export const updateSettingsSchema = z.object({
-  useGlobalConfig: z.boolean().optional(),
+  useCustomCallConfig: z.boolean().optional(),
+  useCustomAiConfig: z.boolean().optional(),
+  useCustomTtsConfig: z.boolean().optional(),
+  useCustomEmailConfig: z.boolean().optional(),
   callConfig: z
     .object({
       twilioAccountSid: z.string().max(100).optional(),

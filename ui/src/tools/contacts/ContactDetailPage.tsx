@@ -7,7 +7,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Badge from '@mui/material/Badge';
-import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
 import HistoryIcon from '@mui/icons-material/History';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import EmailIcon from '@mui/icons-material/Email';
@@ -61,46 +61,86 @@ const ContactDetailPage = () => {
 
   return (
     <Box>
-      <AppBreadcrumb items={[
-        { label: 'Contacts', href: '/contacts' },
-        { label: fullName },
-      ]} />
+      <AppBreadcrumb items={[{ label: 'Contacts', href: '/contacts' }, { label: fullName }]} />
 
-      <ContactInfoCard contact={contact} pendingScheduledCount={pendingCount} />
-
-      {/* Action buttons */}
-      {contact.email && (
-        <Box sx={{ mb: 2, display: 'flex', gap: 1 }}>
-          <Button variant="outlined" size="small" startIcon={<EmailIcon />} onClick={() => setEmailDialogOpen(true)}>
-            Send Email
-          </Button>
-        </Box>
-      )}
-
-      {/* Tabs */}
-      <Card>
-        <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ px: 2, borderBottom: 1, borderColor: 'divider' }}>
-          <Tab icon={<HistoryIcon sx={{ fontSize: 16 }} />} iconPosition="start" label="Call History" sx={{ textTransform: 'none', minHeight: 48, fontSize: '0.82rem' }} />
-          <Tab
-            icon={<Badge badgeContent={pendingCount} color="warning" max={99}>
-              <ScheduleIcon sx={{ fontSize: 16 }} />
-            </Badge>}
-            iconPosition="start"
-            label="Scheduled Calls"
-            sx={{ textTransform: 'none', minHeight: 48, fontSize: '0.82rem' }}
+      {/* CRM two-column layout */}
+      <Grid container spacing={2}>
+        {/* Left Sidebar — Contact Info */}
+        <Grid item xs={12} md={4} lg={3}>
+          <ContactInfoCard
+            contact={contact}
+            pendingScheduledCount={pendingCount}
+            onSendEmail={contact.email ? () => setEmailDialogOpen(true) : undefined}
+            onScheduleCall={() => setScheduleDialogOpen(true)}
           />
-        </Tabs>
-        <Box sx={{ p: 2 }}>
-          {tab === 0 && <CallHistoryTab phone={contact.phone} />}
-          {tab === 1 && (
-            <ScheduledCallsTab
-              scheduled={scheduled}
-              onRefresh={load}
-              onOpenDialog={() => setScheduleDialogOpen(true)}
-            />
-          )}
-        </Box>
-      </Card>
+        </Grid>
+
+        {/* Right Content — Tabs */}
+        <Grid item xs={12} md={8} lg={9}>
+          <Card>
+            <Tabs
+              value={tab}
+              onChange={(_, v) => setTab(v)}
+              variant="scrollable"
+              scrollButtons="auto"
+              sx={{ px: 2, borderBottom: 1, borderColor: 'divider' }}
+            >
+              <Tab
+                icon={<HistoryIcon sx={{ fontSize: 16 }} />}
+                iconPosition="start"
+                label="Call History"
+                sx={{ textTransform: 'none', minHeight: 48, fontSize: '0.82rem' }}
+              />
+              <Tab
+                icon={
+                  <Badge badgeContent={pendingCount} color="warning" max={99}>
+                    <ScheduleIcon sx={{ fontSize: 16 }} />
+                  </Badge>
+                }
+                iconPosition="start"
+                label="Scheduled Calls"
+                sx={{ textTransform: 'none', minHeight: 48, fontSize: '0.82rem' }}
+              />
+              {contact.email && (
+                <Tab
+                  icon={<EmailIcon sx={{ fontSize: 16 }} />}
+                  iconPosition="start"
+                  label="Email"
+                  sx={{ textTransform: 'none', minHeight: 48, fontSize: '0.82rem' }}
+                />
+              )}
+            </Tabs>
+            <Box sx={{ p: 2 }}>
+              {tab === 0 && <CallHistoryTab phone={contact.phone} />}
+              {tab === 1 && (
+                <ScheduledCallsTab
+                  scheduled={scheduled}
+                  onRefresh={load}
+                  onOpenDialog={() => setScheduleDialogOpen(true)}
+                />
+              )}
+              {tab === 2 && contact.email && (
+                <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <EmailIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    Email integration — compose and send emails directly.
+                  </Typography>
+                  <Box>
+                    <button
+                      onClick={() => setEmailDialogOpen(true)}
+                      style={{ all: 'unset', cursor: 'pointer' }}
+                    >
+                      <Typography variant="body2" color="primary" sx={{ fontWeight: 600, textDecoration: 'underline' }}>
+                        Compose New Email
+                      </Typography>
+                    </button>
+                  </Box>
+                </Box>
+              )}
+            </Box>
+          </Card>
+        </Grid>
+      </Grid>
 
       <CreateScheduleDialog
         open={scheduleDialogOpen}

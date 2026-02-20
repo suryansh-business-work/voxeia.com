@@ -3,7 +3,10 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface ISettings extends Document {
   _id: mongoose.Types.ObjectId;
   userId: mongoose.Types.ObjectId;
-  useGlobalConfig: boolean;
+  useCustomCallConfig: boolean;
+  useCustomAiConfig: boolean;
+  useCustomTtsConfig: boolean;
+  useCustomEmailConfig: boolean;
   callConfig: {
     twilioAccountSid: string;
     twilioAuthToken: string;
@@ -29,7 +32,10 @@ export interface ISettings extends Document {
 const settingsSchema = new Schema<ISettings>(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true, index: true },
-    useGlobalConfig: { type: Boolean, default: false },
+    useCustomCallConfig: { type: Boolean, default: false },
+    useCustomAiConfig: { type: Boolean, default: false },
+    useCustomTtsConfig: { type: Boolean, default: false },
+    useCustomEmailConfig: { type: Boolean, default: false },
     callConfig: {
       twilioAccountSid: { type: String, default: '' },
       twilioAuthToken: { type: String, default: '' },

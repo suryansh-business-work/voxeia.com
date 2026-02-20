@@ -24,6 +24,13 @@ import AiConfigPanel from './components/AiConfigPanel';
 import TtsConfigPanel from './components/TtsConfigPanel';
 import EmailConfigPanel from './components/EmailConfigPanel';
 
+const SECTION_FIELDS = [
+  'useCustomCallConfig',
+  'useCustomAiConfig',
+  'useCustomTtsConfig',
+  'useCustomEmailConfig',
+] as const;
+
 const VERTICAL_TABS = [
   { label: 'Call Config', icon: <PhoneIcon sx={{ fontSize: 18 }} /> },
   { label: 'AI Config', icon: <SmartToyIcon sx={{ fontSize: 18 }} /> },
@@ -49,19 +56,18 @@ const SettingsPage = () => {
 
   useEffect(() => { loadSettings(); }, [loadSettings]);
 
-  const handleGlobalToggle = async (_: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
+  const handleSectionToggle = async (checked: boolean) => {
+    const field = SECTION_FIELDS[verticalTab];
     try {
-      const res = await updateSettings({ useGlobalConfig: checked });
+      const res = await updateSettings({ [field]: checked });
       if (res.success) {
         setSettings(res.data);
-        toast.success(checked ? 'Custom configuration enabled' : 'Using global (.env) configuration');
+        toast.success(checked ? 'Custom config enabled for this section' : 'Using .env defaults for this section');
       }
     } catch {
-      toast.error('Failed to update configuration mode');
+      toast.error('Failed to update');
     }
   };
-
-  const isCustom = settings?.useGlobalConfig ?? false;
 
   if (loading) {
     return (
@@ -70,6 +76,8 @@ const SettingsPage = () => {
       </Box>
     );
   }
+
+  const sectionEnabled = settings ? settings[SECTION_FIELDS[verticalTab]] : false;
 
   return (
     <Box>
@@ -108,27 +116,32 @@ const SettingsPage = () => {
             ))}
           </Tabs>
           <Box sx={{ flex: 1, p: 3 }}>
-            {/* Use Custom Config toggle — shown in every panel */}
-            <Card sx={{ p: 1.5, mb: 2.5, borderLeft: '3px solid', borderLeftColor: 'primary.main' }}>
+            {/* Section-level custom config toggle */}
+            <Card sx={{ p: 1.5, mb: 2.5, borderLeft: '3px solid', borderLeftColor: sectionEnabled ? 'primary.main' : 'text.disabled' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <FormControlLabel
-                    control={<Switch checked={isCustom} onChange={handleGlobalToggle} color="primary" size="small" />}
-                    label={<Typography variant="body2" fontWeight={600}>Use Custom Configuration</Typography>}
+                    control={<Switch checked={sectionEnabled} onChange={(_, c) => handleSectionToggle(c)} color="primary" size="small" />}
+                    label={
+                      <Typography variant="body2" fontWeight={600}>
+                        Use Custom {VERTICAL_TABS[verticalTab].label}
+                      </Typography>
+                    }
                   />
-                  <Tooltip title="When OFF, server .env values are used. When ON, your custom values override defaults.">
+                  <Tooltip title="ON = Use your custom values below. OFF = Use server .env defaults.">
                     <InfoOutlinedIcon sx={{ fontSize: 16, color: 'text.secondary', cursor: 'help' }} />
                   </Tooltip>
                 </Box>
                 <Typography variant="caption" color="text.secondary">
-                  {isCustom ? 'Custom config active' : 'Using .env defaults'}
+                  {sectionEnabled ? 'Using your custom values' : 'Using .env defaults'}
                 </Typography>
               </Box>
             </Card>
-            {verticalTab === 0 && <CallConfigPanel settings={settings} disabled={!isCustom} onSaved={loadSettings} />}
-            {verticalTab === 1 && <AiConfigPanel settings={settings} disabled={!isCustom} onSaved={loadSettings} />}
-            {verticalTab === 2 && <TtsConfigPanel settings={settings} disabled={!isCustom} onSaved={loadSettings} />}
-            {verticalTab === 3 && <EmailConfigPanel settings={settings} disabled={!isCustom} onSaved={loadSettings} />}
+
+            {verticalTab === 0 && <CallConfigPanel settings={settings} disabled={!settings.useCustomCallConfig} onSaved={loadSettings} />}
+            {verticalTab === 1 && <AiConfigPanel settings={settings} disabled={!settings.useCustomAiConfig} onSaved={loadSettings} />}
+            {verticalTab === 2 && <TtsConfigPanel settings={settings} disabled={!settings.useCustomTtsConfig} onSaved={loadSettings} />}
+            {verticalTab === 3 && <EmailConfigPanel settings={settings} disabled={!settings.useCustomEmailConfig} onSaved={loadSettings} />}
           </Box>
         </Card>
       )}

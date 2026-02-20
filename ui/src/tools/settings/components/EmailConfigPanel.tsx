@@ -9,6 +9,7 @@ import Alert from '@mui/material/Alert';
 import CircularProgress from '@mui/material/CircularProgress';
 import SaveIcon from '@mui/icons-material/Save';
 import WifiIcon from '@mui/icons-material/Wifi';
+import SendIcon from '@mui/icons-material/Send';
 import toast from 'react-hot-toast';
 import { SettingsData } from '../settings.types';
 import { updateSettings } from '../settings.api';
@@ -30,6 +31,7 @@ const validationSchema = Yup.object().shape({
 
 const EmailConfigPanel = ({ settings, disabled, onSaved }: EmailConfigPanelProps) => {
   const [testing, setTesting] = useState(false);
+  const [sendingTest, setSendingTest] = useState(false);
 
   const handleTestConnection = async () => {
     setTesting(true);
@@ -44,6 +46,22 @@ const EmailConfigPanel = ({ settings, disabled, onSaved }: EmailConfigPanelProps
       toast.error('Failed to test SMTP connection');
     } finally {
       setTesting(false);
+    }
+  };
+
+  const handleSendTestMail = async () => {
+    setSendingTest(true);
+    try {
+      const { data } = await apiClient.post<{ success: boolean; data: { success: boolean; message: string } }>('/emails/test');
+      if (data.success && data.data.success) {
+        toast.success(data.data.message || 'Test email sent');
+      } else {
+        toast.error(data.data?.message || 'Failed to send test email');
+      }
+    } catch {
+      toast.error('Failed to send test email');
+    } finally {
+      setSendingTest(false);
     }
   };
 
@@ -169,6 +187,16 @@ const EmailConfigPanel = ({ settings, disabled, onSaved }: EmailConfigPanelProps
             onClick={handleTestConnection}
           >
             {testing ? 'Testing...' : 'Test Connection'}
+          </Button>
+          <Button
+            variant="outlined"
+            size="small"
+            color="secondary"
+            startIcon={sendingTest ? <CircularProgress size={14} /> : <SendIcon />}
+            disabled={disabled || sendingTest}
+            onClick={handleSendTestMail}
+          >
+            {sendingTest ? 'Sending...' : 'Send Test Mail'}
           </Button>
         </Box>
       </Box>

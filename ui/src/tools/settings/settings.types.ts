@@ -23,7 +23,10 @@ export interface EmailConfig {
 export interface SettingsData {
   _id: string;
   userId: string;
-  useGlobalConfig: boolean;
+  useCustomCallConfig: boolean;
+  useCustomAiConfig: boolean;
+  useCustomTtsConfig: boolean;
+  useCustomEmailConfig: boolean;
   callConfig: CallConfig;
   aiConfig: AiConfig;
   ttsConfig: TtsConfig;
@@ -38,7 +41,10 @@ export interface SettingsResponse {
 }
 
 export interface UpdateSettingsPayload {
-  useGlobalConfig?: boolean;
+  useCustomCallConfig?: boolean;
+  useCustomAiConfig?: boolean;
+  useCustomTtsConfig?: boolean;
+  useCustomEmailConfig?: boolean;
   callConfig?: Partial<CallConfig>;
   aiConfig?: Partial<AiConfig>;
   ttsConfig?: Partial<TtsConfig>;

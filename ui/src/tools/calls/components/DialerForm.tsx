@@ -18,6 +18,7 @@ import SmartToyIcon from '@mui/icons-material/SmartToy';
 import CallIcon from '@mui/icons-material/Call';
 import RecordVoiceOverIcon from '@mui/icons-material/RecordVoiceOver';
 import TranslateIcon from '@mui/icons-material/Translate';
+import { alpha } from '@mui/material/styles';
 import { FormikProps } from 'formik';
 import { getVoiceLabel, getVoiceLanguageCode, getVoicesByLanguage } from '../../voices/voices.data';
 import VoiceSelector from '../../voices/VoiceSelector';
@@ -123,17 +124,32 @@ const DialerForm = ({
           </Box>
         </Backdrop>
 
-        {/* Contact search dropdown */}
+        {/* 1. Contact search */}
         <ContactAutocomplete onSelect={handleContactSelect} disabled={disabled} />
 
-        {/* Dial Pad */}
+        {/* 2. Dial Pad — full width */}
         <DialPad value={formik.values.to} onChange={(v) => formik.setFieldValue('to', v)} disabled={disabled} />
 
-        <Chip icon={<RecordVoiceOverIcon />} label={getVoiceLabel(formik.values.voice)}
-          onClick={() => onVoiceDialogToggle(true)} variant="outlined" disabled={disabled}
+        {/* 3. Voice selector chip */}
+        <Chip
+          icon={<RecordVoiceOverIcon />}
+          label={getVoiceLabel(formik.values.voice)}
+          onClick={() => onVoiceDialogToggle(true)}
+          variant="outlined"
+          disabled={disabled}
           aria-label={`Voice: ${getVoiceLabel(formik.values.voice)}. Click to change`}
-          sx={{ width: '100%', justifyContent: 'flex-start', height: 32, fontSize: '0.72rem', transition: 'all 0.2s ease' }} />
+          sx={{ width: '100%', justifyContent: 'flex-start', height: 36, fontSize: '0.72rem' }}
+        />
 
+        {/* 4. First Message */}
+        <TextField
+          fullWidth size="small" label="First Message" name="message"
+          value={formik.values.message} onChange={formik.handleChange}
+          multiline rows={3} disabled={disabled}
+          InputProps={{ sx: { fontSize: '0.78rem' } }}
+        />
+
+        {/* Voice Dialog */}
         <Dialog open={voiceDialogOpen} onClose={() => onVoiceDialogToggle(false)} maxWidth="md" fullWidth>
           <DialogTitle>Select Voice</DialogTitle>
           <DialogContent>
@@ -147,49 +163,59 @@ const DialerForm = ({
           </DialogActions>
         </Dialog>
 
-        <TextField fullWidth size="small" label="First Message" name="message"
-          value={formik.values.message} onChange={formik.handleChange}
-          multiline rows={2} disabled={disabled} />
-
-        <Box sx={{ border: '1px solid', borderColor: 'divider', p: 0.8, borderRadius: 1, transition: 'all 0.2s ease' }}>
+        {/* 5. AI Mode — full width */}
+        <Box sx={{
+          border: '2px solid',
+          borderColor: formik.values.aiEnabled ? 'primary.main' : 'divider',
+          bgcolor: formik.values.aiEnabled ? (t) => alpha(t.palette.primary.main, 0.04) : 'transparent',
+          p: 0.8, borderRadius: 1, transition: 'all 0.2s ease',
+        }}>
           <FormControlLabel
             control={<Switch checked={formik.values.aiEnabled}
               onChange={(e) => formik.setFieldValue('aiEnabled', e.target.checked)}
               size="small" disabled={disabled} />}
             label={<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <SmartToyIcon sx={{ fontSize: 16 }} />
-              <Typography variant="body2" sx={{ fontSize: '0.78rem' }}>AI Mode</Typography>
+              <SmartToyIcon sx={{ fontSize: 16, color: formik.values.aiEnabled ? 'primary.main' : 'text.secondary' }} />
+              <Typography variant="body2" sx={{ fontSize: '0.78rem', fontWeight: formik.values.aiEnabled ? 700 : 400 }}>AI Mode</Typography>
             </Box>}
           />
-          <Collapse in={formik.values.aiEnabled}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 0.5 }}>
-              {/* AI Model selector */}
-              <TextField select fullWidth size="small" label="AI Model" value={aiModel}
-                onChange={(e) => setAiModel(e.target.value)} disabled={disabled}>
-                {AI_MODELS.map((m) => (
-                  <MenuItem key={m.id} value={m.id} sx={{ fontSize: '0.75rem' }}>
-                    {m.label} <Chip label={m.tier} size="small" sx={{ ml: 0.5, height: 16, fontSize: '0.6rem' }} />
-                  </MenuItem>
-                ))}
-              </TextField>
-              <AgentPromptSelect value={selectedPromptId} onChange={handlePromptSelect} disabled={disabled} />
-              <TextField fullWidth size="small" label="Agent Prompt (from library)" name="systemPrompt"
-                value={formik.values.systemPrompt} onChange={formik.handleChange}
-                multiline rows={2} disabled={disabled}
-                helperText="Loaded from selected prompt template" />
-              <TextField fullWidth size="small" label="Additional Prompt"
-                value={formik.values.additionalPrompt || ''} onChange={(e) => formik.setFieldValue('additionalPrompt', e.target.value)}
-                multiline rows={2} disabled={disabled}
-                helperText="Extra instructions for this specific call" />
-            </Box>
-          </Collapse>
         </Box>
 
-        {/* Language at the bottom */}
-        <LanguageSelect value={formik.values.language} onChange={handleLanguageChange} disabled={disabled} />
+        {/* 6. Language — full width */}
+        <Box sx={{
+          border: '2px solid', borderColor: 'primary.main',
+          bgcolor: (t) => alpha(t.palette.primary.main, 0.04),
+          p: 0.8, borderRadius: 1,
+        }}>
+          <LanguageSelect value={formik.values.language} onChange={handleLanguageChange} disabled={disabled} />
+        </Box>
+
+        {/* 7. AI settings (collapse) */}
+        <Collapse in={formik.values.aiEnabled}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 0.5 }}>
+            <TextField select fullWidth size="small" label="AI Model" value={aiModel}
+              onChange={(e) => setAiModel(e.target.value)} disabled={disabled}>
+              {AI_MODELS.map((m) => (
+                <MenuItem key={m.id} value={m.id} sx={{ fontSize: '0.75rem' }}>
+                  {m.label} <Chip label={m.tier} size="small" sx={{ ml: 0.5, height: 16, fontSize: '0.6rem' }} />
+                </MenuItem>
+              ))}
+            </TextField>
+            <AgentPromptSelect value={selectedPromptId} onChange={handlePromptSelect} disabled={disabled} />
+            <TextField fullWidth size="small" label="Agent Prompt (from library)" name="systemPrompt"
+              value={formik.values.systemPrompt} onChange={formik.handleChange}
+              multiline rows={2} disabled={disabled}
+              helperText="Loaded from selected prompt template" />
+            <TextField fullWidth size="small" label="Additional Prompt"
+              value={formik.values.additionalPrompt || ''} onChange={(e) => formik.setFieldValue('additionalPrompt', e.target.value)}
+              multiline rows={2} disabled={disabled}
+              helperText="Extra instructions for this specific call" />
+          </Box>
+        </Collapse>
+
+        {/* 8. Translate */}
         <Button
-          size="small"
-          variant="text"
+          size="small" variant="text"
           startIcon={translating ? <CircularProgress size={14} /> : <TranslateIcon />}
           onClick={() => runTranslation(formik.values.language)}
           disabled={disabled || translating}
@@ -198,17 +224,20 @@ const DialerForm = ({
           {translating ? 'Translating...' : 'Click to Translate'}
         </Button>
 
+        {/* ── Call Button — Prominent ── */}
         <Button type="submit" variant="contained" fullWidth
           disabled={disabled || !isCallReady}
-          startIcon={loading ? <CircularProgress size={16} /> : <CallIcon />}
+          startIcon={loading ? <CircularProgress size={18} /> : <CallIcon />}
           aria-label={loading ? 'Calling in progress' : 'Start call'}
           sx={{
-            py: 0.8, fontSize: '0.8rem',
+            py: 1.2, fontSize: '0.9rem', fontWeight: 700,
+            bgcolor: 'primary.main',
+            boxShadow: (t) => `0 4px 14px ${alpha(t.palette.primary.main, 0.35)}`,
             transition: 'all 0.2s ease',
-            '&:not(:disabled):hover': { transform: 'translateY(-1px)', boxShadow: 4 },
+            '&:not(:disabled):hover': { transform: 'translateY(-2px)', boxShadow: (t) => `0 6px 20px ${alpha(t.palette.primary.main, 0.45)}` },
             '&:not(:disabled):active': { transform: 'translateY(0)' },
           }}>
-          {loading ? 'Calling...' : 'Call'}
+          {loading ? 'Calling...' : 'Start Call'}
         </Button>
       </Box>
     </form>

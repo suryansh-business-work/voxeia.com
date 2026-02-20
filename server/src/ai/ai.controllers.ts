@@ -67,7 +67,9 @@ export const handleCallStatusWebhook = async (req: Request, res: Response): Prom
 
     console.log(`[AI Status Webhook] CallSid: ${callSid}, Status: ${callStatus}`);
 
-      await aiService.handleCallStatus(callSid, callStatus);
+    await aiService.handleCallStatus(callSid, callStatus);
+
+    res.status(200).type('text/xml').send('<Response/>');
   } catch (error) {
     console.error('[AI Status Webhook Error]', error);
     res.status(200).type('text/xml').send('<Response/>');

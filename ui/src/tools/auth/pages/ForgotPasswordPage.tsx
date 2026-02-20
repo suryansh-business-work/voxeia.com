@@ -7,6 +7,7 @@ import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Link from '@mui/material/Link';
 import Alert from '@mui/material/Alert';
+import { alpha } from '@mui/material/styles';
 import LockResetIcon from '@mui/icons-material/LockReset';
 import { useFormik } from 'formik';
 import { useState } from 'react';
@@ -39,12 +40,14 @@ const ForgotPasswordPage = () => {
 
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.default', p: 2 }}>
-      <Card sx={{ maxWidth: 440, width: '100%' }}>
+      <Card sx={{ maxWidth: 440, width: '100%', borderTop: '3px solid', borderTopColor: 'primary.main', boxShadow: (t) => `0 0 40px ${alpha(t.palette.primary.main, 0.06)}` }}>
         <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
-          <Box sx={{ textAlign: 'center', mb: 3 }}>
-            <LockResetIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
-            <Typography variant="h5">Forgot Password</Typography>
-            <Typography variant="body2" color="text.secondary">Enter your email to receive a reset link</Typography>
+          <Box sx={{ textAlign: 'center', mb: 4 }}>
+            <Box sx={{ width: 56, height: 56, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'primary.main', color: '#fff', mb: 2, boxShadow: (t) => `0 0 20px ${alpha(t.palette.primary.main, 0.3)}` }}>
+              <LockResetIcon sx={{ fontSize: 28 }} />
+            </Box>
+            <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: '-0.02em' }}>Forgot Password</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>Enter your email to receive a reset link</Typography>
           </Box>
 
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}

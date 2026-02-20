@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
+import SplitPane from 'react-split-pane';
 import { useParams } from 'react-router-dom';
 import DialerPanel from './components/DialerPanel';
 import CallLogsPanelCard from './components/CallLogsPanelCard';
@@ -17,6 +17,8 @@ interface HistorySelection {
   systemPrompt: string;
   message: string;
 }
+
+const BORDER_RADIUS = '4px';
 
 const AgentCallPage = () => {
   const { agentId } = useParams<{ agentId: string }>();
@@ -92,17 +94,44 @@ const AgentCallPage = () => {
     };
   }, [socket, activeCallSid]);
 
+  const panelSx = {
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    overflow: 'hidden',
+    borderRadius: BORDER_RADIUS,
+  };
+
   return (
-    <Box sx={{
-      height: '100%',
-      mx: { xs: -1, sm: -2, md: -3 },
-      my: { xs: -1, sm: -2 },
-      display: 'flex',
-      flexDirection: 'column',
-      overflow: 'hidden',
-    }}>
-      <Grid container sx={{ flex: 1, minHeight: 0 }}>
-        <Grid item xs={12} md={2.5} sx={{ display: 'flex', flexDirection: 'column', height: '100%', borderRight: { md: '1px solid' }, borderColor: { md: 'divider' }, overflow: 'hidden' }}>
+    <Box
+      sx={{
+        height: '100%',
+        mx: { xs: -1, sm: -2, md: -3 },
+        my: { xs: -1, sm: -2 },
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+        '& .SplitPane': { position: 'relative !important' as string },
+        '& .Pane': { overflow: 'hidden' },
+        '& .Resizer': {
+          background: 'transparent',
+          opacity: 1,
+          zIndex: 1,
+          boxSizing: 'border-box',
+          backgroundClip: 'padding-box',
+        },
+        '& .Resizer.vertical': {
+          width: 6,
+          borderLeft: '2px solid transparent',
+          borderRight: '2px solid transparent',
+          cursor: 'col-resize',
+          '&:hover': { borderLeft: '2px solid', borderRight: '2px solid', borderColor: 'primary.main' },
+        },
+      }}
+    >
+      {/* @ts-expect-error react-split-pane types mismatch with React 18 */}
+      <SplitPane split="vertical" minSize={220} maxSize={400} defaultSize={280} style={{ flex: 1, position: 'relative' }}>
+        <Box sx={panelSx}>
           <DialerPanel
             agentId={agentId}
             activeCallSid={activeCallSid}
@@ -112,14 +141,17 @@ const AgentCallPage = () => {
             onCallEnded={handleCallEnded}
             historySelection={historySelection}
           />
-        </Grid>
-        <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column', height: '100%', borderRight: { md: '1px solid' }, borderColor: { md: 'divider' }, overflow: 'hidden' }}>
-          <CallLogsPanelCard onSelectLog={handleSelectLog} />
-        </Grid>
-        <Grid item xs={12} md={3.5} sx={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
-          <ChatPanel events={events} isActive={isCallActive} />
-        </Grid>
-      </Grid>
+        </Box>
+        {/* @ts-expect-error react-split-pane types mismatch with React 18 */}
+        <SplitPane split="vertical" minSize={300} maxSize={-300} defaultSize="65%" style={{ position: 'relative' }}>
+          <Box sx={panelSx}>
+            <CallLogsPanelCard onSelectLog={handleSelectLog} />
+          </Box>
+          <Box sx={panelSx}>
+            <ChatPanel events={events} isActive={isCallActive} />
+          </Box>
+        </SplitPane>
+      </SplitPane>
     </Box>
   );
 };

@@ -35,12 +35,19 @@ const PromptLibraryPage = () => {
   return (
     <Box>
       <AppBreadcrumb items={breadcrumbItems} />
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h6" fontWeight={700}>Agent Prompt Library</Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreate} size="small">
+
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3, flexWrap: 'wrap', gap: 1 }}>
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 800 }}>Prompt Library</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.3 }}>
+            Pre-built system prompts for your agents
+          </Typography>
+        </Box>
+        <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreate} sx={{ px: 3 }}>
           New Prompt
         </Button>
       </Box>
+
       <PromptLibraryTable onEdit={handleEdit} refreshKey={refreshKey} />
       <PromptFormDialog
         open={dialogOpen}

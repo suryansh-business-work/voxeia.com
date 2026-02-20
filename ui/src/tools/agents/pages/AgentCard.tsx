@@ -7,6 +7,8 @@ import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
 import Avatar from '@mui/material/Avatar';
+import Tooltip from '@mui/material/Tooltip';
+import { alpha } from '@mui/material/styles';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -22,34 +24,127 @@ interface AgentCardProps {
 
 const AgentCard = ({ agent, onSelect, onEdit, onDelete }: AgentCardProps) => {
   return (
-    <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <CardContent sx={{ flex: 1 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+    <Card
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        borderLeft: '3px solid',
+        borderLeftColor: 'primary.main',
+        transition: 'all 0.2s ease',
+        '&:hover': {
+          borderLeftColor: 'primary.light',
+          boxShadow: (t) => `0 0 20px ${alpha(t.palette.primary.main, 0.1)}`,
+        },
+      }}
+    >
+      <CardContent sx={{ flex: 1, p: 2.5 }}>
+        {/* Agent identity */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
           <Avatar
             src={agent.image || undefined}
-            sx={{ width: 40, height: 40, bgcolor: 'primary.main' }}
+            sx={{
+              width: 42,
+              height: 42,
+              bgcolor: (t) => alpha(t.palette.primary.main, 0.1),
+              color: 'primary.main',
+              border: '1px solid',
+              borderColor: (t) => alpha(t.palette.primary.main, 0.2),
+            }}
           >
-            {!agent.image && <SmartToyIcon />}
+            {!agent.image && <SmartToyIcon sx={{ fontSize: 22 }} />}
           </Avatar>
-          <Typography variant="h6" noWrap sx={{ flex: 1 }}>{agent.name}</Typography>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography variant="subtitle1" noWrap sx={{ fontWeight: 700, lineHeight: 1.2 }}>
+              {agent.name}
+            </Typography>
+            <Chip
+              label={agent.voice.replace('Polly.', '').replace('-Neural', '')}
+              size="small"
+              variant="outlined"
+              sx={{
+                height: 20,
+                fontSize: '0.62rem',
+                fontWeight: 600,
+                mt: 0.5,
+                letterSpacing: '0.04em',
+              }}
+            />
+          </Box>
         </Box>
-        <Chip label={agent.voice.replace('Polly.', '').replace('-Neural', '')} size="small" sx={{ mb: 1 }} />
-        <Typography variant="body2" color="text.secondary" sx={{
-          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
-        }}>
+
+        {/* System prompt preview */}
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            fontSize: '0.8rem',
+            lineHeight: 1.5,
+            mb: 1.5,
+          }}
+        >
           {agent.systemPrompt}
         </Typography>
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+
+        {/* Meta */}
+        <Typography
+          variant="caption"
+          sx={{
+            color: 'text.secondary',
+            fontSize: '0.65rem',
+            letterSpacing: '0.04em',
+            textTransform: 'uppercase',
+          }}
+        >
           Created {new Date(agent.createdAt).toLocaleDateString()}
         </Typography>
       </CardContent>
-      <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2 }}>
-        <Button size="small" variant="contained" startIcon={<PhoneForwardedIcon />} onClick={onSelect}>
+
+      <CardActions sx={{ justifyContent: 'space-between', px: 2.5, pb: 2, pt: 0 }}>
+        <Button
+          size="small"
+          variant="contained"
+          startIcon={<PhoneForwardedIcon sx={{ fontSize: 16 }} />}
+          onClick={onSelect}
+          sx={{ fontSize: '0.78rem', px: 2, py: 0.7 }}
+        >
           Use Agent
         </Button>
-        <Box>
-          <IconButton size="small" onClick={onEdit}><EditIcon fontSize="small" /></IconButton>
-          <IconButton size="small" color="error" onClick={onDelete}><DeleteIcon fontSize="small" /></IconButton>
+        <Box sx={{ display: 'flex', gap: 0.5 }}>
+          <Tooltip title="Edit">
+            <IconButton
+              size="small"
+              onClick={onEdit}
+              sx={{
+                border: '1px solid',
+                borderColor: 'divider',
+                width: 30,
+                height: 30,
+                '&:hover': { borderColor: 'primary.main', color: 'primary.main' },
+              }}
+            >
+              <EditIcon sx={{ fontSize: 15 }} />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Delete">
+            <IconButton
+              size="small"
+              onClick={onDelete}
+              sx={{
+                border: '1px solid',
+                borderColor: 'divider',
+                width: 30,
+                height: 30,
+                '&:hover': { borderColor: 'error.main', color: 'error.main' },
+              }}
+            >
+              <DeleteIcon sx={{ fontSize: 15 }} />
+            </IconButton>
+          </Tooltip>
         </Box>
       </CardActions>
     </Card>

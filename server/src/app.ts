@@ -10,6 +10,7 @@ import callLogsRoutes from './calllogs/calllogs.routes';
 import companiesRoutes from './companies/companies.routes';
 import contactsRoutes from './contacts/contacts.routes';
 import promptLibraryRoutes from './promptlibrary/promptlibrary.routes';
+import settingsRoutes from './settings/settings.routes';
 
 const app = express();
 
@@ -45,5 +46,6 @@ app.use('/api/calls', callsRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/tts', ttsRoutes);
 app.use('/api/prompts', promptLibraryRoutes);
+app.use('/api/settings', settingsRoutes);
 
 export default app;

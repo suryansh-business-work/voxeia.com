@@ -39,7 +39,7 @@ const ChatPanel = ({ events, isActive }: ChatPanelProps) => {
   ).length;
 
   return (
-    <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', borderRadius: '4px' }}>
       <Box sx={{
         px: 1.5, py: 0.8, bgcolor: 'primary.main', color: '#fff',
         display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0,

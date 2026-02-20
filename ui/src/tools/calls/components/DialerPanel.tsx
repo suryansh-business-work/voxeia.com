@@ -121,7 +121,7 @@ const DialerPanel = ({ agentId, activeCallSid, isCallActive, activePhone, onCall
         <DialerIdle phoneNumber={formik.values.to} />
       )}
 
-      <Card sx={{ flex: 1, overflow: 'auto' }}>
+      <Card sx={{ flex: 1, overflow: 'auto', borderRadius: '4px' }}>
         <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
           <DialerForm
             formik={formik}

@@ -67,9 +67,13 @@ const ProfilePage = () => {
   return (
     <Box>
       <AppBreadcrumb items={breadcrumbItems} />
-      <Card sx={{ maxWidth: 600, mx: 'auto' }}>
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h5" sx={{ fontWeight: 800 }}>My Profile</Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.3 }}>Manage your account settings</Typography>
+      </Box>
+
+      <Card sx={{ maxWidth: 600, mx: 'auto', borderTop: '3px solid', borderTopColor: 'primary.main' }}>
         <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
-          <Typography variant="h5" sx={{ mb: 3 }}>My Profile</Typography>
 
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3 }}>
             <Box sx={{ position: 'relative' }}>

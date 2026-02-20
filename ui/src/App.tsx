@@ -21,6 +21,7 @@ import CreateAgentPage from './tools/agents/pages/CreateAgentPage';
 import EditAgentPage from './tools/agents/pages/EditAgentPage';
 import ContactsPage from './tools/contacts/ContactsPage';
 import PromptLibraryPage from './tools/promptlibrary/pages/PromptLibraryPage';
+import SettingsPage from './tools/settings/SettingsPage';
 
 const App = () => {
   return (
@@ -45,6 +46,7 @@ const App = () => {
 
                   <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
                   <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+                  <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
                   <Route path="/agents" element={<ProtectedRoute><AgentsListPage /></ProtectedRoute>} />
                   <Route path="/agents/create" element={<ProtectedRoute><CreateAgentPage /></ProtectedRoute>} />
                   <Route path="/agents/:agentId/edit" element={<ProtectedRoute><EditAgentPage /></ProtectedRoute>} />

@@ -143,6 +143,8 @@ export const initiateAiCall = async (
     twiml,
     record: true,
     recordingChannels: 'dual',
+    recordingStatusCallback: `${baseUrl}/api/calls/webhooks/recording-status`,
+    recordingStatusCallbackEvent: ['completed'],
     statusCallback: `${baseUrl}/api/ai/conversation/status`,
     statusCallbackEvent: ['completed', 'failed', 'busy', 'no-answer'],
   });

@@ -7,7 +7,10 @@ import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import TextField from '@mui/material/TextField';
 import TablePagination from '@mui/material/TablePagination';
+import InputAdornment from '@mui/material/InputAdornment';
 import AddIcon from '@mui/icons-material/Add';
+import SearchIcon from '@mui/icons-material/Search';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
 import Grid from '@mui/material/Grid';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -60,30 +63,61 @@ const AgentsListPage = () => {
   return (
     <Box>
       <AppBreadcrumb items={breadcrumbItems} />
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 1 }}>
-        <Typography variant="h5">Call Agents</Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/agents/create')}>
+
+      {/* ── Page header ──────────────────── */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3, flexWrap: 'wrap', gap: 1 }}>
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 800 }}>Call Agents</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.3 }}>
+            Manage your AI-powered calling agents
+          </Typography>
+        </Box>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => navigate('/agents/create')}
+          sx={{ px: 3 }}
+        >
           Create Agent
         </Button>
       </Box>
 
-      <Card sx={{ mb: 2 }}>
+      {/* ── Search bar ───────────────────── */}
+      <Card sx={{ mb: 2.5 }}>
         <CardContent sx={{ py: 1.5 }}>
           <TextField
-            fullWidth size="small" label="Search agents..."
-            value={search} onChange={(e) => { setSearch(e.target.value); setPage(0); }}
+            fullWidth
+            size="small"
+            placeholder="Search agents by name..."
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(0); }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+                </InputAdornment>
+              ),
+            }}
           />
         </CardContent>
       </Card>
 
+      {/* ── Content ──────────────────────── */}
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}><CircularProgress /></Box>
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+          <CircularProgress size={32} thickness={4} />
+        </Box>
       ) : agents.length === 0 ? (
         <Card>
-          <CardContent sx={{ textAlign: 'center', py: 6 }}>
-            <Typography variant="h6" color="text.secondary">No agents yet</Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>Create your first call agent to get started</Typography>
-            <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/agents/create')}>Create Agent</Button>
+          <CardContent sx={{ textAlign: 'center', py: 8 }}>
+            <SmartToyIcon sx={{ fontSize: 48, color: 'text.secondary', opacity: 0.3, mb: 2 }} />
+            <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 600 }}>No agents yet</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Create your first call agent to get started
+            </Typography>
+            <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/agents/create')}>
+              Create Agent
+            </Button>
           </CardContent>
         </Card>
       ) : (
@@ -101,7 +135,9 @@ const AgentsListPage = () => {
             ))}
           </Grid>
           <TablePagination
-            component="div" count={total} page={page}
+            component="div"
+            count={total}
+            page={page}
             onPageChange={(_, p) => setPage(p)}
             rowsPerPage={rowsPerPage}
             onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}

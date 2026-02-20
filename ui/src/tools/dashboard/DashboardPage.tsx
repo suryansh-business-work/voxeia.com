@@ -5,6 +5,8 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
+import Chip from '@mui/material/Chip';
+import { alpha } from '@mui/material/styles';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import PhoneIcon from '@mui/icons-material/Phone';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -24,6 +26,7 @@ interface MetricItem {
   value: string | number;
   icon: React.ReactNode;
   color: string;
+  sub?: string;
 }
 
 const DashboardPage = () => {
@@ -65,36 +68,102 @@ const DashboardPage = () => {
   useEffect(() => { loadData(); }, [loadData]);
 
   const metricCards: MetricItem[] = [
-    { label: 'Total Agents', value: metrics.totalAgents, icon: <SmartToyIcon />, color: '#00897B' },
-    { label: 'Total Calls', value: metrics.totalCalls, icon: <PhoneIcon />, color: '#1976D2' },
-    { label: 'Completed', value: metrics.completedCalls, icon: <CheckCircleIcon />, color: '#2E7D32' },
-    { label: 'Avg Duration', value: metrics.avgDuration, icon: <TrendingUpIcon />, color: '#ED6C02' },
+    { label: 'TOTAL AGENTS', value: metrics.totalAgents, icon: <SmartToyIcon />, color: '#00E5CC', sub: 'Active agents' },
+    { label: 'TOTAL CALLS', value: metrics.totalCalls, icon: <PhoneIcon />, color: '#3B82F6', sub: 'All time' },
+    { label: 'COMPLETED', value: metrics.completedCalls, icon: <CheckCircleIcon />, color: '#10B981', sub: 'Successfully ended' },
+    { label: 'AVG DURATION', value: metrics.avgDuration, icon: <TrendingUpIcon />, color: '#F59E0B', sub: 'Per call' },
   ];
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed': return '#10B981';
+      case 'failed': return '#F43F5E';
+      default: return '#F59E0B';
+    }
+  };
 
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
-        <CircularProgress />
+        <CircularProgress size={32} thickness={4} />
       </Box>
     );
   }
 
   return (
-    <Box sx={{ px: { xs: 1, md: 2 }, py: 1 }}>
+    <Box sx={{ px: { xs: 0.5, md: 1 }, py: 1 }}>
       <AppBreadcrumb items={breadcrumbItems} />
-      <Typography variant="h5" sx={{ mb: 2, fontWeight: 700 }}>Dashboard</Typography>
 
+      {/* ── Page header ──────────────────── */}
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: '-0.02em' }}>
+          Dashboard
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+          Overview of your call center operations
+        </Typography>
+      </Box>
+
+      {/* ── Metric cards ─────────────────── */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
         {metricCards.map((m) => (
           <Grid item xs={6} sm={3} key={m.label}>
-            <Card sx={{ height: '100%' }}>
-              <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2 }}>
-                <Box sx={{ width: 48, height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: `${m.color}14`, color: m.color }}>
-                  {m.icon}
-                </Box>
-                <Box>
-                  <Typography variant="h5" fontWeight={700}>{m.value}</Typography>
-                  <Typography variant="caption" color="text.secondary">{m.label}</Typography>
+            <Card
+              sx={{
+                height: '100%',
+                borderLeft: `3px solid ${m.color}`,
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  borderColor: m.color,
+                  boxShadow: `0 0 20px ${alpha(m.color, 0.12)}`,
+                },
+              }}
+            >
+              <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                  <Box>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: 'text.secondary',
+                        fontWeight: 700,
+                        letterSpacing: '0.08em',
+                        fontSize: '0.62rem',
+                      }}
+                    >
+                      {m.label}
+                    </Typography>
+                    <Typography
+                      variant="h4"
+                      sx={{
+                        fontWeight: 800,
+                        mt: 0.5,
+                        color: 'text.primary',
+                        fontFamily: '"Inter", monospace',
+                      }}
+                    >
+                      {m.value}
+                    </Typography>
+                    {m.sub && (
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>
+                        {m.sub}
+                      </Typography>
+                    )}
+                  </Box>
+                  <Box
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: m.color,
+                      bgcolor: alpha(m.color, 0.08),
+                      boxShadow: `0 0 12px ${alpha(m.color, 0.1)}`,
+                    }}
+                  >
+                    {m.icon}
+                  </Box>
                 </Box>
               </CardContent>
             </Card>
@@ -102,16 +171,62 @@ const DashboardPage = () => {
         ))}
       </Grid>
 
+      {/* ── Recent calls table ────────────── */}
       <Card>
-        <CardContent>
-          <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>Recent Calls</Typography>
+        <CardContent sx={{ p: { xs: 2, md: 3 }, '&:last-child': { pb: 2 } }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+            <Box>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Recent Calls</Typography>
+              <Typography variant="caption" color="text.secondary">Last 10 call records</Typography>
+            </Box>
+            <Chip
+              label={`${recentCalls.length} records`}
+              size="small"
+              variant="outlined"
+              sx={{ height: 22, fontSize: '0.65rem' }}
+            />
+          </Box>
+
           {recentCalls.length === 0 ? (
-            <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
-              No calls yet. Start by creating an agent and making a call.
-            </Typography>
+            <Box sx={{ textAlign: 'center', py: 6 }}>
+              <PhoneIcon sx={{ fontSize: 40, color: 'text.secondary', opacity: 0.3, mb: 1 }} />
+              <Typography variant="body2" color="text.secondary">
+                No calls yet. Start by creating an agent and making a call.
+              </Typography>
+            </Box>
           ) : (
             <Box sx={{ overflowX: 'auto' }}>
-              <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', '& th, & td': { px: 2, py: 1.2, textAlign: 'left', borderBottom: '1px solid', borderColor: 'divider', fontSize: '0.85rem' }, '& th': { fontWeight: 600, color: 'text.secondary', fontSize: '0.75rem', textTransform: 'uppercase' } }}>
+              <Box
+                component="table"
+                sx={{
+                  width: '100%',
+                  borderCollapse: 'collapse',
+                  '& th': {
+                    px: 2,
+                    py: 1.5,
+                    textAlign: 'left',
+                    fontWeight: 700,
+                    color: 'text.secondary',
+                    fontSize: '0.68rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.08em',
+                    borderBottom: '2px solid',
+                    borderColor: 'divider',
+                  },
+                  '& td': {
+                    px: 2,
+                    py: 1.5,
+                    textAlign: 'left',
+                    borderBottom: '1px solid',
+                    borderColor: 'divider',
+                    fontSize: '0.82rem',
+                  },
+                  '& tr': {
+                    transition: 'background-color 0.15s ease',
+                    '&:hover': { bgcolor: (t) => alpha(t.palette.primary.main, 0.03) },
+                  },
+                }}
+              >
                 <thead>
                   <tr>
                     <th>To</th>
@@ -123,14 +238,34 @@ const DashboardPage = () => {
                 <tbody>
                   {recentCalls.map((call) => (
                     <tr key={call.callSid}>
-                      <td><Typography variant="body2" fontFamily="monospace">{call.to}</Typography></td>
                       <td>
-                        <Box component="span" sx={{ px: 1, py: 0.3, fontSize: '0.75rem', fontWeight: 600, bgcolor: call.status === 'completed' ? 'success.main' : call.status === 'failed' ? 'error.main' : 'warning.main', color: '#fff', display: 'inline-block' }}>
-                          {call.status}
-                        </Box>
+                        <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 500, fontSize: '0.82rem' }}>
+                          {call.to}
+                        </Typography>
                       </td>
-                      <td><Typography variant="body2">{call.duration}s</Typography></td>
-                      <td><Typography variant="body2" color="text.secondary">{call.startTime ? new Date(call.startTime).toLocaleString() : '-'}</Typography></td>
+                      <td>
+                        <Chip
+                          label={call.status}
+                          size="small"
+                          sx={{
+                            height: 22,
+                            fontSize: '0.68rem',
+                            fontWeight: 700,
+                            letterSpacing: '0.04em',
+                            bgcolor: alpha(getStatusColor(call.status), 0.12),
+                            color: getStatusColor(call.status),
+                            border: `1px solid ${alpha(getStatusColor(call.status), 0.3)}`,
+                          }}
+                        />
+                      </td>
+                      <td>
+                        <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>{call.duration}s</Typography>
+                      </td>
+                      <td>
+                        <Typography variant="body2" color="text.secondary">
+                          {call.startTime ? new Date(call.startTime).toLocaleString() : '-'}
+                        </Typography>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import { EnvConfig } from './env.interface';
-import { APP_PORTS, APP_DOMAINS } from './app.config';
+import { APP_PORTS, APP_URLS } from './app.config';
 
 dotenv.config();
 
@@ -16,13 +16,17 @@ const getOptionalEnvVar = (key: string, fallback?: string): string => {
   return process.env[key] || fallback || '';
 };
 
+/** Resolve URLs from NODE_ENV; allow .env override only in dev/test */
+const nodeEnv = (process.env.NODE_ENV || 'development') as EnvConfig['NODE_ENV'];
+const urls = nodeEnv === 'production' ? APP_URLS.production : APP_URLS.development;
+
 export const envConfig: EnvConfig = {
   TWILIO_ACCOUNT_SID: getOptionalEnvVar('TWILIO_ACCOUNT_SID'),
   TWILIO_AUTH_TOKEN: getOptionalEnvVar('TWILIO_AUTH_TOKEN'),
   TWILIO_PHONE_NUMBER: getEnvVar('TWILIO_PHONE_NUMBER'),
-  NODE_ENV: getEnvVar('NODE_ENV', 'development') as EnvConfig['NODE_ENV'],
-  CLIENT_URL: getEnvVar('CLIENT_URL', `http://localhost:${APP_PORTS.UI}`),
-  BASE_URL: getEnvVar('BASE_URL', `http://localhost:${APP_PORTS.SERVER}`),
+  NODE_ENV: nodeEnv,
+  CLIENT_URL: process.env.CLIENT_URL || urls.CLIENT_URL,
+  BASE_URL: process.env.BASE_URL || urls.BASE_URL,
   OPENAI_API_KEY: getOptionalEnvVar('OPENAI_API_KEY'),
   AI_SYSTEM_PROMPT: getOptionalEnvVar(
     'AI_SYSTEM_PROMPT',

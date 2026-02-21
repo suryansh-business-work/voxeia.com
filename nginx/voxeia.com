@@ -146,6 +146,21 @@ server {
     listen 80;
     server_name ecomm.voxeia.com;
 
+    # ─── Proxy API calls to the backend server ─────────────────
+    location /api/ {
+        limit_req zone=voxeia_api burst=50 nodelay;
+
+        proxy_pass http://127.0.0.1:2002;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 120s;
+        proxy_connect_timeout 10s;
+    }
+
+    # ─── Static SPA ───────────────────────────────────────────
     location / {
         limit_req zone=voxeia_site burst=30 nodelay;
 

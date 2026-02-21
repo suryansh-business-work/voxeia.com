@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import { envConfig } from './config';
+import { ALLOWED_ORIGINS } from './config/app.config';
 import callsRoutes from './calls/calls.routes';
 import aiRoutes from './ai/ai.routes';
 import ttsRoutes from './tts/tts.routes';
@@ -18,8 +19,17 @@ import openApiRoutes from './openapi/openapi.routes';
 
 const app = express();
 
-// Middleware
-app.use(cors({ origin: envConfig.CLIENT_URL, credentials: true }));
+// Middleware — allow requests from UI, ecomm, and website origins
+app.use(
+  cors({
+    origin: (origin, cb) => {
+      // Allow requests with no origin (curl, server-to-server, etc.)
+      if (!origin || ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+      cb(new Error(`CORS: origin ${origin} not allowed`));
+    },
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

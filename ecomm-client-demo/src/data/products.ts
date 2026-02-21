@@ -69,7 +69,7 @@ const products: Product[] = [
     price: 89900,
     rating: 4.7,
     reviews: 983,
-    image: 'https://images.unsplash.com/photo-1546868871-af0de0ae72be?w=400&h=400&fit=crop&q=80',
+    image: 'https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?w=400&h=400&fit=crop&q=80',
     badge: 'Premium',
     description: '49mm titanium case. S9 SiP with 4-core Neural Engine. Precision dual-frequency GPS. 36-hour battery life.',
     highlights: ['49mm Titanium', 'S9 SiP', '36hr battery', 'Precision GPS'],

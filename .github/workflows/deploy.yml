@@ -132,8 +132,6 @@ jobs:
                   - ./server/.env
                 environment:
                   - NODE_ENV=production
-                  - CLIENT_URL=https://app.voxeia.com
-                  - BASE_URL=https://api.voxeia.com
                 healthcheck:
                   test: wget --no-verbose --tries=1 --spider http://127.0.0.1:2002/api/health || exit 1
                   interval: 30s
@@ -182,6 +180,9 @@ jobs:
                 restart: unless-stopped
                 ports:
                   - "127.0.0.1:2004:80"
+                depends_on:
+                  server:
+                    condition: service_healthy
                 healthcheck:
                   test: wget --no-verbose --tries=1 --spider http://127.0.0.1:80 || exit 1
                   interval: 30s
@@ -204,8 +205,6 @@ jobs:
             TWILIO_AUTH_TOKEN=${{ secrets.TWILIO_AUTH_TOKEN }}
             TWILIO_PHONE_NUMBER=${{ secrets.TWILIO_PHONE_NUMBER }}
             NODE_ENV=production
-            CLIENT_URL=https://app.voxeia.com
-            BASE_URL=https://api.voxeia.com
             OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
             AI_SYSTEM_PROMPT=${{ secrets.AI_SYSTEM_PROMPT }}
             MONGODB_URI=${{ secrets.MONGODB_URI }}
@@ -295,6 +294,17 @@ jobs:
             server {
                 listen 80;
                 server_name ecomm.voxeia.com;
+                location /api/ {
+                    limit_req zone=voxeia_api burst=50 nodelay;
+                    proxy_pass http://127.0.0.1:2002;
+                    proxy_http_version 1.1;
+                    proxy_set_header Host $host;
+                    proxy_set_header X-Real-IP $remote_addr;
+                    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                    proxy_set_header X-Forwarded-Proto $scheme;
+                    proxy_read_timeout 120s;
+                    proxy_connect_timeout 10s;
+                }
                 location / {
                     limit_req zone=voxeia_site burst=30 nodelay;
                     proxy_pass http://127.0.0.1:2004;

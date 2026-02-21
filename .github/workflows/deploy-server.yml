@@ -57,8 +57,6 @@ jobs:
             TWILIO_AUTH_TOKEN=${{ secrets.TWILIO_AUTH_TOKEN }}
             TWILIO_PHONE_NUMBER=${{ secrets.TWILIO_PHONE_NUMBER }}
             NODE_ENV=production
-            CLIENT_URL=https://app.voxeia.com
-            BASE_URL=https://api.voxeia.com
             OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
             AI_SYSTEM_PROMPT=${{ secrets.AI_SYSTEM_PROMPT }}
             MONGODB_URI=${{ secrets.MONGODB_URI }}

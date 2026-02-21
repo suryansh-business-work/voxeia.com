@@ -26,8 +26,6 @@ services:
       - ./server/.env
     environment:
       - NODE_ENV=development
-      - CLIENT_URL=http://localhost:2001
-      - BASE_URL=http://localhost:2002
       - MONGODB_URI=mongodb://mongo:27017/voxeia
     depends_on:
       mongo:
@@ -62,6 +60,8 @@ services:
     restart: unless-stopped
     ports:
       - "2004:80"
+    depends_on:
+      - server
 
 volumes:
   mongo_data:

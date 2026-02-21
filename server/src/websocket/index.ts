@@ -1,6 +1,6 @@
 import http from 'http';
 import { Server, Socket } from 'socket.io';
-import { envConfig } from '../config';
+import { ALLOWED_ORIGINS } from '../config/app.config';
 
 let io: Server | null = null;
 
@@ -11,7 +11,7 @@ export const initSocketIO = (port: number): Server => {
   const wsServer = http.createServer();
   io = new Server(wsServer, {
     cors: {
-      origin: envConfig.CLIENT_URL,
+      origin: ALLOWED_ORIGINS,
       methods: ['GET', 'POST'],
       credentials: true,
     },

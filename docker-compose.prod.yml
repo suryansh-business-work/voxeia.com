@@ -5,18 +5,16 @@ services:
     container_name: voxeia-server
     restart: unless-stopped
     ports:
-      - "127.0.0.1:9004:9004"
-      - "127.0.0.1:9005:9005"
+      - "127.0.0.1:2002:2002"
+      - "127.0.0.1:2003:2003"
     env_file:
       - ./server/.env
     environment:
-      - PORT=9004
-      - WS_PORT=9005
       - NODE_ENV=production
       - CLIENT_URL=https://app.voxeia.com
       - BASE_URL=https://api.voxeia.com
     healthcheck:
-      test: wget --no-verbose --tries=1 --spider http://127.0.0.1:9004/api/health || exit 1
+      test: wget --no-verbose --tries=1 --spider http://127.0.0.1:2002/api/health || exit 1
       interval: 30s
       timeout: 5s
       start_period: 15s
@@ -30,7 +28,7 @@ services:
     container_name: voxeia-ui
     restart: unless-stopped
     ports:
-      - "127.0.0.1:9003:80"
+      - "127.0.0.1:2001:80"
     depends_on:
       server:
         condition: service_healthy
@@ -49,7 +47,23 @@ services:
     container_name: voxeia-saas-website
     restart: unless-stopped
     ports:
-      - "127.0.0.1:9006:80"
+      - "127.0.0.1:2000:80"
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://127.0.0.1:80 || exit 1
+      interval: 30s
+      timeout: 5s
+      start_period: 5s
+      retries: 3
+    networks:
+      - voxeia-net
+
+  # ─── E-commerce Demo (Nginx) ────────────────────────────────────
+  ecomm:
+    image: ${DOCKERHUB_USERNAME:-local}/voxeia-ecomm:latest
+    container_name: voxeia-ecomm
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:2004:80"
     healthcheck:
       test: wget --no-verbose --tries=1 --spider http://127.0.0.1:80 || exit 1
       interval: 30s

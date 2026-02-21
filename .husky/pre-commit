@@ -63,4 +63,22 @@ if [ $? -ne 0 ]; then
 fi
 cd ..
 
+# ── Ecomm Demo type check ─────────────────────────────────────
+echo "📦 Ecomm Demo — Type check..."
+cd ecomm-client-demo && npm run typecheck
+if [ $? -ne 0 ]; then
+  echo "❌ Ecomm Demo type check failed. Aborting commit."
+  exit 1
+fi
+cd ..
+
+# ── Ecomm Demo build check ────────────────────────────────────
+echo "📦 Ecomm Demo — Build check..."
+cd ecomm-client-demo && npm run build
+if [ $? -ne 0 ]; then
+  echo "❌ Ecomm Demo build failed. Aborting commit."
+  exit 1
+fi
+cd ..
+
 echo "✅ All checks passed! Committing..."

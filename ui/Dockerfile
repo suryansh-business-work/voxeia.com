@@ -6,7 +6,7 @@ RUN npm ci
 COPY . .
 
 # Build-time env vars (Vite embeds these at build time)
-ARG VITE_WS_URL=http://localhost:9005
+ARG VITE_WS_URL=http://localhost:2003
 ARG VITE_API_URL=/api
 ENV VITE_WS_URL=$VITE_WS_URL
 ENV VITE_API_URL=$VITE_API_URL

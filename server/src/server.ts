@@ -1,6 +1,7 @@
 import http from 'http';
 import app from './app';
 import { envConfig } from './config';
+import { APP_PORTS } from './config/app.config';
 import { connectDB } from './config/db';
 import { initSocketIO } from './websocket';
 import { startTunnel, getTunnelUrl, stopTunnel } from './tunnel';
@@ -15,11 +16,11 @@ const start = async () => {
     const httpServer = http.createServer(app);
 
     // Attach Socket.io on dedicated WebSocket port
-    initSocketIO(envConfig.WS_PORT);
+    initSocketIO(APP_PORTS.WEBSOCKET);
 
-    httpServer.listen(envConfig.PORT, async () => {
-      console.log(`Server running on http://localhost:${envConfig.PORT}`);
-      console.log(`WebSocket running on ws://localhost:${envConfig.WS_PORT}`);
+    httpServer.listen(APP_PORTS.SERVER, async () => {
+      console.log(`Server running on http://localhost:${APP_PORTS.SERVER}`);
+      console.log(`WebSocket running on ws://localhost:${APP_PORTS.WEBSOCKET}`);
       console.log(`Environment: ${envConfig.NODE_ENV}`);
 
       if (envConfig.OPENAI_API_KEY) {
@@ -38,7 +39,7 @@ const start = async () => {
         console.log(`[Tunnel] Skipped — using production BASE_URL: ${envConfig.BASE_URL}`);
       } else {
         try {
-          const url = await startTunnel(envConfig.PORT);
+          const url = await startTunnel(APP_PORTS.SERVER);
           console.log(`[Tunnel] Public URL ready: ${url}`);
           console.log('[Tunnel] AI conversation calls are now available ✓');
         } catch (err) {

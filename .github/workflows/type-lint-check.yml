@@ -82,3 +82,22 @@ jobs:
 
       - run: npm ci
       - run: npm run lint
+
+  # ─── Ecomm Demo Type Check ────────────────────────────────────
+  typecheck-ecomm:
+    name: Ecomm Demo – Type Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ecomm-client-demo
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: ecomm-client-demo/package-lock.json
+
+      - run: npm ci --legacy-peer-deps
+      - run: npm run typecheck

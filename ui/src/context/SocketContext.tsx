@@ -24,7 +24,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
   useEffect(() => {
     // Connect directly to the backend server (not via Vite proxy) to avoid
     // ws proxy socket ECONNABORTED errors during dev-server hot reloads.
-    const wsUrl = import.meta.env.VITE_WS_URL || 'http://localhost:9005';
+    const wsUrl = import.meta.env.VITE_WS_URL || 'http://localhost:2003';
     const s = io(wsUrl, {
       transports: ['websocket', 'polling'],
       autoConnect: true,

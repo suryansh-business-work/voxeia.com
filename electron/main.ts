@@ -5,7 +5,7 @@ let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
 
 const isDev = !app.isPackaged;
-const DEV_URL = 'http://localhost:9003';
+const DEV_URL = 'http://localhost:2001';
 const PROD_INDEX = path.join(__dirname, '..', 'ui', 'dist', 'index.html');
 
 function createWindow(): void {

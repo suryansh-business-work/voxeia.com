@@ -10,10 +10,11 @@ Voxeia automates outbound business calls using AI voice agents powered by Twilio
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  voxeia.com       (SaaS Website)     :9006 — Astro + Tailwind  │
-│  app.voxeia.com   (Dashboard UI)     :9003 — React + MUI       │
-│  api.voxeia.com   (REST API)         :9004 — Express + TS      │
-│  ws.voxeia.com    (WebSocket)        :9005 — Socket.IO          │
+│  voxeia.com       (SaaS Website)     :2000 — Astro + Tailwind  │
+│  app.voxeia.com   (Dashboard UI)     :2001 — React + MUI       │
+│  api.voxeia.com   (REST API)         :2002 — Express + TS      │
+│  ws.voxeia.com    (WebSocket)        :2003 — Socket.IO          │
+│  ecomm.voxeia.com (E-commerce Demo)  :2004 — React + MUI       │
 │  MongoDB Atlas    (Database)         cloud                      │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -107,10 +108,11 @@ docker compose up -d
 
 | Service | Port | URL |
 |---|---|---|
-| UI | 9003 | http://localhost:9003 |
-| API | 9004 | http://localhost:9004 |
-| WebSocket | 9005 | ws://localhost:9005 |
-| Website | 9006 | http://localhost:9006 |
+| UI | 2001 | http://localhost:2001 |
+| API | 2002 | http://localhost:2002 |
+| WebSocket | 2003 | ws://localhost:2003 |
+| Website | 2000 | http://localhost:2000 |
+| Ecomm Demo | 2004 | http://localhost:2004 |
 | MongoDB | 27017 | mongodb://localhost:27017 |
 
 ### Production
@@ -131,8 +133,6 @@ Copy `server/.env.example` to `server/.env`:
 
 | Variable | Description |
 |---|---|
-| `PORT` | API server port (default: `9004`) |
-| `WS_PORT` | WebSocket port (default: `9005`) |
 | `MONGODB_URI` | MongoDB connection string (Atlas in prod) |
 | `NODE_ENV` | `development` or `production` |
 | `BASE_URL` | Public base URL (e.g. `https://api.voxeia.com`) |

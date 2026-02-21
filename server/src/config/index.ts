@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import { EnvConfig } from './env.interface';
+import { APP_PORTS, APP_DOMAINS } from './app.config';
 
 dotenv.config();
 
@@ -19,11 +20,9 @@ export const envConfig: EnvConfig = {
   TWILIO_ACCOUNT_SID: getOptionalEnvVar('TWILIO_ACCOUNT_SID'),
   TWILIO_AUTH_TOKEN: getOptionalEnvVar('TWILIO_AUTH_TOKEN'),
   TWILIO_PHONE_NUMBER: getEnvVar('TWILIO_PHONE_NUMBER'),
-  PORT: parseInt(getEnvVar('PORT', '9004'), 10),
-  WS_PORT: parseInt(getEnvVar('WS_PORT', '9005'), 10),
   NODE_ENV: getEnvVar('NODE_ENV', 'development') as EnvConfig['NODE_ENV'],
-  CLIENT_URL: getEnvVar('CLIENT_URL', 'http://localhost:9003'),
-  BASE_URL: getEnvVar('BASE_URL', 'http://localhost:5000'),
+  CLIENT_URL: getEnvVar('CLIENT_URL', `http://localhost:${APP_PORTS.UI}`),
+  BASE_URL: getEnvVar('BASE_URL', `http://localhost:${APP_PORTS.SERVER}`),
   OPENAI_API_KEY: getOptionalEnvVar('OPENAI_API_KEY'),
   AI_SYSTEM_PROMPT: getOptionalEnvVar(
     'AI_SYSTEM_PROMPT',

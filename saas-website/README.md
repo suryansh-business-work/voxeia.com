@@ -28,7 +28,7 @@ Marketing and product website for **Voxeia** — built with [Astro](https://astr
 # Install dependencies
 npm install
 
-# Start dev server (port 9006)
+# Start dev server (port 2000)
 npm run dev
 
 # Build for production
@@ -42,7 +42,7 @@ npm run preview
 
 | Command | Description |
 |---|---|
-| `npm run dev` | Start development server on port 9006 |
+| `npm run dev` | Start development server on port 2000 |
 | `npm run build` | Build static site to `dist/` |
 | `npm run preview` | Preview production build locally |
 | `npm run typecheck` | Run Astro type checker (`astro check`) |
@@ -55,7 +55,7 @@ npm run preview
 
 ```bash
 docker build -t voxeia-website .
-docker run -p 9006:80 voxeia-website
+docker run -p 2000:80 voxeia-website
 ```
 
 ### With Docker Compose (from project root)
@@ -64,7 +64,7 @@ docker run -p 9006:80 voxeia-website
 docker compose up saas-website -d
 ```
 
-The website will be available at `http://localhost:9006`.
+The website will be available at `http://localhost:2000`.
 
 ## Nginx Configuration
 

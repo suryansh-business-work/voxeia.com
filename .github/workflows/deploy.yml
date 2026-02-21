@@ -14,6 +14,7 @@ env:
   SERVER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/voxeia-server
   UI_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/voxeia-ui
   SITE_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/voxeia-website
+  ECOMM_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/voxeia-ecomm
 
 jobs:
   # ─── Step 1: Build & Push Docker Images ──────────────────────────
@@ -71,6 +72,18 @@ jobs:
           cache-from: type=registry,ref=${{ env.SITE_IMAGE }}:buildcache
           cache-to: type=registry,ref=${{ env.SITE_IMAGE }}:buildcache,mode=max
 
+      # ── E-commerce Demo Image ────────────────────────────────
+      - name: Build & Push Ecomm
+        uses: docker/build-push-action@v6
+        with:
+          context: ./ecomm-client-demo
+          push: true
+          tags: |
+            ${{ env.ECOMM_IMAGE }}:latest
+            ${{ env.ECOMM_IMAGE }}:${{ github.sha }}
+          cache-from: type=registry,ref=${{ env.ECOMM_IMAGE }}:buildcache
+          cache-to: type=registry,ref=${{ env.ECOMM_IMAGE }}:buildcache,mode=max
+
   # ─── Step 2: Deploy to VPS ──────────────────────────────────────
   deploy:
     name: Deploy to VPS
@@ -103,6 +116,7 @@ jobs:
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/voxeia-server:latest
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/voxeia-ui:latest
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/voxeia-website:latest
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/voxeia-ecomm:latest
 
             # ── Write docker-compose.prod.yml ──────────────────────
             cat > docker-compose.prod.yml << 'COMPOSEOF'
@@ -112,18 +126,16 @@ jobs:
                 container_name: voxeia-server
                 restart: unless-stopped
                 ports:
-                  - "127.0.0.1:9004:9004"
-                  - "127.0.0.1:9005:9005"
+                  - "127.0.0.1:2002:2002"
+                  - "127.0.0.1:2003:2003"
                 env_file:
                   - ./server/.env
                 environment:
-                  - PORT=9004
-                  - WS_PORT=9005
                   - NODE_ENV=production
                   - CLIENT_URL=https://app.voxeia.com
                   - BASE_URL=https://api.voxeia.com
                 healthcheck:
-                  test: wget --no-verbose --tries=1 --spider http://127.0.0.1:9004/api/health || exit 1
+                  test: wget --no-verbose --tries=1 --spider http://127.0.0.1:2002/api/health || exit 1
                   interval: 30s
                   timeout: 5s
                   start_period: 15s
@@ -136,7 +148,7 @@ jobs:
                 container_name: voxeia-ui
                 restart: unless-stopped
                 ports:
-                  - "127.0.0.1:9003:80"
+                  - "127.0.0.1:2001:80"
                 depends_on:
                   server:
                     condition: service_healthy
@@ -154,7 +166,22 @@ jobs:
                 container_name: voxeia-saas-website
                 restart: unless-stopped
                 ports:
-                  - "127.0.0.1:9006:80"
+                  - "127.0.0.1:2000:80"
+                healthcheck:
+                  test: wget --no-verbose --tries=1 --spider http://127.0.0.1:80 || exit 1
+                  interval: 30s
+                  timeout: 5s
+                  start_period: 5s
+                  retries: 3
+                networks:
+                  - voxeia-net
+
+              ecomm:
+                image: DOCKERHUB_USER_PLACEHOLDER/voxeia-ecomm:latest
+                container_name: voxeia-ecomm
+                restart: unless-stopped
+                ports:
+                  - "127.0.0.1:2004:80"
                 healthcheck:
                   test: wget --no-verbose --tries=1 --spider http://127.0.0.1:80 || exit 1
                   interval: 30s
@@ -176,8 +203,6 @@ jobs:
             TWILIO_ACCOUNT_SID=${{ secrets.TWILIO_ACCOUNT_SID }}
             TWILIO_AUTH_TOKEN=${{ secrets.TWILIO_AUTH_TOKEN }}
             TWILIO_PHONE_NUMBER=${{ secrets.TWILIO_PHONE_NUMBER }}
-            PORT=9004
-            WS_PORT=9005
             NODE_ENV=production
             CLIENT_URL=https://app.voxeia.com
             BASE_URL=https://api.voxeia.com
@@ -210,7 +235,7 @@ jobs:
                 server_name voxeia.com www.voxeia.com;
                 location / {
                     limit_req zone=voxeia_site burst=30 nodelay;
-                    proxy_pass http://127.0.0.1:9006;
+                    proxy_pass http://127.0.0.1:2000;
                     proxy_http_version 1.1;
                     proxy_set_header Host $host;
                     proxy_set_header X-Real-IP $remote_addr;
@@ -224,7 +249,7 @@ jobs:
                 server_name app.voxeia.com;
                 location / {
                     limit_req zone=voxeia_general burst=40 nodelay;
-                    proxy_pass http://127.0.0.1:9003;
+                    proxy_pass http://127.0.0.1:2001;
                     proxy_http_version 1.1;
                     proxy_set_header Host $host;
                     proxy_set_header X-Real-IP $remote_addr;
@@ -239,7 +264,7 @@ jobs:
                 client_max_body_size 50M;
                 location / {
                     limit_req zone=voxeia_api burst=50 nodelay;
-                    proxy_pass http://127.0.0.1:9004;
+                    proxy_pass http://127.0.0.1:2002;
                     proxy_http_version 1.1;
                     proxy_set_header Host $host;
                     proxy_set_header X-Real-IP $remote_addr;
@@ -254,7 +279,7 @@ jobs:
                 listen 80;
                 server_name ws.voxeia.com;
                 location / {
-                    proxy_pass http://127.0.0.1:9005;
+                    proxy_pass http://127.0.0.1:2003;
                     proxy_http_version 1.1;
                     proxy_set_header Upgrade $http_upgrade;
                     proxy_set_header Connection "upgrade";
@@ -264,6 +289,20 @@ jobs:
                     proxy_set_header X-Forwarded-Proto $scheme;
                     proxy_read_timeout 86400s;
                     proxy_send_timeout 86400s;
+                }
+            }
+
+            server {
+                listen 80;
+                server_name ecomm.voxeia.com;
+                location / {
+                    limit_req zone=voxeia_site burst=30 nodelay;
+                    proxy_pass http://127.0.0.1:2004;
+                    proxy_http_version 1.1;
+                    proxy_set_header Host $host;
+                    proxy_set_header X-Real-IP $remote_addr;
+                    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                    proxy_set_header X-Forwarded-Proto $scheme;
                 }
             }
             NGINXEOF
@@ -291,6 +330,7 @@ jobs:
               -d app.voxeia.com \
               -d api.voxeia.com \
               -d ws.voxeia.com \
+              -d ecomm.voxeia.com \
               --non-interactive --agree-tos \
               -m ${{ secrets.SSL_EMAIL }} \
               --redirect \

@@ -2,8 +2,8 @@ import axios from 'axios';
 
 /**
  * API base URL:
- *  - Development: '/api' (proxied by Vite dev server to localhost:9004)
- *  - Docker local: '/api' (proxied by nginx to server:9004)
+ *  - Development: '/api' (proxied by Vite dev server to localhost:2002)
+ *  - Docker local: '/api' (proxied by nginx to server:2002)
  *  - Production:   'https://api.voxeia.com/api' (set via VITE_API_URL build arg)
  */
 const baseURL = import.meta.env.VITE_API_URL || '/api';

@@ -10,7 +10,7 @@ limit_req_zone $binary_remote_addr zone=voxeia_api:10m rate=20r/s;
 limit_req_zone $binary_remote_addr zone=voxeia_site:10m rate=15r/s;
 
 # ═══════════════════════════════════════════════════════════════════
-#  voxeia.com → SaaS Marketing Website (port 9006)
+#  voxeia.com → SaaS Marketing Website (port 2000)
 # ═══════════════════════════════════════════════════════════════════
 server {
     listen 80;
@@ -22,7 +22,7 @@ server {
     location / {
         limit_req zone=voxeia_site burst=30 nodelay;
 
-        proxy_pass http://127.0.0.1:9006;
+        proxy_pass http://127.0.0.1:2000;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
@@ -38,7 +38,7 @@ server {
 }
 
 # ═══════════════════════════════════════════════════════════════════
-#  app.voxeia.com → UI Dashboard (port 9003)
+#  app.voxeia.com → UI Dashboard (port 2001)
 # ═══════════════════════════════════════════════════════════════════
 server {
     listen 80;
@@ -47,7 +47,7 @@ server {
     location / {
         limit_req zone=voxeia_general burst=40 nodelay;
 
-        proxy_pass http://127.0.0.1:9003;
+        proxy_pass http://127.0.0.1:2001;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
@@ -67,7 +67,7 @@ server {
 }
 
 # ═══════════════════════════════════════════════════════════════════
-#  api.voxeia.com → Backend API (port 9004)
+#  api.voxeia.com → Backend API (port 2002)
 # ═══════════════════════════════════════════════════════════════════
 server {
     listen 80;
@@ -78,7 +78,7 @@ server {
     location / {
         limit_req zone=voxeia_api burst=50 nodelay;
 
-        proxy_pass http://127.0.0.1:9004;
+        proxy_pass http://127.0.0.1:2002;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
@@ -110,14 +110,14 @@ server {
 }
 
 # ═══════════════════════════════════════════════════════════════════
-#  ws.voxeia.com → WebSocket Server (port 9005)
+#  ws.voxeia.com → WebSocket Server (port 2003)
 # ═══════════════════════════════════════════════════════════════════
 server {
     listen 80;
     server_name ws.voxeia.com;
 
     location / {
-        proxy_pass http://127.0.0.1:9005;
+        proxy_pass http://127.0.0.1:2003;
         proxy_http_version 1.1;
 
         # WebSocket upgrade headers
@@ -136,5 +136,30 @@ server {
         # CORS
         add_header Access-Control-Allow-Origin "https://app.voxeia.com" always;
         add_header Access-Control-Allow-Credentials "true" always;
+    }
+}
+
+# ═══════════════════════════════════════════════════════════════════
+#  ecomm.voxeia.com → E-commerce Demo (port 2004)
+# ═══════════════════════════════════════════════════════════════════
+server {
+    listen 80;
+    server_name ecomm.voxeia.com;
+
+    location / {
+        limit_req zone=voxeia_site burst=30 nodelay;
+
+        proxy_pass http://127.0.0.1:2004;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Security headers
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header X-XSS-Protection "1; mode=block" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
     }
 }

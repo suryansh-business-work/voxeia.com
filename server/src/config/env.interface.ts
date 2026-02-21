@@ -8,12 +8,6 @@ export interface EnvConfig {
   /** Twilio Phone Number - Your purchased Twilio number (E.164 format: +1234567890) */
   TWILIO_PHONE_NUMBER: string;
 
-  /** Server port */
-  PORT: number;
-
-  /** WebSocket port */
-  WS_PORT: number;
-
   /** Node environment */
   NODE_ENV: 'development' | 'production' | 'test';
 

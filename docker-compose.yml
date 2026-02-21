@@ -22,16 +22,14 @@ services:
     container_name: voxeia-dev-server
     restart: unless-stopped
     ports:
-      - "9004:9004"
-      - "9005:9005"
+      - "2002:2002"
+      - "2003:2003"
     env_file:
       - ./server/.env
     environment:
-      - PORT=9004
-      - WS_PORT=9005
       - NODE_ENV=development
-      - CLIENT_URL=http://localhost:9003
-      - BASE_URL=http://localhost:9004
+      - CLIENT_URL=http://localhost:2001
+      - BASE_URL=http://localhost:2002
       - MONGODB_URI=mongodb://mongo:27017/voxeia
     depends_on:
       mongo:
@@ -42,12 +40,12 @@ services:
     build:
       context: ./ui
       args:
-        VITE_WS_URL: http://localhost:9005
+        VITE_WS_URL: http://localhost:2003
         VITE_API_URL: /api
     container_name: voxeia-dev-ui
     restart: unless-stopped
     ports:
-      - "9003:80"
+      - "2001:80"
     depends_on:
       - server
 
@@ -57,7 +55,15 @@ services:
     container_name: voxeia-dev-saas-website
     restart: unless-stopped
     ports:
-      - "9006:80"
+      - "2000:80"
+
+  # ─── E-commerce Demo (Nginx) ────────────────────────────────────
+  ecomm:
+    build: ./ecomm-client-demo
+    container_name: voxeia-dev-ecomm
+    restart: unless-stopped
+    ports:
+      - "2004:80"
 
 volumes:
   mongo_data:

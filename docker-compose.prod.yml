@@ -18,6 +18,7 @@ services:
 
   # ─── Server (API + WebSocket) ────────────────────────────────────
   server:
+    image: ${DOCKERHUB_USERNAME:-local}/voxeia-server:latest
     build: ./server
     container_name: voxeia-server
     restart: unless-stopped
@@ -41,6 +42,7 @@ services:
 
   # ─── UI (Nginx) ──────────────────────────────────────────────────
   ui:
+    image: ${DOCKERHUB_USERNAME:-local}/voxeia-ui:latest
     build:
       context: ./ui
       args:
@@ -56,6 +58,7 @@ services:
 
   # ─── SaaS Website (Nginx) ───────────────────────────────────────
   saas-website:
+    image: ${DOCKERHUB_USERNAME:-local}/voxeia-website:latest
     build: ./saas-website
     container_name: voxeia-saas-website
     restart: unless-stopped

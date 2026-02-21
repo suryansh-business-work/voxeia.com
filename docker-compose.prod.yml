@@ -1,25 +1,7 @@
-version: "3.8"
-
 services:
-  # ─── MongoDB ──────────────────────────────────────────────────────
-  mongo:
-    image: mongo:7
-    container_name: voxeia-mongo
-    restart: unless-stopped
-    volumes:
-      - mongo_data:/data/db
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh --quiet
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - voxeia-net
-
   # ─── Server (API + WebSocket) ────────────────────────────────────
   server:
     image: ${DOCKERHUB_USERNAME:-local}/voxeia-server:latest
-    build: ./server
     container_name: voxeia-server
     restart: unless-stopped
     ports:
@@ -33,43 +15,49 @@ services:
       - NODE_ENV=production
       - CLIENT_URL=https://app.voxeia.com
       - BASE_URL=https://api.voxeia.com
-      - MONGODB_URI=mongodb://mongo:27017/voxeia
-    depends_on:
-      mongo:
-        condition: service_healthy
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://127.0.0.1:9004/api/health || exit 1
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
     networks:
       - voxeia-net
 
   # ─── UI (Nginx) ──────────────────────────────────────────────────
   ui:
     image: ${DOCKERHUB_USERNAME:-local}/voxeia-ui:latest
-    build:
-      context: ./ui
-      args:
-        VITE_WS_URL: https://ws.voxeia.com
     container_name: voxeia-ui
     restart: unless-stopped
     ports:
       - "127.0.0.1:9003:80"
     depends_on:
-      - server
+      server:
+        condition: service_healthy
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://127.0.0.1:80 || exit 1
+      interval: 30s
+      timeout: 5s
+      start_period: 5s
+      retries: 3
     networks:
       - voxeia-net
 
   # ─── SaaS Website (Nginx) ───────────────────────────────────────
   saas-website:
     image: ${DOCKERHUB_USERNAME:-local}/voxeia-website:latest
-    build: ./saas-website
     container_name: voxeia-saas-website
     restart: unless-stopped
     ports:
       - "127.0.0.1:9006:80"
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://127.0.0.1:80 || exit 1
+      interval: 30s
+      timeout: 5s
+      start_period: 5s
+      retries: 3
     networks:
       - voxeia-net
-
-volumes:
-  mongo_data:
-    driver: local
 
 networks:
   voxeia-net:

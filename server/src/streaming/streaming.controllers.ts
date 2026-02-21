@@ -16,8 +16,7 @@ import {
   handleStreamCallStatus,
   getActiveStreamSessions,
 } from './stream.orchestrator';
-import { getTunnelUrl } from '../tunnel';
-import { envConfig } from '../config';
+import { getWebhookBaseUrl } from '../utils/webhook-url';
 
 /**
  * POST /api/ai/stream/call
@@ -63,7 +62,7 @@ export const handleStreamRespond = async (req: Request, res: Response): Promise<
   try {
     const callSid = req.body.CallSid as string;
     const speechResult = req.body.SpeechResult as string | undefined;
-    const baseUrl = getTunnelUrl() || envConfig.BASE_URL;
+    const baseUrl = getWebhookBaseUrl();
 
     console.log(`[Stream Webhook] CallSid: ${callSid}, Speech: "${speechResult || '(empty)'}"`);
 

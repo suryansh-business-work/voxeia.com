@@ -1,99 +1,183 @@
-# Twilio Call Bot
+# Voxeia — AI-Powered Business Calling Platform
 
-Twilio based phone call system with **AI-powered natural voices** - make outbound calls using Twilio API with Amazon Polly Neural voices that sound human!
+> **[voxeia.com](https://voxeia.com)** | **[app.voxeia.com](https://app.voxeia.com)** | **[api.voxeia.com](https://api.voxeia.com)**
 
-## ✨ Features
+Voxeia automates outbound business calls using AI voice agents powered by Twilio, OpenAI, Amazon Polly, and real-time streaming. Upload contacts, configure an AI agent, launch campaigns, and monitor results — all from a single dashboard.
 
-- 🎙️ **6 Natural AI Voices** - Amazon Polly Neural voices (US/UK accents, male/female)
-- 🗣️ **Human-like Speech** - SSML-enhanced with natural pauses, prosody, and intonation
-- 📞 **Simple Call Interface** - Easy-to-use form for making calls
-- 📊 **Call Logs** - View call history with pagination, filtering, and search
-- 🎯 **Message Templates** - Example messages for natural-sounding calls
-- 🔒 **Secure** - Environment-based credential management
+---
 
-## 📚 Documentation
+## Architecture
 
-- **[TWILIO_SETUP.md](TWILIO_SETUP.md)** - Setup guide for Twilio credentials
-- **[VOICE_GUIDE.md](VOICE_GUIDE.md)** - How to write natural-sounding messages & voice selection tips
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  voxeia.com       (SaaS Website)     :9006 — Astro + Tailwind  │
+│  app.voxeia.com   (Dashboard UI)     :9003 — React + MUI       │
+│  api.voxeia.com   (REST API)         :9004 — Express + TS      │
+│  ws.voxeia.com    (WebSocket)        :9005 — Socket.IO          │
+│  MongoDB Atlas    (Database)         cloud                      │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## Features
+
+- **AI Voice Agents** — GPT-4 powered conversations with natural voices (Amazon Polly Neural, ElevenLabs, Deepgram)
+- **Real-time Streaming** — Live call audio streaming with bidirectional AI responses
+- **Campaign Management** — Schedule calls, auto-retry, bulk outreach
+- **Contact Management** — CSV import, CRM-ready contact lists
+- **Call Logs & Analytics** — Full history with pagination, filters, search, and sentiment analysis
+- **Prompt Library** — Reusable conversation scripts and templates
+- **Multi-company Support** — White-label ready with company-level isolation
+- **Scheduled Calls** — Cron-based call scheduling with timezone support
 
 ## Project Structure
 
 ```
-├── server/              # Node.js + TypeScript backend
+├── server/              # Node.js + Express + TypeScript API
 │   └── src/
-│       ├── calls/       # Call feature (controllers, services, routes, validators, models)
-│       └── config/      # Environment config & interfaces
-├── ui/                  # React + TypeScript + MUI frontend
+│       ├── agents/      # AI agent configuration
+│       ├── ai/          # AI/LLM integration (OpenAI, prompts)
+│       ├── auth/        # Authentication (JWT, middleware)
+│       ├── calls/       # Twilio call initiation
+│       ├── calllogs/    # Call history & analytics
+│       ├── companies/   # Multi-company management
+│       ├── contacts/    # Contact lists & CSV import
+│       ├── config/      # Environment config, DB, ImageKit, mail
+│       ├── emails/      # Email notifications
+│       ├── middleware/   # Auth middleware
+│       ├── promptlibrary/  # Reusable prompt templates
+│       ├── scheduledcalls/ # Cron-based scheduling
+│       ├── settings/    # App-level settings
+│       ├── streaming/   # Real-time AI call streaming
+│       ├── tts/         # Text-to-speech (Polly, ElevenLabs, Deepgram)
+│       ├── tunnel/      # Cloudflare tunnel (dev only)
+│       ├── utils/       # Shared utilities
+│       └── websocket/   # Socket.IO real-time events
+├── ui/                  # React + TypeScript + MUI dashboard
 │   └── src/
-│       ├── api/         # Axios client
-│       ├── components/  # Shared components (Header, Footer, Breadcrumb)
-│       ├── theme/       # MUI theme config
-│       └── tools/
-│           └── calls/   # Call feature UI (form, logs table, components)
-├── saas-website/        # Astro + Tailwind CSS marketing website (port 9006)
+│       ├── api/         # Axios API client
+│       ├── components/  # Shared components
+│       ├── context/     # React Context providers
+│       ├── theme/       # MUI theme configuration
+│       └── tools/       # Feature modules (calls, contacts, agents, etc.)
+├── saas-website/        # Astro + Tailwind CSS v4 marketing site
 │   └── src/
 │       ├── components/  # Navbar, Footer
-│       ├── layouts/     # Shared Layout
-│       ├── pages/       # All pages (home, about, use-cases, pricing, contact, legal)
-│       └── styles/      # Global CSS + Tailwind theme
+│       ├── layouts/     # Shared HTML layout
+│       ├── pages/       # All pages (home, about, pricing, use-cases, contact, legal)
+│       └── styles/      # Global CSS + design tokens
+├── docker-compose.yml          # Local development (all services)
+├── docker-compose.prod.yml     # Production (no MongoDB — uses Atlas)
+└── .github/workflows/          # CI/CD pipelines
+    ├── build.yml               # Build verification
+    ├── type-lint-check.yml     # TypeScript + lint checks
+    ├── deploy.yml              # Full infra deploy (SSL, nginx, all services)
+    ├── deploy-server.yml       # Server-only deploy
+    ├── deploy-ui.yml           # UI-only deploy
+    └── deploy-website.yml      # Website-only deploy
 ```
-
-## Environment Variables
-
-⚠️ **First Time Setup**: See [TWILIO_SETUP.md](TWILIO_SETUP.md) for detailed instructions on getting your Twilio credentials.
-
-Copy `server/.env.example` to `server/.env` and fill in:
-
-| Variable | Description |
-|---|---|
-| `TWILIO_ACCOUNT_SID` | Your Twilio Account SID (from Twilio Console) |
-| `TWILIO_AUTH_TOKEN` | Your Twilio Auth Token (from Twilio Console) |
-| `TWILIO_PHONE_NUMBER` | Your Twilio phone number in E.164 format (e.g., +1234567890) |
-| `PORT` | Server port (default: 5000) |
-| `CLIENT_URL` | Frontend URL for CORS (default: http://localhost:3000) |
 
 ## Getting Started
 
-### Server
-```bash
-cd server
-npm install
-npm run dev
-```
+### Prerequisites
 
-### UI
-```bash
-cd ui
-npm install
-npm run dev
-```
+- Node.js 20+
+- Docker & Docker Compose
+- MongoDB Atlas account (or local MongoDB for dev)
+- Twilio account with phone number
+- OpenAI API key
 
-### SaaS Website
-```bash
-cd saas-website
-npm install
-npm run dev
-```
+### Local Development
 
-Server runs on `http://localhost:5000`, UI runs on `http://localhost:3000`, SaaS website runs on `http://localhost:9006`.
+```bash
+# Server
+cd server && npm install && npm run dev
+
+# UI (separate terminal)
+cd ui && npm install && npm run dev
+
+# SaaS Website (separate terminal)
+cd saas-website && npm install && npm run dev
+```
 
 ### Docker Compose (All Services)
+
 ```bash
 docker compose up -d
 ```
 
-| Service | Port |
-|---|---|
-| MongoDB | 27017 |
-| Server (API) | 9004 |
-| WebSocket | 9005 |
-| UI | 9003 |
-| SaaS Website | 9006 |
-
-## API Endpoints
-
-| Method | Endpoint | Description |
+| Service | Port | URL |
 |---|---|---|
-| `POST` | `/api/calls` | Make an outbound call |
-| `GET` | `/api/calls/logs` | Get call history with pagination & filters |
-| `GET` | `/api/health` | Health check |
+| UI | 9003 | http://localhost:9003 |
+| API | 9004 | http://localhost:9004 |
+| WebSocket | 9005 | ws://localhost:9005 |
+| Website | 9006 | http://localhost:9006 |
+| MongoDB | 27017 | mongodb://localhost:27017 |
+
+### Production
+
+Production uses **MongoDB Atlas** (no self-hosted MongoDB).  
+All services deploy via GitHub Actions to a VPS behind nginx with SSL.
+
+| Domain | Service |
+|---|---|
+| `voxeia.com` | SaaS marketing website |
+| `app.voxeia.com` | Dashboard UI |
+| `api.voxeia.com` | REST API |
+| `ws.voxeia.com` | WebSocket |
+
+## Environment Variables
+
+Copy `server/.env.example` to `server/.env`:
+
+| Variable | Description |
+|---|---|
+| `PORT` | API server port (default: `9004`) |
+| `WS_PORT` | WebSocket port (default: `9005`) |
+| `MONGODB_URI` | MongoDB connection string (Atlas in prod) |
+| `NODE_ENV` | `development` or `production` |
+| `BASE_URL` | Public base URL (e.g. `https://api.voxeia.com`) |
+| `CLIENT_URL` | Frontend URL for CORS (e.g. `https://app.voxeia.com`) |
+| `JWT_SECRET` | Secret for JWT token signing |
+| `TWILIO_ACCOUNT_SID` | Twilio Account SID |
+| `TWILIO_AUTH_TOKEN` | Twilio Auth Token |
+| `TWILIO_PHONE_NUMBER` | Twilio phone number (E.164 format) |
+| `OPENAI_API_KEY` | OpenAI API key |
+
+## CI/CD
+
+GitHub Actions workflows trigger on push to `main`:
+
+- **build.yml** — Builds server, UI, and website
+- **type-lint-check.yml** — TypeScript strict checks + linting
+- **deploy.yml** — Full infrastructure deploy (nginx, SSL, all containers)
+- **deploy-server.yml** — Server-only redeploy (triggers on `server/**` changes)
+- **deploy-ui.yml** — UI-only redeploy (triggers on `ui/**` changes)
+- **deploy-website.yml** — Website-only redeploy (triggers on `saas-website/**` changes)
+
+### Required GitHub Secrets
+
+| Secret | Description |
+|---|---|
+| `DOCKERHUB_USERNAME` | DockerHub username |
+| `DOCKERHUB_TOKEN` | DockerHub access token |
+| `VPS_HOST` | VPS IP address |
+| `VPS_USERNAME` | SSH username |
+| `VPS_SSH_KEY` | SSH private key |
+| `MONGODB_URI` | MongoDB Atlas connection string |
+| `JWT_SECRET` | JWT signing secret |
+| `TWILIO_ACCOUNT_SID` | Twilio Account SID |
+| `TWILIO_AUTH_TOKEN` | Twilio Auth Token |
+| `TWILIO_PHONE_NUMBER` | Twilio phone number |
+| `OPENAI_API_KEY` | OpenAI API key |
+| `SSL_EMAIL` | Email for Let's Encrypt SSL certificates |
+| `BASE_URL` | Production API base URL |
+| `CLIENT_URL` | Production UI URL |
+
+## Documentation
+
+- **[TWILIO_SETUP.md](TWILIO_SETUP.md)** — Twilio credentials setup guide
+- **[VOICE_GUIDE.md](VOICE_GUIDE.md)** — Writing natural-sounding AI call scripts
+
+## License
+
+Proprietary — All rights reserved.

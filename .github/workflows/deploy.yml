@@ -3,6 +3,11 @@ name: Deploy to Production
 on:
   push:
     branches: [main]
+    paths:
+      - 'docker-compose.prod.yml'
+      - 'nginx/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
 
 env:
   DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -50,6 +55,7 @@ jobs:
             ${{ env.UI_IMAGE }}:${{ github.sha }}
           build-args: |
             VITE_WS_URL=https://ws.voxeia.com
+            VITE_API_URL=https://api.voxeia.com/api
           cache-from: type=registry,ref=${{ env.UI_IMAGE }}:buildcache
           cache-to: type=registry,ref=${{ env.UI_IMAGE }}:buildcache,mode=max
 
@@ -80,13 +86,14 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
+          command_timeout: 20m
           script: |
             set -e
 
             APP_DIR=/root/voxeia
 
-            # ── Create app dir if not exists ───────────────────────
-            mkdir -p "$APP_DIR"
+            # ── Create app dir ─────────────────────────────────────
+            mkdir -p "$APP_DIR/server"
             cd "$APP_DIR"
 
             # ── Login to DockerHub ─────────────────────────────────
@@ -99,23 +106,7 @@ jobs:
 
             # ── Write docker-compose.prod.yml ──────────────────────
             cat > docker-compose.prod.yml << 'COMPOSEOF'
-            version: "3.8"
-
             services:
-              mongo:
-                image: mongo:7
-                container_name: voxeia-mongo
-                restart: unless-stopped
-                volumes:
-                  - mongo_data:/data/db
-                healthcheck:
-                  test: echo 'db.runCommand("ping").ok' | mongosh --quiet
-                  interval: 10s
-                  timeout: 5s
-                  retries: 5
-                networks:
-                  - voxeia-net
-
               server:
                 image: DOCKERHUB_USER_PLACEHOLDER/voxeia-server:latest
                 container_name: voxeia-server
@@ -125,9 +116,18 @@ jobs:
                   - "127.0.0.1:9005:9005"
                 env_file:
                   - ./server/.env
-                depends_on:
-                  mongo:
-                    condition: service_healthy
+                environment:
+                  - PORT=9004
+                  - WS_PORT=9005
+                  - NODE_ENV=production
+                  - CLIENT_URL=https://app.voxeia.com
+                  - BASE_URL=https://api.voxeia.com
+                healthcheck:
+                  test: wget --no-verbose --tries=1 --spider http://127.0.0.1:9004/api/health || exit 1
+                  interval: 30s
+                  timeout: 5s
+                  start_period: 15s
+                  retries: 3
                 networks:
                   - voxeia-net
 
@@ -138,7 +138,14 @@ jobs:
                 ports:
                   - "127.0.0.1:9003:80"
                 depends_on:
-                  - server
+                  server:
+                    condition: service_healthy
+                healthcheck:
+                  test: wget --no-verbose --tries=1 --spider http://127.0.0.1:80 || exit 1
+                  interval: 30s
+                  timeout: 5s
+                  start_period: 5s
+                  retries: 3
                 networks:
                   - voxeia-net
 
@@ -148,23 +155,23 @@ jobs:
                 restart: unless-stopped
                 ports:
                   - "127.0.0.1:9006:80"
+                healthcheck:
+                  test: wget --no-verbose --tries=1 --spider http://127.0.0.1:80 || exit 1
+                  interval: 30s
+                  timeout: 5s
+                  start_period: 5s
+                  retries: 3
                 networks:
                   - voxeia-net
-
-            volumes:
-              mongo_data:
-                driver: local
 
             networks:
               voxeia-net:
                 driver: bridge
             COMPOSEOF
 
-            # Replace placeholder with actual DockerHub username
             sed -i "s|DOCKERHUB_USER_PLACEHOLDER|${{ secrets.DOCKERHUB_USERNAME }}|g" docker-compose.prod.yml
 
             # ── Write production .env for server ───────────────────
-            mkdir -p server
             cat > server/.env << 'ENVEOF'
             TWILIO_ACCOUNT_SID=${{ secrets.TWILIO_ACCOUNT_SID }}
             TWILIO_AUTH_TOKEN=${{ secrets.TWILIO_AUTH_TOKEN }}
@@ -176,7 +183,7 @@ jobs:
             BASE_URL=https://api.voxeia.com
             OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
             AI_SYSTEM_PROMPT=${{ secrets.AI_SYSTEM_PROMPT }}
-            MONGODB_URI=mongodb://mongo:27017/voxeia
+            MONGODB_URI=${{ secrets.MONGODB_URI }}
             JWT_SECRET=${{ secrets.JWT_SECRET }}
             JWT_EXPIRES_IN=7d
             SMTP_HOST=${{ secrets.SMTP_HOST }}
@@ -198,11 +205,9 @@ jobs:
             limit_req_zone $binary_remote_addr zone=voxeia_api:10m rate=20r/s;
             limit_req_zone $binary_remote_addr zone=voxeia_site:10m rate=15r/s;
 
-            # ── voxeia.com → SaaS Website (port 9006) ─────────────
             server {
                 listen 80;
                 server_name voxeia.com www.voxeia.com;
-
                 location / {
                     limit_req zone=voxeia_site burst=30 nodelay;
                     proxy_pass http://127.0.0.1:9006;
@@ -211,18 +216,12 @@ jobs:
                     proxy_set_header X-Real-IP $remote_addr;
                     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
                     proxy_set_header X-Forwarded-Proto $scheme;
-                    add_header X-Frame-Options "SAMEORIGIN" always;
-                    add_header X-Content-Type-Options "nosniff" always;
-                    add_header X-XSS-Protection "1; mode=block" always;
-                    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
                 }
             }
 
-            # ── app.voxeia.com → UI Dashboard (port 9003) ─────────
             server {
                 listen 80;
                 server_name app.voxeia.com;
-
                 location / {
                     limit_req zone=voxeia_general burst=40 nodelay;
                     proxy_pass http://127.0.0.1:9003;
@@ -231,21 +230,13 @@ jobs:
                     proxy_set_header X-Real-IP $remote_addr;
                     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
                     proxy_set_header X-Forwarded-Proto $scheme;
-                    add_header Access-Control-Allow-Origin "https://voxeia.com" always;
-                    add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, PATCH, OPTIONS" always;
-                    add_header Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization" always;
-                    add_header Access-Control-Allow-Credentials "true" always;
-                    add_header X-Frame-Options "SAMEORIGIN" always;
-                    add_header X-Content-Type-Options "nosniff" always;
                 }
             }
 
-            # ── api.voxeia.com → Backend API (port 9004) ──────────
             server {
                 listen 80;
                 server_name api.voxeia.com;
                 client_max_body_size 50M;
-
                 location / {
                     limit_req zone=voxeia_api burst=50 nodelay;
                     proxy_pass http://127.0.0.1:9004;
@@ -256,28 +247,12 @@ jobs:
                     proxy_set_header X-Forwarded-Proto $scheme;
                     proxy_read_timeout 120s;
                     proxy_connect_timeout 10s;
-                    add_header Access-Control-Allow-Origin "https://app.voxeia.com" always;
-                    add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, PATCH, OPTIONS" always;
-                    add_header Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization" always;
-                    add_header Access-Control-Allow-Credentials "true" always;
-                    if ($request_method = OPTIONS) {
-                        add_header Access-Control-Allow-Origin "https://app.voxeia.com";
-                        add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, PATCH, OPTIONS";
-                        add_header Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization";
-                        add_header Access-Control-Allow-Credentials "true";
-                        add_header Access-Control-Max-Age 86400;
-                        add_header Content-Length 0;
-                        return 204;
-                    }
-                    add_header X-Content-Type-Options "nosniff" always;
                 }
             }
 
-            # ── ws.voxeia.com → WebSocket (port 9005) ─────────────
             server {
                 listen 80;
                 server_name ws.voxeia.com;
-
                 location / {
                     proxy_pass http://127.0.0.1:9005;
                     proxy_http_version 1.1;
@@ -289,8 +264,6 @@ jobs:
                     proxy_set_header X-Forwarded-Proto $scheme;
                     proxy_read_timeout 86400s;
                     proxy_send_timeout 86400s;
-                    add_header Access-Control-Allow-Origin "https://app.voxeia.com" always;
-                    add_header Access-Control-Allow-Credentials "true" always;
                 }
             }
             NGINXEOF
@@ -301,11 +274,31 @@ jobs:
             nginx -t && systemctl reload nginx
 
             # ── Deploy containers ──────────────────────────────────
-            docker compose -f docker-compose.prod.yml down --remove-orphans
+            docker compose -f docker-compose.prod.yml down --remove-orphans || true
             docker compose -f docker-compose.prod.yml up -d
+
+            # ── Wait for healthy ───────────────────────────────────
+            sleep 10
+            docker compose -f docker-compose.prod.yml ps
+
+            # ── SSL via Certbot (idempotent) ───────────────────────
+            if ! command -v certbot &> /dev/null; then
+              apt-get update -qq && apt-get install -y -qq certbot python3-certbot-nginx
+            fi
+
+            certbot --nginx \
+              -d voxeia.com -d www.voxeia.com \
+              -d app.voxeia.com \
+              -d api.voxeia.com \
+              -d ws.voxeia.com \
+              --non-interactive --agree-tos \
+              -m ${{ secrets.SSL_EMAIL }} \
+              --redirect \
+              --keep-until-expiring
+
+            nginx -t && systemctl reload nginx
 
             # ── Cleanup ────────────────────────────────────────────
             docker image prune -f
 
-            echo "✅ Deployment complete!"
-            echo "🌐 voxeia.com | app.voxeia.com | api.voxeia.com | ws.voxeia.com"
+            echo "✅ Full deployment complete with SSL!"

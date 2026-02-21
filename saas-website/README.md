@@ -1,6 +1,6 @@
-# CallBotAI - SaaS Website
+# Voxeia - SaaS Website
 
-Marketing and product website for **CallBotAI** — built with [Astro](https://astro.build), TypeScript, and Tailwind CSS v4.
+Marketing and product website for **Voxeia** — built with [Astro](https://astro.build), TypeScript, and Tailwind CSS v4.
 
 ## Tech Stack
 
@@ -54,8 +54,8 @@ npm run preview
 ### Build & Run Standalone
 
 ```bash
-docker build -t callbotai-website .
-docker run -p 9006:80 callbotai-website
+docker build -t voxeia-website .
+docker run -p 9006:80 voxeia-website
 ```
 
 ### With Docker Compose (from project root)

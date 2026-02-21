@@ -2,7 +2,7 @@ import twilio from 'twilio';
 import { envConfig } from '../config';
 import CallLog from '../calllogs/calllogs.models';
 import { CallLogItem, CallLogsQuery, CallResponse, VoiceOption } from './calls.models';
-import { getTunnelUrl } from '../tunnel';
+import { getWebhookBaseUrl } from '../utils/webhook-url';
 import { emitGlobal } from '../websocket';
 import { generateAndCacheAudio } from '../tts/tts.services';
 import { escapeRegex } from '../utils/regex';
@@ -33,7 +33,7 @@ export const makeCall = async (
   try {
     const twilioClient = getTwilioClient();
     
-    const baseUrl = getTunnelUrl() || envConfig.BASE_URL;
+    const baseUrl = getWebhookBaseUrl();
     const isPublicUrl = !baseUrl.includes('localhost') && !baseUrl.includes('127.0.0.1');
 
     // Generate ALL Sarvam.ai TTS audio clips in parallel to minimize latency

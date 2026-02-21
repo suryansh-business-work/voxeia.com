@@ -1,10 +1,10 @@
 version: "3.8"
 
 services:
-  # ─── MongoDB ──────────────────────────────────────────────────────
+  # ─── MongoDB (local dev only) ────────────────────────────────────
   mongo:
     image: mongo:7
-    container_name: exyconn-mongo
+    container_name: voxeia-dev-mongo
     restart: unless-stopped
     ports:
       - "27017:27017"
@@ -19,7 +19,7 @@ services:
   # ─── Server (API + WebSocket) ────────────────────────────────────
   server:
     build: ./server
-    container_name: exyconn-server
+    container_name: voxeia-dev-server
     restart: unless-stopped
     ports:
       - "9004:9004"
@@ -29,8 +29,10 @@ services:
     environment:
       - PORT=9004
       - WS_PORT=9005
+      - NODE_ENV=development
       - CLIENT_URL=http://localhost:9003
-      - MONGODB_URI=mongodb://mongo:27017/exyconn
+      - BASE_URL=http://localhost:9004
+      - MONGODB_URI=mongodb://mongo:27017/voxeia
     depends_on:
       mongo:
         condition: service_healthy
@@ -41,7 +43,8 @@ services:
       context: ./ui
       args:
         VITE_WS_URL: http://localhost:9005
-    container_name: exyconn-ui
+        VITE_API_URL: /api
+    container_name: voxeia-dev-ui
     restart: unless-stopped
     ports:
       - "9003:80"
@@ -51,7 +54,7 @@ services:
   # ─── SaaS Website (Nginx) ───────────────────────────────────────
   saas-website:
     build: ./saas-website
-    container_name: exyconn-saas-website
+    container_name: voxeia-dev-saas-website
     restart: unless-stopped
     ports:
       - "9006:80"

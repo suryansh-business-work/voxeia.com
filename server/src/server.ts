@@ -28,20 +28,22 @@ const start = async () => {
         console.log('OpenAI: not configured (set OPENAI_API_KEY in .env for AI calls)');
       }
 
-      // Auto-start Cloudflare tunnel for Twilio webhooks
-      try {
-        const url = await startTunnel(envConfig.PORT);
-        console.log(`[Tunnel] Public URL ready: ${url}`);
-        console.log('[Tunnel] AI conversation calls are now available ✓');
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        console.warn(`[Tunnel] Could not start: ${msg}`);
-        if (
-          !envConfig.BASE_URL.includes('localhost') &&
-          !envConfig.BASE_URL.includes('127.0.0.1')
-        ) {
-          console.log(`[Tunnel] Falling back to configured BASE_URL: ${envConfig.BASE_URL}`);
-        } else {
+      // In production, BASE_URL is already a public domain (e.g. https://api.voxeia.com)
+      // so no tunnel is needed. Only start Cloudflare tunnel in development.
+      const isPublicBaseUrl =
+        !envConfig.BASE_URL.includes('localhost') &&
+        !envConfig.BASE_URL.includes('127.0.0.1');
+
+      if (isPublicBaseUrl) {
+        console.log(`[Tunnel] Skipped — using production BASE_URL: ${envConfig.BASE_URL}`);
+      } else {
+        try {
+          const url = await startTunnel(envConfig.PORT);
+          console.log(`[Tunnel] Public URL ready: ${url}`);
+          console.log('[Tunnel] AI conversation calls are now available ✓');
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : String(err);
+          console.warn(`[Tunnel] Could not start: ${msg}`);
           console.warn('[Tunnel] AI conversation calls will not work without a public URL');
           console.warn('[Tunnel] Ensure cloudflared is installed: npm install -g cloudflared');
         }

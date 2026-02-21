@@ -42,7 +42,7 @@ jobs:
           cache: npm
           cache-dependency-path: ui/package-lock.json
 
-      - run: npm ci
+      - run: npm ci --legacy-peer-deps
       - run: npm run typecheck
 
   # ─── SaaS Website Type Check ──────────────────────────────────

@@ -17,7 +17,7 @@
 
 import twilio from 'twilio';
 import { envConfig } from '../config';
-import { getTunnelUrl } from '../tunnel';
+import { getWebhookBaseUrl } from '../utils/webhook-url';
 import { generateAndCacheAudio } from '../tts/tts.services';
 import CallLog from '../calllogs/calllogs.models';
 import { emitToCall } from '../websocket';
@@ -38,8 +38,7 @@ const getTwilioClient = () => {
   return twilioClient;
 };
 
-/** Returns the tunnel URL if available, else falls back to env BASE_URL. */
-const getWebhookBaseUrl = (): string => getTunnelUrl() || envConfig.BASE_URL;
+// getWebhookBaseUrl imported from utils/webhook-url
 
 // ─── Initiate Streaming Call ────────────────────────────────────────────────
 

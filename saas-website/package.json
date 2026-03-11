@@ -12,9 +12,16 @@
     "format": "prettier --write \"src/**/*.{astro,ts,tsx,css,json}\""
   },
   "dependencies": {
+    "@astrojs/react": "^5.0.0",
+    "@lucide/astro": "^0.577.0",
     "@tailwindcss/vite": "^4.2.0",
     "astro": "^5.17.1",
-    "tailwindcss": "^4.2.0"
+    "formik": "^2.4.9",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-phone-number-input": "^3.4.16",
+    "tailwindcss": "^4.2.0",
+    "yup": "^1.7.1"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",

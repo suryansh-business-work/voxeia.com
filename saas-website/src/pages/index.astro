@@ -1,248 +1,470 @@
 ---
 import Layout from '../layouts/Layout.astro';
-
-const features = [
-  {
-    icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>`,
-    title: 'Lightning Fast Setup',
-    description:
-      'Get started in minutes, not days. Our intuitive dashboard lets you configure AI calling campaigns with zero technical knowledge.',
-  },
-  {
-    icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>`,
-    title: 'Real-time Analytics',
-    description:
-      'Monitor call performance, conversion rates, and customer sentiment in real-time with our comprehensive analytics dashboard.',
-  },
-  {
-    icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>`,
-    title: 'Fully Customizable',
-    description:
-      'Tailor AI voice, scripts, and conversation flows to match your brand. Supports multiple languages and regional accents.',
-  },
-  {
-    icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>`,
-    title: 'Lead Qualification',
-    description:
-      'AI automatically qualifies leads based on conversation context, saving your sales team hours of manual follow-ups.',
-  },
-  {
-    icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>`,
-    title: 'Enterprise Security',
-    description:
-      "Bank-grade encryption, SOC 2 compliance, and GDPR ready. Your data and your customers' data stays safe.",
-  },
-  {
-    icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>`,
-    title: 'Auto Retries & Scheduling',
-    description:
-      'Smart retry logic and advanced scheduling ensures maximum contact rates. Never miss an opportunity again.',
-  },
-];
-
-const stats = [
-  { value: '10M+', label: 'Calls Made' },
-  { value: '98.5%', label: 'Uptime SLA' },
-  { value: '500+', label: 'Happy Clients' },
-  { value: '45%', label: 'Cost Savings' },
-];
+import { Check, Zap, BarChart3, SlidersHorizontal, Users, ShieldCheck, RefreshCw, Volume2, Pause } from '@lucide/astro';
 ---
 
 <Layout title="Home">
-  <!-- Hero Section -->
-  <section class="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 gradient-mesh">
-    <!-- Background Effects -->
+  <!-- Hero Section with animated background -->
+  <section class="hero-animated-bg relative min-h-screen flex items-center overflow-hidden pt-20">
+    <div class="absolute inset-0 grid-pattern"></div>
     <div class="absolute inset-0">
-      <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[128px] animate-pulse"></div>
+      <div class="hero-orb hero-orb-1 absolute top-1/4 left-[10%] w-[400px] h-[400px] rounded-full blur-[150px]"></div>
+      <div class="hero-orb hero-orb-2 absolute bottom-1/4 right-[10%] w-[350px] h-[350px] rounded-full blur-[150px]">
+      </div>
       <div
-        class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/10 rounded-full blur-[128px] animate-pulse"
-        style="animation-delay: 1s;"
+        class="hero-orb hero-orb-3 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full blur-[150px]"
       >
       </div>
     </div>
 
-    <!-- Grid Pattern -->
-    <div
-      class="absolute inset-0 opacity-[0.04]"
-      style="background-image: linear-gradient(var(--color-border) 1px, transparent 1px), linear-gradient(90deg, var(--color-border) 1px, transparent 1px); background-size: 64px 64px;"
-    >
-    </div>
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-12 sm:py-16 lg:py-24">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
+        <!-- Left: Hero Content -->
+        <div class="min-w-0">
+          <div
+            class="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6 sm:mb-8"
+          >
+            <span class="w-2 h-2 rounded-full bg-success animate-pulse"></span>
+            <span class="text-xs sm:text-sm text-text-muted font-medium">GPT-4o Powered Conversations</span>
+          </div>
 
-    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <!-- Badge -->
-      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 border border-primary/20 mb-8">
-        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-        <span class="text-sm text-text-muted font-medium">Now with GPT-4 Powered Conversations</span>
-      </div>
+          <h1
+            class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-[1.1] tracking-tight font-display"
+          >
+            <span class="block text-text">AI Voice Agents</span>
+            <span class="block text-text">That Actually</span>
+            <span
+              class="block bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent bg-[length:200%_100%] animate-shimmer"
+            >
+              Sound Human
+            </span>
+          </h1>
 
-      <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-tight tracking-tight text-text">
-        <span class="block">Automate Your</span>
-        <span
-          class="block bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent bg-[length:200%_100%] animate-[shimmer_3s_ease-in-out_infinite]"
-        >
-          Business Calls
-        </span>
-        <span class="block">With AI</span>
-      </h1>
+          <p class="mt-4 sm:mt-6 text-base sm:text-lg text-text-muted leading-relaxed max-w-lg">
+            Deploy intelligent AI voice agents that qualify leads, book appointments, handle support, and close deals —
+            on autopilot, 24/7, in 20+ languages.
+          </p>
 
-      <p class="mt-6 max-w-2xl mx-auto text-lg sm:text-xl text-text-muted leading-relaxed">
-        Revolutionize your outbound calling with intelligent AI agents. Qualify leads, book appointments, and close
-        deals — all on autopilot.
-      </p>
-
-      <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-        <a
-          href="/pricing"
-          class="w-full sm:w-auto px-8 py-4 text-base font-semibold text-white bg-gradient-to-r from-primary to-secondary rounded-full hover:shadow-2xl hover:shadow-primary/30 transition-all hover:-translate-y-1"
-        >
-          Start Free Trial
-        </a>
-        <a
-          href="/about"
-          class="w-full sm:w-auto px-8 py-4 text-base font-semibold text-text bg-surface border border-border rounded-full hover:border-primary/30 hover:shadow-lg transition-all"
-        >
-          Learn More →
-        </a>
-      </div>
-
-      <!-- Starting Price -->
-      <p class="mt-6 text-sm text-text-muted">
-        Starting at just <span class="text-primary font-bold">₹5.99/min</span> (~$0.07/min) · No setup fees · Cancel anytime
-      </p>
-    </div>
-  </section>
-
-  <!-- Stats Section -->
-  <section class="relative py-20 border-y border-border bg-surface-alt">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-        {
-          stats.map((stat) => (
-            <div class="text-center">
-              <div class="text-3xl sm:text-4xl font-black bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                {stat.value}
-              </div>
-              <p class="mt-2 text-sm text-text-muted">{stat.label}</p>
+          <div class="mt-6 sm:mt-8 flex flex-wrap gap-4 sm:gap-6 text-sm text-text-muted">
+            <div class="flex items-center gap-2">
+              <Check class="w-5 h-5 text-success" />
+              No setup fees
             </div>
-          ))
-        }
+            <div class="flex items-center gap-2">
+              <Check class="w-5 h-5 text-success" />
+              10 min free
+            </div>
+            <div class="flex items-center gap-2">
+              <Check class="w-5 h-5 text-success" />
+              Cancel anytime
+            </div>
+          </div>
+
+          <!-- Audio Sample Player -->
+          <div class="mt-8 sm:mt-10">
+            <p class="text-xs text-text-light uppercase tracking-wider mb-3">Hear our AI in action</p>
+            <button
+              id="audio-play-btn"
+              class="group flex items-center gap-3 px-5 py-3 rounded-2xl bg-surface-card border border-border hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10 transition-all"
+            >
+              <div
+                class="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center group-hover:scale-110 transition-transform"
+              >
+                <Volume2 id="audio-icon-play" class="w-5 h-5 text-white" />
+                <Pause id="audio-icon-pause" class="w-5 h-5 text-white hidden" />
+              </div>
+              <div class="text-left">
+                <p class="text-sm font-semibold text-text">AI Voice Sample</p>
+                <p class="text-xs text-text-muted" id="audio-status">Click to play</p>
+              </div>
+              <div class="ml-2 flex items-center gap-0.5" id="audio-bars">
+                <span class="w-1 h-3 bg-primary/30 rounded-full"></span>
+                <span class="w-1 h-5 bg-primary/30 rounded-full"></span>
+                <span class="w-1 h-4 bg-primary/30 rounded-full"></span>
+                <span class="w-1 h-6 bg-primary/30 rounded-full"></span>
+                <span class="w-1 h-3 bg-primary/30 rounded-full"></span>
+              </div>
+            </button>
+            <audio id="audio-sample" preload="none">
+              <source src="/audio/sample.mp3" type="audio/mpeg" />
+            </audio>
+          </div>
+        </div>
+
+        <!-- Right: Stepper Form -->
+        <div class="relative min-w-0">
+          <div class="absolute -inset-1 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-3xl blur-xl"></div>
+          <div
+            class="relative rounded-2xl bg-surface-card/90 backdrop-blur-xl border border-border p-4 sm:p-6 md:p-8 shadow-2xl shadow-black/20"
+          >
+            <div id="stepper-form-root"></div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- Features Section -->
-  <section class="relative py-24 sm:py-32">
+  <!-- Features -->
+  <section class="relative py-16 sm:py-24 lg:py-32">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center max-w-3xl mx-auto mb-16">
+      <div class="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
         <span class="text-sm font-semibold text-primary uppercase tracking-wider">Features</span>
-        <h2 class="mt-3 text-3xl sm:text-4xl md:text-5xl font-bold text-text">
+        <h2 class="mt-3 text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold font-display text-text">
           Everything you need to <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
             >scale calls</span
           >
         </h2>
-        <p class="mt-4 text-text-muted text-lg">
-          Powerful features designed to help businesses of all sizes automate their calling operations.
+        <p class="mt-4 text-text-muted text-base sm:text-lg">
+          Enterprise-grade AI calling infrastructure built for businesses of all sizes.
         </p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {
-          features.map((feature) => (
-            <div class="group relative p-8 rounded-2xl bg-surface border border-border hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
-              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center text-primary mb-5 group-hover:scale-110 transition-transform">
-                <Fragment set:html={feature.icon} />
-              </div>
-              <h3 class="text-xl font-semibold text-text mb-3">{feature.title}</h3>
-              <p class="text-text-muted leading-relaxed">{feature.description}</p>
-            </div>
-          ))
-        }
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div
+          class="group relative p-6 sm:p-8 rounded-2xl bg-surface-card border border-border hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300"
+        >
+          <div
+            class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/15 to-secondary/15 flex items-center justify-center text-primary mb-5 group-hover:scale-110 transition-transform"
+          >
+            <Zap class="w-6 h-6" />
+          </div>
+          <h3 class="text-lg sm:text-xl font-semibold text-text mb-3 font-display">Lightning Fast Setup</h3>
+          <p class="text-text-muted leading-relaxed text-sm sm:text-base">
+            Get started in minutes, not days. Configure AI calling campaigns with zero technical knowledge.
+          </p>
+        </div>
+
+        <div
+          class="group relative p-6 sm:p-8 rounded-2xl bg-surface-card border border-border hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300"
+        >
+          <div
+            class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/15 to-secondary/15 flex items-center justify-center text-primary mb-5 group-hover:scale-110 transition-transform"
+          >
+            <BarChart3 class="w-6 h-6" />
+          </div>
+          <h3 class="text-lg sm:text-xl font-semibold text-text mb-3 font-display">Real-time Analytics</h3>
+          <p class="text-text-muted leading-relaxed text-sm sm:text-base">
+            Monitor call performance, conversion rates, and customer sentiment with comprehensive dashboards.
+          </p>
+        </div>
+
+        <div
+          class="group relative p-6 sm:p-8 rounded-2xl bg-surface-card border border-border hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300"
+        >
+          <div
+            class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/15 to-secondary/15 flex items-center justify-center text-primary mb-5 group-hover:scale-110 transition-transform"
+          >
+            <SlidersHorizontal class="w-6 h-6" />
+          </div>
+          <h3 class="text-lg sm:text-xl font-semibold text-text mb-3 font-display">Fully Customizable</h3>
+          <p class="text-text-muted leading-relaxed text-sm sm:text-base">
+            Tailor AI voice, scripts, and conversation flows. Supports 20+ languages and regional accents.
+          </p>
+        </div>
+
+        <div
+          class="group relative p-6 sm:p-8 rounded-2xl bg-surface-card border border-border hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300"
+        >
+          <div
+            class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/15 to-secondary/15 flex items-center justify-center text-primary mb-5 group-hover:scale-110 transition-transform"
+          >
+            <Users class="w-6 h-6" />
+          </div>
+          <h3 class="text-lg sm:text-xl font-semibold text-text mb-3 font-display">Smart Lead Qualification</h3>
+          <p class="text-text-muted leading-relaxed text-sm sm:text-base">
+            AI automatically qualifies leads based on conversation context, saving hours of manual follow-ups.
+          </p>
+        </div>
+
+        <div
+          class="group relative p-6 sm:p-8 rounded-2xl bg-surface-card border border-border hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300"
+        >
+          <div
+            class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/15 to-secondary/15 flex items-center justify-center text-primary mb-5 group-hover:scale-110 transition-transform"
+          >
+            <ShieldCheck class="w-6 h-6" />
+          </div>
+          <h3 class="text-lg sm:text-xl font-semibold text-text mb-3 font-display">Enterprise Security</h3>
+          <p class="text-text-muted leading-relaxed text-sm sm:text-base">
+            Bank-grade encryption, SOC 2 compliance, and GDPR ready. Your data stays safe.
+          </p>
+        </div>
+
+        <div
+          class="group relative p-6 sm:p-8 rounded-2xl bg-surface-card border border-border hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300"
+        >
+          <div
+            class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/15 to-secondary/15 flex items-center justify-center text-primary mb-5 group-hover:scale-110 transition-transform"
+          >
+            <RefreshCw class="w-6 h-6" />
+          </div>
+          <h3 class="text-lg sm:text-xl font-semibold text-text mb-3 font-display">Auto Retries & Scheduling</h3>
+          <p class="text-text-muted leading-relaxed text-sm sm:text-base">
+            Smart retry logic and advanced scheduling ensures maximum contact rates. Never miss an opportunity.
+          </p>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- How it Works -->
-  <section class="relative py-24 sm:py-32 bg-surface-alt">
+  <section class="relative py-16 sm:py-24 lg:py-32 bg-surface-alt border-y border-border">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center max-w-3xl mx-auto mb-16">
+      <div class="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
         <span class="text-sm font-semibold text-primary uppercase tracking-wider">How It Works</span>
-        <h2 class="mt-3 text-3xl sm:text-4xl md:text-5xl font-bold text-text">
+        <h2 class="mt-3 text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold font-display text-text">
           Three simple steps to <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
             >get started</span
           >
         </h2>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div class="relative text-center p-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+        <div class="relative text-center p-6 sm:p-8">
           <div
-            class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-2xl font-black text-white mb-6 shadow-lg shadow-primary/20"
+            class="w-14 h-14 sm:w-16 sm:h-16 mx-auto rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-xl sm:text-2xl font-black text-white mb-5 sm:mb-6 shadow-lg shadow-primary/20 font-display"
           >
             1
           </div>
-          <h3 class="text-xl font-semibold text-text mb-3">Upload Contacts</h3>
-          <p class="text-text-muted">
+          <h3 class="text-lg sm:text-xl font-semibold text-text mb-3 font-display">Upload Contacts</h3>
+          <p class="text-text-muted text-sm sm:text-base">
             Import your contact list via CSV or connect your CRM. We support all major platforms.
           </p>
         </div>
-        <div class="relative text-center p-8">
+        <div class="relative text-center p-6 sm:p-8">
           <div
-            class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-2xl font-black text-white mb-6 shadow-lg shadow-primary/20"
+            class="w-14 h-14 sm:w-16 sm:h-16 mx-auto rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-xl sm:text-2xl font-black text-white mb-5 sm:mb-6 shadow-lg shadow-primary/20 font-display"
           >
             2
           </div>
-          <h3 class="text-xl font-semibold text-text mb-3">Configure AI Agent</h3>
-          <p class="text-text-muted">
+          <h3 class="text-lg sm:text-xl font-semibold text-text mb-3 font-display">Configure AI Agent</h3>
+          <p class="text-text-muted text-sm sm:text-base">
             Set up your AI voice, conversation script, and goals. Our templates make it easy.
           </p>
         </div>
-        <div class="relative text-center p-8">
+        <div class="relative text-center p-6 sm:p-8">
           <div
-            class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-2xl font-black text-white mb-6 shadow-lg shadow-primary/20"
+            class="w-14 h-14 sm:w-16 sm:h-16 mx-auto rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-xl sm:text-2xl font-black text-white mb-5 sm:mb-6 shadow-lg shadow-primary/20 font-display"
           >
             3
           </div>
-          <h3 class="text-xl font-semibold text-text mb-3">Launch & Monitor</h3>
-          <p class="text-text-muted">Start your campaign and monitor results in real-time. AI handles the rest.</p>
+          <h3 class="text-lg sm:text-xl font-semibold text-text mb-3 font-display">Launch & Monitor</h3>
+          <p class="text-text-muted text-sm sm:text-base">
+            Start your campaign and monitor results in real-time. AI handles the rest.
+          </p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- CTA Section -->
-  <section class="relative py-24 sm:py-32 overflow-hidden gradient-mesh">
+  <!-- Industries -->
+  <section class="relative py-16 sm:py-24 lg:py-32">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
+        <span class="text-sm font-semibold text-primary uppercase tracking-wider">Industries</span>
+        <h2 class="mt-3 text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold font-display text-text">
+          Built for <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
+            >every industry</span
+          >
+        </h2>
+        <p class="mt-4 text-text-muted text-base sm:text-lg">
+          AI voice agents tailored to the unique needs of your sector.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+        {
+          [
+            { name: 'Real Estate', slug: 'real-estate', icon: '🏠' },
+            { name: 'Healthcare', slug: 'healthcare', icon: '🏥' },
+            { name: 'Financial Services', slug: 'financial-services', icon: '💰' },
+            { name: 'Insurance', slug: 'insurance', icon: '🛡️' },
+            { name: 'Logistics', slug: 'logistics-transportation', icon: '🚛' },
+            { name: 'Home Services', slug: 'home-services', icon: '🔧' },
+            { name: 'Retail', slug: 'retail-consumer', icon: '🛒' },
+            { name: 'Travel', slug: 'travel-hospitality', icon: '✈️' },
+            { name: 'Debt Collection', slug: 'debt-collection', icon: '💼' },
+            { name: 'Recruitment', slug: 'recruitment', icon: '👥' },
+            { name: 'CRM Integration', slug: 'voice-ai-for-crms', icon: '🔗' },
+            { name: 'Telecom', slug: 'telecom', icon: '📱' },
+          ].map((industry) => (
+            <a
+              href={`/industries/${industry.slug}`}
+              class="group p-4 sm:p-5 rounded-xl bg-surface-card border border-border hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all text-center"
+            >
+              <div class="text-2xl sm:text-3xl mb-2 sm:mb-3">{industry.icon}</div>
+              <p class="text-xs sm:text-sm font-medium text-text group-hover:text-primary transition-colors">
+                {industry.name}
+              </p>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="relative py-16 sm:py-24 lg:py-32 overflow-hidden gradient-mesh">
     <div class="absolute inset-0">
       <div
-        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/8 rounded-full blur-[128px]"
+        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/8 rounded-full blur-[150px]"
       >
       </div>
     </div>
     <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-text mb-6">
+      <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold font-display text-text mb-6">
         Ready to transform your <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
           >calling operations?</span
         >
       </h2>
-      <p class="text-text-muted text-lg mb-10 max-w-2xl mx-auto">
-        Join 500+ businesses already using Voxeia to automate their outreach. Start your free trial today.
+      <p class="text-text-muted text-base sm:text-lg mb-8 sm:mb-10 max-w-2xl mx-auto">
+        Start automating your outreach with Voxeia today. Try it free for 10 minutes.
       </p>
-      <a
-        href="https://app.voxeia.com"
-        class="inline-block px-10 py-4 text-base font-semibold text-white bg-gradient-to-r from-primary to-secondary rounded-full hover:shadow-2xl hover:shadow-primary/30 transition-all hover:-translate-y-1"
-      >
-        Get Started for Free
-      </a>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a
+          href="https://app.voxeia.com"
+          class="w-full sm:w-auto px-8 sm:px-10 py-4 text-base font-semibold text-white bg-gradient-to-r from-primary to-primary-dark rounded-full hover:shadow-2xl hover:shadow-primary/30 transition-all hover:-translate-y-1 text-center"
+        >
+          Get Started for Free
+        </a>
+        <a
+          href="/pricing"
+          class="w-full sm:w-auto px-8 sm:px-10 py-4 text-base font-semibold text-text bg-surface-card border border-border rounded-full hover:border-primary/30 hover:shadow-lg transition-all text-center"
+        >
+          View Pricing
+        </a>
+      </div>
     </div>
   </section>
 
+  <script>
+    import { createElement } from 'react';
+    import { createRoot } from 'react-dom/client';
+    import HeroStepperForm from '../components/HeroStepperForm/HeroStepperForm';
+
+    const root = document.getElementById('stepper-form-root');
+    if (root) {
+      createRoot(root).render(createElement(HeroStepperForm));
+    }
+
+    // Audio player
+    const audioBtn = document.getElementById('audio-play-btn');
+    const audio = document.getElementById('audio-sample') as HTMLAudioElement;
+    const iconPlay = document.getElementById('audio-icon-play');
+    const iconPause = document.getElementById('audio-icon-pause');
+    const statusText = document.getElementById('audio-status');
+    const bars = document.querySelectorAll('#audio-bars span');
+
+    let isPlaying = false;
+
+    audioBtn?.addEventListener('click', () => {
+      if (!audio) return;
+      if (isPlaying) {
+        audio.pause();
+        isPlaying = false;
+        iconPlay?.classList.remove('hidden');
+        iconPause?.classList.add('hidden');
+        if (statusText) statusText.textContent = 'Paused';
+        bars.forEach((b) => {
+          (b as HTMLElement).style.animation = '';
+          (b as HTMLElement).classList.remove('bg-primary');
+          (b as HTMLElement).classList.add('bg-primary/30');
+        });
+      } else {
+        audio.play();
+        isPlaying = true;
+        iconPlay?.classList.add('hidden');
+        iconPause?.classList.remove('hidden');
+        if (statusText) statusText.textContent = 'Playing...';
+        bars.forEach((b, i) => {
+          (b as HTMLElement).classList.remove('bg-primary/30');
+          (b as HTMLElement).classList.add('bg-primary');
+          (b as HTMLElement).style.animation = `audio-bar 0.5s ease-in-out ${i * 0.1}s infinite alternate`;
+        });
+      }
+    });
+
+    audio?.addEventListener('ended', () => {
+      isPlaying = false;
+      iconPlay?.classList.remove('hidden');
+      iconPause?.classList.add('hidden');
+      if (statusText) statusText.textContent = 'Click to play';
+      bars.forEach((b) => {
+        (b as HTMLElement).style.animation = '';
+        (b as HTMLElement).classList.remove('bg-primary');
+        (b as HTMLElement).classList.add('bg-primary/30');
+      });
+    });
+  </script>
+
   <style>
-    @keyframes shimmer {
+    /* Hero animated background color cycling */
+    .hero-animated-bg {
+      background: var(--color-surface);
+    }
+    .hero-orb-1 {
+      background: rgba(124, 92, 252, 0.08);
+      animation: orb-shift-1 8s ease-in-out infinite;
+    }
+    .hero-orb-2 {
+      background: rgba(0, 212, 255, 0.06);
+      animation: orb-shift-2 10s ease-in-out infinite;
+    }
+    .hero-orb-3 {
+      background: rgba(255, 107, 53, 0.05);
+      animation: orb-shift-3 12s ease-in-out infinite;
+    }
+    @keyframes orb-shift-1 {
       0%,
       100% {
-        background-position: 0% 50%;
+        background: rgba(124, 92, 252, 0.08);
+        transform: translate(0, 0);
       }
-      50% {
-        background-position: 100% 50%;
+      33% {
+        background: rgba(0, 212, 255, 0.08);
+        transform: translate(30px, -20px);
+      }
+      66% {
+        background: rgba(255, 107, 53, 0.06);
+        transform: translate(-20px, 15px);
+      }
+    }
+    @keyframes orb-shift-2 {
+      0%,
+      100% {
+        background: rgba(0, 212, 255, 0.06);
+        transform: translate(0, 0);
+      }
+      33% {
+        background: rgba(255, 107, 53, 0.06);
+        transform: translate(-25px, 20px);
+      }
+      66% {
+        background: rgba(124, 92, 252, 0.08);
+        transform: translate(15px, -25px);
+      }
+    }
+    @keyframes orb-shift-3 {
+      0%,
+      100% {
+        background: rgba(255, 107, 53, 0.05);
+        transform: translate(-50%, -50%);
+      }
+      33% {
+        background: rgba(124, 92, 252, 0.06);
+        transform: translate(-45%, -55%);
+      }
+      66% {
+        background: rgba(0, 212, 255, 0.06);
+        transform: translate(-55%, -45%);
+      }
+    }
+    @keyframes audio-bar {
+      0% {
+        height: 0.5rem;
+      }
+      100% {
+        height: 1.5rem;
       }
     }
   </style>

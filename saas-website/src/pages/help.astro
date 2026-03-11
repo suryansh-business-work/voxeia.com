@@ -1,0 +1,184 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { Mail, MessageCircle, Video, Search } from '@lucide/astro';
+import Icon from '../components/Icon.astro';
+
+const sections = [
+  {
+    title: 'Getting Started',
+    icon: 'rocket',
+    articles: [
+      {
+        title: 'Quick Start Guide',
+        description: 'Create your first AI agent and make a test call in under 5 minutes.',
+      },
+      { title: 'Account Setup', description: 'Configure your account settings, team members, and billing.' },
+      { title: 'Understanding Your Dashboard', description: 'Navigate the Voxeia dashboard and key metrics.' },
+      {
+        title: 'Your First Campaign',
+        description: 'Upload contacts, write a script, and launch your first AI calling campaign.',
+      },
+    ],
+  },
+  {
+    title: 'AI Agents',
+    icon: 'bot',
+    articles: [
+      {
+        title: 'Creating an AI Agent',
+        description: 'Step-by-step guide to building and configuring your AI voice agent.',
+      },
+      {
+        title: 'Script Writing Best Practices',
+        description: 'Tips for writing effective conversation scripts that convert.',
+      },
+      {
+        title: 'Voice Selection & Customization',
+        description: 'Choose the perfect voice and personality for your use case.',
+      },
+      { title: 'Training Your Agent', description: 'Fine-tune your agent with custom knowledge base and FAQs.' },
+    ],
+  },
+  {
+    title: 'Calling & Campaigns',
+    icon: 'phone-call',
+    articles: [
+      { title: 'Scheduling Calls', description: 'Set up one-time or recurring call schedules with timezone support.' },
+      {
+        title: 'Outbound Campaign Management',
+        description: 'Manage contact lists, campaign settings, and calling windows.',
+      },
+      { title: 'Inbound Call Handling', description: 'Configure AI receptionist for inbound calls and call routing.' },
+      { title: 'Call Transfer & Escalation', description: 'Set up warm and cold transfers to human agents.' },
+    ],
+  },
+  {
+    title: 'Integrations',
+    icon: 'link-2',
+    articles: [
+      { title: 'CRM Integration Guide', description: 'Connect Salesforce, HubSpot, Zoho, and other CRMs.' },
+      { title: 'Twilio Setup', description: 'Configure your Twilio account for use with Voxeia.' },
+      { title: 'Zapier Automation', description: 'Trigger calls from any app using Zapier workflows.' },
+      { title: 'Webhook Configuration', description: 'Set up webhooks for real-time event notifications.' },
+    ],
+  },
+  {
+    title: 'Analytics & Reporting',
+    icon: 'chart',
+    articles: [
+      { title: 'Call Analytics Overview', description: 'Understanding your call metrics, outcomes, and trends.' },
+      { title: 'Campaign Reports', description: 'Generate and export detailed campaign performance reports.' },
+      {
+        title: 'Conversation Intelligence',
+        description: 'Analyze call transcripts for sentiment, keywords, and insights.',
+      },
+      { title: 'Custom Dashboards', description: 'Build custom analytics dashboards for your team.' },
+    ],
+  },
+  {
+    title: 'API Reference',
+    icon: 'code',
+    articles: [
+      { title: 'Authentication', description: 'API key management and authentication methods.' },
+      { title: 'Agents API', description: 'Create, update, and manage AI agents programmatically.' },
+      { title: 'Calls API', description: 'Trigger calls, check status, and retrieve call data via API.' },
+      { title: 'Webhooks Reference', description: 'Complete list of webhook events and payload schemas.' },
+    ],
+  },
+];
+---
+
+<Layout
+  title="Help & Documentation"
+  description="Everything you need to get started and succeed with Voxeia AI voice agents."
+>
+  <section class="relative pt-32 pb-16 overflow-hidden gradient-mesh">
+    <div class="absolute inset-0 grid-pattern"></div>
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <span class="text-sm font-semibold text-primary uppercase tracking-wider">Help Center</span>
+      <h1 class="mt-3 text-4xl sm:text-5xl lg:text-6xl font-black font-display text-text">
+        How can we <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">help?</span>
+      </h1>
+      <div class="mt-8 max-w-2xl mx-auto">
+        <div class="relative">
+          <Search class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-light pointer-events-none" />
+          <input
+            type="text"
+            placeholder="Search documentation..."
+            class="w-full pl-12 pr-5 py-4 rounded-2xl bg-surface-card border border-border text-text placeholder-text-light focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors text-lg"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {
+          sections.map((section) => (
+            <div class="rounded-2xl bg-surface-card border border-border overflow-hidden hover:shadow-lg hover:shadow-primary/5 transition-all">
+              <div class="p-6 border-b border-border bg-surface-raised">
+                <div class="flex items-center gap-3">
+                  <Icon name={section.icon} class="w-5 h-5 text-primary" />
+                  <h2 class="text-xl font-bold font-display text-text">{section.title}</h2>
+                </div>
+              </div>
+              <div class="p-6">
+                <ul class="space-y-4">
+                  {section.articles.map((article) => (
+                    <li>
+                      <a href="#" class="group block">
+                        <h3 class="text-sm font-semibold text-text group-hover:text-primary transition-colors">
+                          {article.title}
+                        </h3>
+                        <p class="text-xs text-text-muted mt-1">{article.description}</p>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="py-24 bg-surface-alt border-y border-border">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold font-display text-text">Need more help?</h2>
+        <p class="mt-3 text-text-muted">Our support team is available to assist you.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+        <div class="p-8 rounded-2xl bg-surface-card border border-border text-center">
+          <div class="p-4 rounded-2xl bg-primary/10 w-fit mx-auto mb-4">
+            <Mail class="w-8 h-8 text-primary" />
+          </div>
+          <h3 class="text-lg font-bold text-text">Email Support</h3>
+          <p class="text-sm text-text-muted mt-2">
+            Get a response within 24 hours.<br /><a
+              href="mailto:support@voxeia.com"
+              class="text-primary hover:underline">support@voxeia.com</a
+            >
+          </p>
+        </div>
+        <div class="p-8 rounded-2xl bg-surface-card border border-border text-center">
+          <div class="p-4 rounded-2xl bg-secondary/10 w-fit mx-auto mb-4">
+            <MessageCircle class="w-8 h-8 text-secondary" />
+          </div>
+          <h3 class="text-lg font-bold text-text">Live Chat</h3>
+          <p class="text-sm text-text-muted mt-2">Chat with our team during business hours for quick answers.</p>
+        </div>
+        <div class="p-8 rounded-2xl bg-surface-card border border-border text-center">
+          <div class="p-4 rounded-2xl bg-accent/10 w-fit mx-auto mb-4">
+            <Video class="w-8 h-8 text-accent" />
+          </div>
+          <h3 class="text-lg font-bold text-text">Schedule a Call</h3>
+          <p class="text-sm text-text-muted mt-2">Book a 15-min call with our team for personalized help.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>

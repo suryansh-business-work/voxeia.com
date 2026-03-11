@@ -1,0 +1,156 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const posts = [
+  {
+    title: 'How AI Voice Agents Are Revolutionizing Sales in 2025',
+    excerpt:
+      'Discover how businesses are using AI-powered voice agents to qualify leads 3x faster and close deals more efficiently.',
+    date: '2025-01-15',
+    category: 'AI Trends',
+    readTime: '5 min read',
+    slug: '#',
+  },
+  {
+    title: 'The Complete Guide to TCPA Compliance for AI Calling',
+    excerpt: 'Everything you need to know about staying compliant when using AI agents for outbound calling campaigns.',
+    date: '2025-01-10',
+    category: 'Compliance',
+    readTime: '8 min read',
+    slug: '#',
+  },
+  {
+    title: '10 Use Cases for AI Voice Agents in Healthcare',
+    excerpt: 'From appointment reminders to prescription refills — how healthcare providers are leveraging AI calling.',
+    date: '2025-01-05',
+    category: 'Industry',
+    readTime: '6 min read',
+    slug: '#',
+  },
+  {
+    title: 'Reducing Cart Abandonment by 35% with AI Follow-Up Calls',
+    excerpt: 'A case study on how an e-commerce brand recovered $2.3M in abandoned cart revenue using Voxeia.',
+    date: '2024-12-28',
+    category: 'Case Study',
+    readTime: '4 min read',
+    slug: '#',
+  },
+  {
+    title: 'Voice AI vs. Chatbots: Why Phone Calls Still Convert Better',
+    excerpt: "Data shows voice conversations convert 3x better than chat. Here's why, and how AI makes it scalable.",
+    date: '2024-12-20',
+    category: 'AI Trends',
+    readTime: '7 min read',
+    slug: '#',
+  },
+  {
+    title: 'How to Build Your First AI Calling Campaign in 15 Minutes',
+    excerpt:
+      'A step-by-step tutorial on setting up your first AI outbound campaign on Voxeia — from script to first call.',
+    date: '2024-12-15',
+    category: 'Tutorial',
+    readTime: '5 min read',
+    slug: '#',
+  },
+];
+
+const categories = ['All', ...new Set(posts.map((p) => p.category))];
+---
+
+<Layout title="Blog" description="Insights, tutorials, and case studies on AI-powered voice communication.">
+  <section class="relative pt-32 pb-16 overflow-hidden gradient-mesh">
+    <div class="absolute inset-0 grid-pattern"></div>
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <span class="text-sm font-semibold text-primary uppercase tracking-wider">Blog</span>
+      <h1 class="mt-3 text-4xl sm:text-5xl lg:text-6xl font-black font-display text-text">
+        Insights & <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
+          >resources</span
+        >
+      </h1>
+      <p class="mt-4 text-lg text-text-muted max-w-2xl mx-auto">
+        The latest on AI voice technology, industry trends, and best practices for automated calling.
+      </p>
+    </div>
+  </section>
+
+  <section class="py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-wrap justify-center gap-3">
+        {
+          categories.map((cat, i) => (
+            <button
+              class:list={[
+                'px-5 py-2 rounded-full text-sm font-semibold transition-all',
+                i === 0
+                  ? 'bg-gradient-to-r from-primary to-primary-dark text-white'
+                  : 'text-text-muted bg-surface-raised border border-border hover:border-primary/30',
+              ]}
+            >
+              {cat}
+            </button>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {
+          posts.map((post) => (
+            <article class="group rounded-2xl bg-surface-card border border-border hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all overflow-hidden">
+              <div class="h-48 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                <span class="text-6xl opacity-50">📝</span>
+              </div>
+              <div class="p-6">
+                <div class="flex items-center gap-3 mb-3">
+                  <span class="text-xs px-3 py-1 rounded-full bg-primary/10 text-primary font-medium">
+                    {post.category}
+                  </span>
+                  <span class="text-xs text-text-light">{post.readTime}</span>
+                </div>
+                <h3 class="text-lg font-bold font-display text-text group-hover:text-primary transition-colors leading-snug">
+                  {post.title}
+                </h3>
+                <p class="mt-2 text-sm text-text-muted leading-relaxed">{post.excerpt}</p>
+                <div class="mt-4 flex items-center justify-between">
+                  <span class="text-xs text-text-light">
+                    {new Date(post.date).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
+                  </span>
+                  <span class="text-sm text-primary font-semibold group-hover:underline">Read more →</span>
+                </div>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="py-24 bg-surface-alt border-t border-border">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl font-bold font-display text-text">Stay in the loop</h2>
+      <p class="mt-3 text-text-muted">
+        Get the latest articles, case studies, and product updates delivered to your inbox.
+      </p>
+      <form class="mt-8 flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
+        <input
+          type="email"
+          placeholder="Enter your email"
+          class="flex-1 px-5 py-3 rounded-full bg-surface-raised border border-border text-text placeholder-text-light focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+        />
+        <button
+          type="submit"
+          class="px-8 py-3 text-white font-semibold bg-gradient-to-r from-primary to-primary-dark rounded-full hover:shadow-lg hover:shadow-primary/25 transition-all hover:-translate-y-0.5"
+          >Subscribe</button
+        >
+      </form>
+      <p class="mt-3 text-xs text-text-light">No spam, unsubscribe anytime.</p>
+    </div>
+  </section>
+</Layout>

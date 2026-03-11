@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { Globe, Clock, MessageCircle } from '@lucide/astro';
 
 const team = [
   { name: 'Rahul Sharma', role: 'CEO & Founder', bio: 'Former Twilio engineer with 10+ years in voice tech.' },
@@ -32,16 +33,13 @@ const values = [
 ];
 ---
 
-<Layout
-  title="About"
-  description="Learn about Voxeia - the team and mission behind AI-powered business calling solutions."
->
-  <!-- Hero -->
+<Layout title="About" description="Learn about Voxeia - the team and mission behind AI-powered voice agents.">
   <section class="gradient-mesh relative pt-32 pb-20 overflow-hidden">
+    <div class="absolute inset-0 grid-pattern"></div>
     <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="max-w-3xl">
         <span class="text-sm font-semibold text-primary uppercase tracking-wider">About Us</span>
-        <h1 class="mt-3 text-4xl sm:text-5xl md:text-6xl font-black leading-tight text-text">
+        <h1 class="mt-3 text-4xl sm:text-5xl lg:text-6xl font-black leading-tight font-display text-text">
           We're building the future of <span
             class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
             >business communication</span
@@ -55,56 +53,85 @@ const values = [
     </div>
   </section>
 
-  <!-- Mission -->
-  <section class="py-20 border-y border-border bg-surface">
+  <section class="py-20 border-y border-border bg-surface-alt">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
         <div>
           <span class="text-sm font-semibold text-primary uppercase tracking-wider">Our Mission</span>
-          <h2 class="mt-3 text-3xl sm:text-4xl font-bold text-text">Democratize AI calling for every business</h2>
+          <h2 class="mt-3 text-3xl sm:text-4xl font-bold font-display text-text">
+            Democratize AI calling for every business
+          </h2>
           <p class="mt-4 text-text-muted leading-relaxed">
-            We believe that every business — from a local shop in Jaipur to an enterprise in Mumbai — should have access
-            to world-class AI communication tools. Our pay-as-you-go model starting at ₹5.99/min makes this a reality.
+            We believe that every business — from a local shop to an enterprise — should have access to world-class AI
+            communication tools. Our pay-as-you-go model starting at ₹5.99/min makes this a reality.
           </p>
           <p class="mt-4 text-text-muted leading-relaxed">
-            Since our founding, we've helped over 500 businesses automate more than 10 million calls, saving them
-            thousands of hours and millions in operational costs.
+            We are on a mission to help businesses of all sizes automate their communication, saving hours and reducing
+            operational costs with the power of AI.
           </p>
         </div>
         <div class="grid grid-cols-2 gap-6">
-          <div class="p-6 rounded-2xl bg-surface border border-border text-center">
-            <div class="text-3xl font-black text-primary">2023</div>
-            <p class="text-sm text-text-muted mt-1">Founded</p>
-          </div>
-          <div class="p-6 rounded-2xl bg-surface border border-border text-center">
-            <div class="text-3xl font-black text-primary">50+</div>
-            <p class="text-sm text-text-muted mt-1">Team Members</p>
-          </div>
-          <div class="p-6 rounded-2xl bg-surface border border-border text-center">
-            <div class="text-3xl font-black text-primary">500+</div>
-            <p class="text-sm text-text-muted mt-1">Clients</p>
-          </div>
-          <div class="p-6 rounded-2xl bg-surface border border-border text-center">
-            <div class="text-3xl font-black text-primary">10M+</div>
-            <p class="text-sm text-text-muted mt-1">Calls Made</p>
-          </div>
+          {
+            [
+              { value: '2023', label: 'Founded' },
+              { value: '🇮🇳', label: 'Made in India' },
+              { value: '20+', label: 'Languages' },
+              { value: '99.9%', label: 'Uptime SLA' },
+            ].map((stat) => (
+              <div class="p-6 rounded-2xl bg-surface-card border border-border text-center">
+                <div class="text-3xl font-black text-primary font-display">{stat.value}</div>
+                <p class="text-sm text-text-muted mt-1">{stat.label}</p>
+              </div>
+            ))
+          }
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Values -->
-  <section class="py-24 bg-surface">
+  <section class="py-20 border-b border-border bg-surface-alt">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl mx-auto text-center mb-12">
+        <span class="text-sm font-semibold text-primary uppercase tracking-wider">Remote-First</span>
+        <h2 class="mt-3 text-3xl sm:text-4xl font-bold font-display text-text">100% Remote Company</h2>
+        <p class="mt-4 text-text-muted leading-relaxed">
+          We're a fully distributed team working across the globe. No office walls — just talented people building the
+          future of voice AI from wherever they do their best work.
+        </p>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
+        <div class="p-6 rounded-2xl bg-surface-card border border-border text-center">
+          <div class="p-3 rounded-2xl bg-primary/10 w-fit mx-auto mb-3"><Globe class="w-6 h-6 text-primary" /></div>
+          <h3 class="text-text font-semibold">Global Team</h3>
+          <p class="text-text-muted text-sm mt-1">Team members across 8+ countries</p>
+        </div>
+        <div class="p-6 rounded-2xl bg-surface-card border border-border text-center">
+          <div class="p-3 rounded-2xl bg-secondary/10 w-fit mx-auto mb-3"><Clock class="w-6 h-6 text-secondary" /></div>
+          <h3 class="text-text font-semibold">Async Culture</h3>
+          <p class="text-text-muted text-sm mt-1">Work when you're most productive</p>
+        </div>
+        <div class="p-6 rounded-2xl bg-surface-card border border-border text-center">
+          <div class="p-3 rounded-2xl bg-accent/10 w-fit mx-auto mb-3">
+            <MessageCircle class="w-6 h-6 text-accent" />
+          </div>
+          <h3 class="text-text font-semibold">Always Connected</h3>
+          <p class="text-text-muted text-sm mt-1">hello@voxeia.com for anything</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-24">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center max-w-3xl mx-auto mb-16">
         <span class="text-sm font-semibold text-primary uppercase tracking-wider">Our Values</span>
-        <h2 class="mt-3 text-3xl sm:text-4xl font-bold text-text">What drives us every day</h2>
+        <h2 class="mt-3 text-3xl sm:text-4xl font-bold font-display text-text">What drives us every day</h2>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {
           values.map((v) => (
             <div class="p-6 rounded-2xl bg-primary/5 border border-border hover:border-primary/30 transition-colors">
-              <h3 class="text-lg font-semibold text-text mb-2">{v.title}</h3>
+              <h3 class="text-lg font-semibold text-text mb-2 font-display">{v.title}</h3>
               <p class="text-text-muted text-sm leading-relaxed">{v.description}</p>
             </div>
           ))
@@ -113,26 +140,25 @@ const values = [
     </div>
   </section>
 
-  <!-- Team -->
-  <section class="py-24 bg-surface-alt">
+  <section class="py-24 bg-surface-alt border-t border-border">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center max-w-3xl mx-auto mb-16">
         <span class="text-sm font-semibold text-primary uppercase tracking-wider">Our Team</span>
-        <h2 class="mt-3 text-3xl sm:text-4xl font-bold text-text">Meet the people behind Voxeia</h2>
+        <h2 class="mt-3 text-3xl sm:text-4xl font-bold font-display text-text">Meet the people behind Voxeia</h2>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {
           team.map((member) => (
-            <div class="p-6 rounded-2xl bg-surface-raised border border-border text-center hover:border-primary/30 transition-all group">
+            <div class="p-6 rounded-2xl bg-surface-card border border-border text-center hover:border-primary/30 transition-all group">
               <div class="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                <span class="text-2xl font-bold text-text">
+                <span class="text-2xl font-bold text-text font-display">
                   {member.name
                     .split(' ')
                     .map((n) => n[0])
                     .join('')}
                 </span>
               </div>
-              <h3 class="text-lg font-semibold text-text">{member.name}</h3>
+              <h3 class="text-lg font-semibold text-text font-display">{member.name}</h3>
               <p class="text-primary text-sm font-medium">{member.role}</p>
               <p class="text-text-muted text-sm mt-2">{member.bio}</p>
             </div>

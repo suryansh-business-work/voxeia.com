@@ -1,0 +1,213 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { industries, type Industry } from '../../data/industries';
+import { AlertTriangle, Quote, ChevronRight } from '@lucide/astro';
+import Icon from '../../components/Icon.astro';
+
+export function getStaticPaths() {
+  return industries.map((industry) => ({
+    params: { slug: industry.slug },
+    props: { industry },
+  }));
+}
+
+interface Props {
+  industry: Industry;
+}
+const { industry } = Astro.props;
+
+const otherIndustries = industries.filter((i) => i.slug !== industry.slug).slice(0, 4);
+---
+
+<Layout title={`${industry.name} - AI Voice Calling`} description={industry.description}>
+  <!-- Hero -->
+  <section class="relative pt-32 pb-20 overflow-hidden gradient-mesh">
+    <div class="absolute inset-0 grid-pattern"></div>
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-4xl">
+        <nav class="flex items-center gap-2 text-sm text-text-muted mb-6">
+          <a href="/" class="hover:text-primary transition-colors">Home</a>
+          <span>/</span>
+          <a href="/#industries" class="hover:text-primary transition-colors">Industries</a>
+          <span>/</span>
+          <span class="text-text">{industry.name}</span>
+        </nav>
+        <span class="text-sm font-semibold text-primary uppercase tracking-wider">{industry.name}</span>
+        <h1 class="mt-3 text-4xl sm:text-5xl lg:text-6xl font-black font-display text-text leading-tight">
+          {industry.tagline}
+        </h1>
+        <p class="mt-6 text-lg text-text-muted leading-relaxed max-w-3xl">{industry.heroDescription}</p>
+        <div class="mt-8 flex flex-wrap gap-4">
+          <a
+            href="/contact"
+            class="px-8 py-4 text-white font-semibold bg-gradient-to-r from-primary to-primary-dark rounded-full hover:shadow-lg hover:shadow-primary/25 transition-all hover:-translate-y-0.5"
+            >Get Started Free</a
+          >
+          <a
+            href="/pricing"
+            class="px-8 py-4 text-text font-semibold bg-surface-raised border border-border rounded-full hover:border-primary/30 transition-all hover:-translate-y-0.5"
+            >View Pricing</a
+          >
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Benefits Stats -->
+  <section class="py-20 bg-surface-alt border-y border-border">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+        {
+          industry.benefits.map((b) => (
+            <div class="text-center">
+              <div class="text-4xl sm:text-5xl font-black font-display bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                {b.metric}
+              </div>
+              <p class="mt-2 text-sm text-text-muted">{b.label}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Challenges -->
+  <section class="py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl mx-auto text-center mb-16">
+        <span class="text-sm font-semibold text-primary uppercase tracking-wider">The Challenge</span>
+        <h2 class="mt-3 text-3xl sm:text-4xl font-bold font-display text-text">
+          Problems we solve for {industry.name}
+        </h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+        {
+          industry.challenges.map((challenge, i) => (
+            <div class="flex items-start gap-4 p-6 rounded-2xl bg-surface-card border border-border hover:shadow-md hover:shadow-primary/5 transition-all">
+              <div class="p-2 rounded-lg bg-accent/10 shrink-0">
+                <AlertTriangle class="w-5 h-5 text-accent" />
+              </div>
+              <p class="text-text-muted">{challenge}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Solutions -->
+  <section class="py-24 bg-surface-alt border-y border-border">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl mx-auto text-center mb-16">
+        <span class="text-sm font-semibold text-primary uppercase tracking-wider">Solutions</span>
+        <h2 class="mt-3 text-3xl sm:text-4xl font-bold font-display text-text">
+          How Voxeia transforms {industry.name.toLowerCase()}
+        </h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {
+          industry.solutions.map((sol) => (
+            <div class="p-8 rounded-2xl bg-surface-card border border-border hover:shadow-lg hover:shadow-primary/5 transition-all group">
+              <div class="p-3 rounded-xl bg-primary/10 w-fit mb-4 group-hover:bg-primary/20 transition-colors">
+                <Icon name={sol.icon} class="w-6 h-6 text-primary" />
+              </div>
+              <h3 class="text-xl font-bold font-display text-text mb-3">{sol.title}</h3>
+              <p class="text-text-muted leading-relaxed">{sol.description}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Use Cases -->
+  <section class="py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl mx-auto text-center mb-16">
+        <span class="text-sm font-semibold text-primary uppercase tracking-wider">Use Cases</span>
+        <h2 class="mt-3 text-3xl sm:text-4xl font-bold font-display text-text">
+          Popular use cases for {industry.name}
+        </h2>
+      </div>
+      <div class="flex flex-wrap justify-center gap-4">
+        {
+          industry.useCases.map((uc) => (
+            <div class="px-6 py-3 rounded-full bg-surface-card border border-border text-text-muted hover:border-primary/30 hover:text-text transition-colors">
+              {uc}
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonial -->
+  {
+    industry.testimonial && (
+      <section class="py-24 bg-surface-alt border-y border-border">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <Quote class="w-10 h-10 text-primary/30 mx-auto mb-6" />
+          <blockquote class="text-2xl sm:text-3xl font-medium text-text leading-relaxed italic">
+            "{industry.testimonial.quote}"
+          </blockquote>
+          <div class="mt-8">
+            <p class="text-text font-semibold">{industry.testimonial.author}</p>
+            <p class="text-text-muted text-sm">
+              {industry.testimonial.role}, {industry.testimonial.company}
+            </p>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- Other Industries -->
+  <section class="py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold font-display text-text">Explore other industries</h2>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {
+          otherIndustries.map((ind) => (
+            <a
+              href={`/industries/${ind.slug}`}
+              class="p-6 rounded-2xl bg-surface-card border border-border hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all group"
+            >
+              <h3 class="text-lg font-bold text-text group-hover:text-primary transition-colors">{ind.name}</h3>
+              <p class="mt-2 text-sm text-text-muted line-clamp-2">{ind.description}</p>
+              <span class="mt-3 inline-flex items-center text-sm text-primary font-semibold">
+                Learn more
+                <ChevronRight class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+              </span>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-24 bg-surface-alt border-t border-border">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl sm:text-4xl font-bold font-display text-text">
+        Ready to transform your {industry.name.toLowerCase()} operations?
+      </h2>
+      <p class="mt-4 text-lg text-text-muted">
+        Start a free trial — no credit card required. See results in your first week.
+      </p>
+      <div class="mt-8 flex flex-wrap justify-center gap-4">
+        <a
+          href="/"
+          class="px-8 py-4 text-white font-semibold bg-gradient-to-r from-primary to-primary-dark rounded-full hover:shadow-lg hover:shadow-primary/25 transition-all hover:-translate-y-0.5"
+          >Get Started Free</a
+        >
+        <a
+          href="/contact"
+          class="px-8 py-4 text-text font-semibold bg-surface-raised border border-border rounded-full hover:border-primary/30 transition-all hover:-translate-y-0.5"
+          >Talk to Sales</a
+        >
+      </div>
+    </div>
+  </section>
+</Layout>

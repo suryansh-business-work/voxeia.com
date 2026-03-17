@@ -11,13 +11,13 @@ interface StepTwoProps {
 }
 
 const inputClass =
-  'w-full px-4 py-3 rounded-xl bg-[#14141f] border border-[#2a2a3c] text-[#f0f0f5] placeholder-[#5a5a72] focus:border-[#7c5cfc]/50 focus:ring-1 focus:ring-[#7c5cfc]/50 focus:outline-none transition-colors text-sm';
+  'w-full px-4 py-3 rounded-xl bg-[#132d45] border border-[#234c6a] text-[#e8f1f8] placeholder-[#4a708d] focus:border-[#3fe3cd]/50 focus:ring-1 focus:ring-[#3fe3cd]/50 focus:outline-none transition-colors text-sm';
 
 const StepTwo: React.FC<StepTwoProps> = ({ values, errors, touched, handleChange, handleBlur }) => {
   return (
     <div className="space-y-5">
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-[#8888a0] mb-2">
+        <label htmlFor="name" className="block text-sm font-medium text-[#7a9bb5] mb-2">
           Full Name
         </label>
         <input
@@ -34,7 +34,7 @@ const StepTwo: React.FC<StepTwoProps> = ({ values, errors, touched, handleChange
       </div>
 
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-[#8888a0] mb-2">
+        <label htmlFor="email" className="block text-sm font-medium text-[#7a9bb5] mb-2">
           Email Address
         </label>
         <input
@@ -57,20 +57,20 @@ const StepTwo: React.FC<StepTwoProps> = ({ values, errors, touched, handleChange
             name="acceptPolicy"
             checked={values.acceptPolicy}
             onChange={handleChange}
-            className="w-4 h-4 mt-0.5 rounded border-[#2a2a3c] bg-[#14141f] text-[#7c5cfc] focus:ring-[#7c5cfc]/50 focus:ring-offset-0"
+            className="w-4 h-4 mt-0.5 rounded border-[#234c6a] bg-[#132d45] text-[#3fe3cd] focus:ring-[#3fe3cd]/50 focus:ring-offset-0"
           />
-          <span className="text-sm text-[#8888a0] group-hover:text-[#f0f0f5] transition-colors">
+          <span className="text-sm text-[#7a9bb5] group-hover:text-[#e8f1f8] transition-colors">
             I accept the{' '}
             <a
               href="/privacy-policy"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#7c5cfc] hover:underline"
+              className="text-[#3fe3cd] hover:underline"
             >
               Privacy Policy
             </a>{' '}
             and{' '}
-            <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-[#7c5cfc] hover:underline">
+            <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-[#3fe3cd] hover:underline">
               Terms of Service
             </a>
             <span className="text-red-400 ml-0.5">*</span>
@@ -86,9 +86,9 @@ const StepTwo: React.FC<StepTwoProps> = ({ values, errors, touched, handleChange
             name="acceptSignup"
             checked={values.acceptSignup}
             onChange={handleChange}
-            className="w-4 h-4 mt-0.5 rounded border-[#2a2a3c] bg-[#14141f] text-[#7c5cfc] focus:ring-[#7c5cfc]/50 focus:ring-offset-0"
+            className="w-4 h-4 mt-0.5 rounded border-[#234c6a] bg-[#132d45] text-[#3fe3cd] focus:ring-[#3fe3cd]/50 focus:ring-offset-0"
           />
-          <span className="text-sm text-[#8888a0] group-hover:text-[#f0f0f5] transition-colors">
+          <span className="text-sm text-[#7a9bb5] group-hover:text-[#e8f1f8] transition-colors">
             I confirm my signup and consent to receive communications
             <span className="text-red-400 ml-0.5">*</span>
           </span>
@@ -103,10 +103,10 @@ const StepTwo: React.FC<StepTwoProps> = ({ values, errors, touched, handleChange
             name="wantCallback"
             checked={values.wantCallback}
             onChange={handleChange}
-            className="w-4 h-4 mt-0.5 rounded border-[#2a2a3c] bg-[#14141f] text-[#7c5cfc] focus:ring-[#7c5cfc]/50 focus:ring-offset-0"
+            className="w-4 h-4 mt-0.5 rounded border-[#234c6a] bg-[#132d45] text-[#3fe3cd] focus:ring-[#3fe3cd]/50 focus:ring-offset-0"
           />
-          <span className="text-sm text-[#8888a0] group-hover:text-[#f0f0f5] transition-colors">
-            I'd like a representative to call me <span className="text-[#5a5a72]">(optional)</span>
+          <span className="text-sm text-[#7a9bb5] group-hover:text-[#e8f1f8] transition-colors">
+            I'd like a representative to call me <span className="text-[#4a708d]">(optional)</span>
           </span>
         </label>
       </div>

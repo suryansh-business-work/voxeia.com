@@ -22,8 +22,8 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({ currentStep, totalSteps }
                   isCompleted
                     ? 'bg-green-500 text-white'
                     : isActive
-                      ? 'bg-gradient-to-r from-[#7c5cfc] to-[#00d4ff] text-white shadow-lg shadow-[#7c5cfc]/30'
-                      : 'bg-[#14141f] text-[#5a5a72] border border-[#2a2a3c]'
+                      ? 'bg-gradient-to-r from-[#3fe3cd] to-[#2789ab] text-white shadow-lg shadow-[#3fe3cd]/30'
+                      : 'bg-[#132d45] text-[#4a708d] border border-[#234c6a]'
                 }`}
               >
                 {isCompleted ? (
@@ -34,12 +34,12 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({ currentStep, totalSteps }
                   stepNum
                 )}
               </div>
-              <span className={`text-[10px] font-medium ${isActive ? 'text-[#f0f0f5]' : 'text-[#5a5a72]'}`}>
+              <span className={`text-[10px] font-medium ${isActive ? 'text-[#e8f1f8]' : 'text-[#4a708d]'}`}>
                 {label}
               </span>
             </div>
             {idx < totalSteps - 1 && (
-              <div className={`w-12 h-0.5 mb-5 rounded-full ${isCompleted ? 'bg-green-500' : 'bg-[#1e1e2e]'}`} />
+              <div className={`w-12 h-0.5 mb-5 rounded-full ${isCompleted ? 'bg-green-500' : 'bg-[#1a3a54]'}`} />
             )}
           </React.Fragment>
         );

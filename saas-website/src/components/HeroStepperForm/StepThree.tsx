@@ -46,7 +46,7 @@ const OtpInputGroup: React.FC<{
 
   return (
     <div>
-      <label className="block text-sm font-medium text-[#8888a0] mb-3">{label}</label>
+      <label className="block text-sm font-medium text-[#7a9bb5] mb-3">{label}</label>
       <div className="flex gap-2 justify-center" onPaste={handlePaste}>
         {Array.from({ length: 6 }).map((_, idx) => (
           <input
@@ -60,7 +60,7 @@ const OtpInputGroup: React.FC<{
             value={value[idx] || ''}
             onChange={(e) => handleInput(idx, e)}
             onKeyDown={(e) => handleKeyDown(idx, e)}
-            className="w-10 h-12 sm:w-12 sm:h-14 text-center text-lg font-bold rounded-xl bg-[#14141f] border border-[#2a2a3c] text-[#f0f0f5] focus:border-[#7c5cfc] focus:ring-1 focus:ring-[#7c5cfc]/50 focus:outline-none transition-colors"
+            className="w-10 h-12 sm:w-12 sm:h-14 text-center text-lg font-bold rounded-xl bg-[#132d45] border border-[#234c6a] text-[#e8f1f8] focus:border-[#3fe3cd] focus:ring-1 focus:ring-[#3fe3cd]/50 focus:outline-none transition-colors"
           />
         ))}
       </div>
@@ -83,8 +83,8 @@ const StepThree: React.FC<StepThreeProps> = ({ values, errors, touched, setField
             />
           </svg>
         </div>
-        <h3 className="text-lg font-bold text-[#f0f0f5] font-['Space_Grotesk']">Verify Your Identity</h3>
-        <p className="text-sm text-[#8888a0] mt-1">Enter the OTP codes sent to your email and phone</p>
+        <h3 className="text-lg font-bold text-[#e8f1f8] font-['Space_Grotesk']">Verify Your Identity</h3>
+        <p className="text-sm text-[#7a9bb5] mt-1">Enter the OTP codes sent to your email and phone</p>
       </div>
 
       <OtpInputGroup
@@ -105,9 +105,9 @@ const StepThree: React.FC<StepThreeProps> = ({ values, errors, touched, setField
         setFieldValue={setFieldValue}
       />
 
-      <p className="text-xs text-[#5a5a72] text-center">
+      <p className="text-xs text-[#4a708d] text-center">
         Didn't receive the code?{' '}
-        <button type="button" className="text-[#7c5cfc] hover:underline">
+        <button type="button" className="text-[#3fe3cd] hover:underline">
           Resend OTP
         </button>
       </p>

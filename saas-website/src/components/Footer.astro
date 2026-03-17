@@ -1,5 +1,5 @@
 ---
-import { Phone, Twitter, Linkedin, Github } from '@lucide/astro';
+import { Twitter, Linkedin, Github } from '@lucide/astro';
 
 const currentYear = new Date().getFullYear();
 
@@ -48,11 +48,8 @@ const footerSections = {
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 lg:gap-12">
       <!-- Brand -->
       <div class="col-span-2 md:col-span-3 lg:col-span-2">
-        <a href="/" class="flex items-center gap-2.5 mb-5">
-          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-            <Phone class="w-5 h-5 text-white" />
-          </div>
-          <span class="text-xl font-bold font-display text-text">Vox<span class="text-primary">eia</span></span>
+        <a href="/" class="flex items-center gap-2 mb-5">
+          <img src="/logo-header.png" alt="Voxeia" class="h-8 w-auto" />
         </a>
         <p class="text-text-muted text-sm leading-relaxed max-w-sm mb-6">
           AI-powered voice agents that automate your outreach, qualify leads, and scale business communications — 24/7,

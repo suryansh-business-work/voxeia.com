@@ -86,8 +86,8 @@ const HeroStepperForm: React.FC = () => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h3 className="text-xl font-bold text-[#e8f1f8] font-['Space_Grotesk']">You're all set!</h3>
-        <p className="text-sm text-[#7a9bb5] mt-2">
+        <h3 className="text-xl font-bold text-[#0f172a] font-['Space_Grotesk']">You're all set!</h3>
+        <p className="text-sm text-[#64748b] mt-2">
           Our AI agent will call you shortly at your number. Get ready to experience the future of voice AI.
         </p>
       </div>
@@ -120,7 +120,7 @@ const HeroStepperForm: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setStep((s) => s - 1)}
-                className="flex-1 px-4 py-3 text-sm font-semibold text-[#7a9bb5] bg-[#132d45] border border-[#234c6a] rounded-xl hover:border-[#3fe3cd]/30 hover:text-[#e8f1f8] transition-all"
+                className="flex-1 px-4 py-3 text-sm font-semibold text-[#64748b] bg-[#f1f5f9] border border-[#e2e8f0] rounded-xl hover:border-[#1337ec]/30 hover:text-[#0f172a] transition-all"
               >
                 Back
               </button>
@@ -128,7 +128,7 @@ const HeroStepperForm: React.FC = () => {
             <button
               type="submit"
               disabled={isSubmitting || loading}
-              className="flex-1 px-4 py-3 text-sm font-semibold text-white bg-gradient-to-r from-[#3fe3cd] to-[#2bbfaa] rounded-xl hover:shadow-lg hover:shadow-[#3fe3cd]/25 transition-all hover:-translate-y-0.5 disabled:opacity-50"
+              className="flex-1 px-4 py-3 text-sm font-semibold text-white bg-gradient-to-r from-[#1337ec] to-[#0f2bc7] rounded-xl hover:shadow-lg hover:shadow-[#1337ec]/25 transition-all hover:-translate-y-0.5 disabled:opacity-50"
             >
               {loading ? 'Connecting...' : isLastStep ? 'Verify & Get Called' : 'Continue'}
             </button>

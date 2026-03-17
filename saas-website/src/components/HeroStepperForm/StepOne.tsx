@@ -15,8 +15,8 @@ const StepOne: React.FC<StepOneProps> = ({ values, errors, touched, setFieldValu
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-[#3fe3cd]/20 to-[#2789ab]/20 mb-4">
-          <svg className="w-7 h-7 text-[#3fe3cd]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-[#1337ec]/20 to-[#6366f1]/20 mb-4">
+          <svg className="w-7 h-7 text-[#1337ec]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -25,20 +25,20 @@ const StepOne: React.FC<StepOneProps> = ({ values, errors, touched, setFieldValu
             />
           </svg>
         </div>
-        <h3 className="text-xl font-bold text-[#e8f1f8] font-['Space_Grotesk']">
+        <h3 className="text-xl font-bold text-[#0f172a] font-['Space_Grotesk']">
           Have one of our AI agents give you a call now
         </h3>
-        <p className="text-sm text-[#7a9bb5] mt-2">Enter your phone number and experience Voxeia in action</p>
+        <p className="text-sm text-[#64748b] mt-2">Enter your phone number and experience Voxeia in action</p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-[#7a9bb5] mb-2">Phone Number</label>
+        <label className="block text-sm font-medium text-[#64748b] mb-2">Phone Number</label>
         <PhoneInput
           international
           defaultCountry="IN"
           value={values.phone}
           onChange={(val) => setFieldValue('phone', val || '')}
-          className="w-full px-4 py-3 rounded-xl bg-[#132d45] border border-[#234c6a] text-[#e8f1f8] focus-within:border-[#3fe3cd]/50 focus-within:ring-1 focus-within:ring-[#3fe3cd]/50 transition-colors"
+          className="w-full px-4 py-3 rounded-xl bg-[#f1f5f9] border border-[#e2e8f0] text-[#0f172a] focus-within:border-[#1337ec]/50 focus-within:ring-1 focus-within:ring-[#1337ec]/50 transition-colors"
         />
         {touched.phone && errors.phone && <p className="text-red-400 text-xs mt-1.5">{errors.phone}</p>}
       </div>

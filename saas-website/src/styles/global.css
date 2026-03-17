@@ -1,32 +1,32 @@
 @import 'tailwindcss';
 
 @theme {
-  /* Primary palette - teal from Voxeia logo */
-  --color-primary: #3fe3cd;
-  --color-primary-dark: #2bbfaa;
-  --color-primary-light: #6aede0;
-  --color-secondary: #2789ab;
-  --color-secondary-dark: #1d6b87;
-  --color-accent: #ff6b35;
-  --color-accent-light: #ff8f66;
+  /* Primary palette - Voxeia Blue */
+  --color-primary: #1337ec;
+  --color-primary-dark: #0f2bc7;
+  --color-primary-light: #4d6aff;
+  --color-secondary: #6366f1;
+  --color-secondary-dark: #4f46e5;
+  --color-accent: #f59e0b;
+  --color-accent-light: #fbbf24;
 
-  /* Surfaces - dark navy from Voxeia logo (#0f2539) */
-  --color-surface: #0b1a2a;
-  --color-surface-alt: #0f2539;
-  --color-surface-raised: #132d45;
-  --color-surface-card: #0d2030;
-  --color-border: #1a3a54;
-  --color-border-light: #234c6a;
+  /* Surfaces - Clean white */
+  --color-surface: #ffffff;
+  --color-surface-alt: #f8fafc;
+  --color-surface-raised: #f1f5f9;
+  --color-surface-card: #ffffff;
+  --color-border: #e2e8f0;
+  --color-border-light: #cbd5e1;
 
   /* Text */
-  --color-text: #e8f1f8;
-  --color-text-muted: #7a9bb5;
-  --color-text-light: #4a708d;
+  --color-text: #0f172a;
+  --color-text-muted: #64748b;
+  --color-text-light: #94a3b8;
 
   /* Status */
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-error: #dc2626;
 
   /* Fonts */
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
@@ -45,15 +45,15 @@ body {
 /* Gradient mesh background */
 .gradient-mesh {
   background:
-    radial-gradient(ellipse at 20% 0%, rgba(63, 227, 205, 0.1) 0, transparent 50%),
-    radial-gradient(ellipse at 80% 0%, rgba(39, 137, 171, 0.08) 0, transparent 50%),
-    radial-gradient(ellipse at 50% 100%, rgba(63, 227, 205, 0.05) 0, transparent 50%), var(--color-surface);
+    radial-gradient(ellipse at 20% 0%, rgba(19, 55, 236, 0.06) 0, transparent 50%),
+    radial-gradient(ellipse at 80% 0%, rgba(99, 102, 241, 0.05) 0, transparent 50%),
+    radial-gradient(ellipse at 50% 100%, rgba(19, 55, 236, 0.03) 0, transparent 50%), var(--color-surface);
 }
 
 .gradient-mesh-subtle {
   background:
-    radial-gradient(ellipse at 30% 20%, rgba(63, 227, 205, 0.05) 0, transparent 50%),
-    radial-gradient(ellipse at 70% 80%, rgba(39, 137, 171, 0.04) 0, transparent 50%), var(--color-surface);
+    radial-gradient(ellipse at 30% 20%, rgba(19, 55, 236, 0.03) 0, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, rgba(99, 102, 241, 0.02) 0, transparent 50%), var(--color-surface);
 }
 
 .gradient-border {
@@ -63,32 +63,22 @@ body {
   border: 1px solid transparent;
 }
 
-/* Glow effects */
+/* Shadow effects for light theme */
 .glow-primary {
-  box-shadow: 0 0 80px -20px rgba(63, 227, 205, 0.35);
+  box-shadow: 0 4px 40px -8px rgba(19, 55, 236, 0.2);
 }
 .glow-secondary {
-  box-shadow: 0 0 80px -20px rgba(39, 137, 171, 0.3);
+  box-shadow: 0 4px 40px -8px rgba(99, 102, 241, 0.18);
 }
 .glow-accent {
-  box-shadow: 0 0 80px -20px rgba(255, 107, 53, 0.3);
-}
-
-/* Noise texture overlay */
-.noise-bg::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  opacity: 0.03;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  pointer-events: none;
+  box-shadow: 0 4px 40px -8px rgba(245, 158, 11, 0.18);
 }
 
 /* Grid pattern background */
 .grid-pattern {
   background-image:
-    linear-gradient(rgba(63, 227, 205, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(63, 227, 205, 0.05) 1px, transparent 1px);
+    linear-gradient(rgba(19, 55, 236, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(19, 55, 236, 0.04) 1px, transparent 1px);
   background-size: 64px 64px;
 }
 
@@ -152,7 +142,7 @@ body {
   width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--color-surface);
+  background: var(--color-surface-alt);
 }
 ::-webkit-scrollbar-thumb {
   background: var(--color-border-light);
@@ -162,7 +152,7 @@ body {
   background: var(--color-text-light);
 }
 
-/* Phone input overrides for dark mode */
+/* Phone input overrides */
 .PhoneInput {
   background: var(--color-surface-raised) !important;
 }
